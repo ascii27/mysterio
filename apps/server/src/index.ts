@@ -4,6 +4,7 @@ import { loadEnv } from "./config/env.js";
 import { healthRoutes } from "./routes/health.js";
 import { mysteriesRoutes } from "./routes/mysteries.js";
 import { playersRoutes } from "./routes/players.js";
+import { staticRoutes } from "./routes/static.js";
 import { markStaleMysteriesFailed } from "./startup.js";
 import { logger } from "./utils/logger.js";
 
@@ -20,6 +21,7 @@ async function main(): Promise<void> {
   await app.register(healthRoutes, { prefix: "/api" });
   await app.register(playersRoutes, { prefix: "/api" });
   await app.register(mysteriesRoutes, { prefix: "/api" });
+  await app.register(staticRoutes);
 
   markStaleMysteriesFailed();
 
