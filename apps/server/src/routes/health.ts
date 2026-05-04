@@ -1,6 +1,15 @@
 import type { FastifyInstance } from "fastify";
+import { getSqlite } from "../db/client.js";
 
 export async function healthRoutes(app: FastifyInstance): Promise<void> {
-  // TODO M1.4: replace db:true stub with a real probe once DB client is available
-  app.get("/health", async () => ({ ok: true, db: true }));
+  app.get("/health", async () => {
+    let dbOk = false;
+    try {
+      getSqlite().prepare("SELECT 1").run();
+      dbOk = true;
+    } catch {
+      dbOk = false;
+    }
+    return { ok: true, db: dbOk };
+  });
 }
