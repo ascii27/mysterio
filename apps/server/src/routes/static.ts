@@ -7,8 +7,9 @@ import { loadEnv } from "../config/env.js";
 export async function staticRoutes(app: FastifyInstance): Promise<void> {
   const env = loadEnv();
   const audioDir = resolve(env.AUDIO_DIR);
-  const webDir = resolve("./apps/web/dist");
+  const webDir = resolve("../web/dist");
   mkdirSync(audioDir, { recursive: true });
+  mkdirSync(webDir, { recursive: true });
 
   await app.register(fastifyStatic, {
     root: audioDir,
