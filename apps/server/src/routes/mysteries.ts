@@ -2,7 +2,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { getDb } from "../db/client.js";
-import { mysteries, solutions } from "../db/schema.js";
+import { mysteries } from "../db/schema.js";
 import { startStubGeneration } from "../services/stub/stubGenerator.js";
 import { mysteryId } from "../utils/ids.js";
 
@@ -75,7 +75,7 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       reply.status(400);
       return { error: "player_id required" };
     }
-    const limit = Math.min(parseInt(req.query.limit ?? "10", 10) || 10, 50);
+    const limit = Math.max(1, Math.min(parseInt(req.query.limit ?? "10", 10) || 10, 50));
     const db = getDb();
     const rows = db.select({
       id: mysteries.id,
