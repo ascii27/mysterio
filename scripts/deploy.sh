@@ -24,7 +24,7 @@ ssh "${VM_HOST}" bash -lc "'
     exit 1
   fi
   corepack enable >/dev/null 2>&1 || true
-  pnpm install --prod --frozen-lockfile
+  pnpm install --frozen-lockfile
   pnpm --filter @mysterio/server db:migrate
   pnpm --filter @mysterio/server db:seed || true
   mkdir -p ~/.config/systemd/user
