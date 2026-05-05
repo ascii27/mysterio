@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes as RRRoutes } from "react-router-dom";
+import { MainScreen } from "./screens/MainScreen/MainScreen.js";
 import { PlayerPicker } from "./screens/PlayerPicker.js";
 import { usePlayerStore } from "./state/playerStore.js";
 
@@ -9,7 +10,7 @@ function Placeholder({ name }: { name: string }) {
 function Home() {
   const activePlayerId = usePlayerStore((s) => s.activePlayerId);
   if (!activePlayerId) return <PlayerPicker />;
-  return <Placeholder name="MainScreen" />;
+  return <MainScreen />;
 }
 
 export function Routes() {
