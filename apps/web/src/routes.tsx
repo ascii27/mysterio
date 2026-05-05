@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes as RRRoutes } from "react-router-dom";
 import { MainScreen } from "./screens/MainScreen/MainScreen.js";
 import { PlayerPicker } from "./screens/PlayerPicker.js";
+import { PlaybackScreen } from "./screens/PlaybackScreen/PlaybackScreen.js";
 import { usePlayerStore } from "./state/playerStore.js";
 
 function Placeholder({ name }: { name: string }) {
@@ -17,7 +18,7 @@ export function Routes() {
   return (
     <RRRoutes>
       <Route path="/" element={<Home />} />
-      <Route path="/mysteries/:id" element={<Placeholder name="Playback" />} />
+      <Route path="/mysteries/:id" element={<PlaybackScreen />} />
       <Route path="/mysteries/:id/solve" element={<Placeholder name="Solve" />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </RRRoutes>
