@@ -1,126 +1,106 @@
-# Mysterio — Session State (paused 2026-05-06, after M1.16)
+# Mysterio — Session State (M1 complete, paused 2026-05-10)
 
-> Pause point during M1 implementation via subagent-driven development. To resume, read this file, then re-invoke `superpowers:subagent-driven-development` and pick up at M1.17.
+> M1 done. Stub mystery game is live on `panther-golem.exe.xyz` and verified working from iPad. Next session picks up at M2.1 (LogicStructure Zod schema). Re-invoke `superpowers:subagent-driven-development` when resuming.
 
 ## Where we are
 
-- **Branch:** `feat/mysterio-implementation` (off `main`)
-- **Last good commit:** `0a332b0` — M1.16 follow-up (drop `--prod` from remote `pnpm install`)
-- **Plan in flight:** `docs/superpowers/plans/2026-05-04-mysterio-implementation.md`
-- **Spec:** `docs/superpowers/specs/2026-05-04-mysterio-prd.md`
-- **Scope this run:** M1 only (17 tasks). Through M1 we land an iPad-reachable stub on `panther-golem.exe.xyz`.
-- **Execution mode:** subagent-driven (skill `superpowers:subagent-driven-development`); each task gets a fresh implementer + spec review + code quality review.
+- **Branch:** `feat/mysterio-implementation` (off `main`). Not merged or PR'd; M1 work has been committed sequentially on this branch.
+- **Last commit:** `<close-out commit>` — M1.17 deploy notes + .gitignore.
+- **Plan in flight:** `docs/superpowers/plans/2026-05-04-mysterio-implementation.md`.
+- **Spec:** `docs/superpowers/specs/2026-05-04-mysterio-prd.md`.
+- **Live URL:** `https://panther-golem.exe.xyz/` — public, exe.dev proxy at port 3000.
+- **Execution mode:** subagent-driven (skill `superpowers:subagent-driven-development`); each task got fresh implementer + spec review + code-quality review.
 
-## Completed tasks (M1.1–M1.16)
+## M1 completed (M1.1–M1.17)
 
-All committed, all reviewed, all clean.
+All 17 tasks committed, all reviewed, all clean. Stub mystery flow works end-to-end on iPad.
 
 | Task | Commit | Notes |
 |---|---|---|
 | M1.1 workspace bootstrap | `f0f506c` | clean |
-| M1.2 shared package | `4b85f00` + `8731443` (lockfile split) | clean |
-| M1.3 Fastify + env + health | `1eaca23` → fixes `34b61f1` | accepted spec deviations: `rootDir: "./"` (TS strict mode requires it because `include` lists root-level config files); `FastifyError` type on error handler |
-| M1.4 SQLite + Drizzle + 5 tables | `4479dba` | clean; `__drizzle_migrations` extra table is normal |
-| M1.5 player seed | `2ebae75` | accepted deviation: `db:seed` script uses `--env-file=.env` (apps/server/.env) instead of plan's `--env-file=../../.env`, because root `.env`'s `DATABASE_PATH=./data/mysterio.db` resolves wrong from `apps/server/` cwd |
+| M1.2 shared package | `4b85f00` + `8731443` | clean |
+| M1.3 Fastify + env + health | `1eaca23` → `34b61f1` | accepted deviations on TS strict-mode (rootDir, FastifyError type) |
+| M1.4 SQLite + Drizzle + 5 tables | `4479dba` | clean |
+| M1.5 player seed | `2ebae75` | seed uses `apps/server/.env` |
 | M1.6 nanoid + stub generator | `c6b7a54` | clean |
 | M1.7 players router | `f7810b8` | clean |
-| M1.8 mysteries router (stub /generate) | `f6731ff` → fixes `0e87c42` | fixed: removed unused `solutions` import, clamp `limit` to ≥1 |
+| M1.8 mysteries router (stub /generate) | `f6731ff` → `0e87c42` | unused-import + limit-clamp fix |
 | M1.9 stale-row cleanup on boot | `b4a0279` | clean |
-| M1.10 static file serving | `a14162f` → fix `1b9778b` | accepted deviation: `webDir = resolve("../web/dist")` not plan's `"./apps/web/dist"` (plan was buggy vs `apps/server/` cwd); also `mkdirSync(webDir, …)` added so server boots before M1.16 builds the web app |
-| M1.11 web bootstrap — Vite + React + react-router + react-query | `e900ac7` | clean; placeholder routes only |
-| M1.12 API client wrappers | `5cc1b49` | clean. `client.ts` (ApiError + generic `api<T>()`), `players.ts` (listPlayers), `mysteries.ts` (generate/get/list + MysteryDetail/PublicCharacter) |
-| M1.13 PlayerPicker + zustand store | `7726019` | clean. Persists active player to localStorage under `mysterio.activePlayer`. Adds reusable `Button` component |
-| M1.14 MainScreen | `740f90a` | clean. CategoryGrid (2x2 emoji), DifficultyPicker (3-button), RecentList (react-query). MainScreen orchestrates and fires `generateMystery` mutation |
-| M1.15 useGenerationJob + Loading/Failed/Playback | `53e8259` | clean. Hook polls every 2s until `TERMINAL_STATUSES`. PlaybackScreen branches on status; ready state shows narrative + "I think I know!" link |
-| M1.16 deploy script + systemd unit | `bf0be47` → fix `0a332b0` | accepted plan correction (ExecStart `dist/src/index.js` not `dist/index.js`, per the rootDir deviation); fix `0a332b0` removed `--prod` from remote `pnpm install` so `db:migrate`/`db:seed` get `tsx` and `drizzle-kit` (both devDeps). Code-quality review caught this before deploy |
+| M1.10 static file serving | `a14162f` → `1b9778b` | webDir path + mkdirSync |
+| M1.11 Vite + React + react-router + react-query | `e900ac7` | clean |
+| M1.12 API client wrappers | `5cc1b49` | clean |
+| M1.13 PlayerPicker + zustand store | `7726019` | clean |
+| M1.14 MainScreen | `740f90a` | clean |
+| M1.15 useGenerationJob + Loading/Failed/Playback | `53e8259` | clean |
+| M1.16 deploy script + systemd unit | `bf0be47` → `0a332b0` | dropped `--prod` from remote `pnpm install` (caught in code review) |
+| M1.17 first deploy | `376f172` (ExecStart absolute path), `675756b` (env-file path) + close-out commit | both deviations were live-deploy fixes |
 
-## How to resume
+## M1.17 deploy notes (what bit during the live deploy)
 
-Run these in order from `/Users/michaelgalloway/dev/mysterio`:
+These are the issues we hit running M1.17 for the first time. Captured here so M2 doesn't re-discover them.
 
-1. **Confirm git state.**
-   ```bash
-   git status
-   git log --oneline -5
-   git branch --show-current   # should show feat/mysterio-implementation
-   ```
-   Expected HEAD: `0a332b0 M1.16: drop --prod from remote pnpm install (db:migrate needs tsx/drizzle-kit)`.
+1. **`pnpm deploy` is a built-in pnpm subcommand** (workspace deploy), not a script. Running our deploy via `bash scripts/deploy.sh` directly. (`pnpm run deploy` would also work but is verbose.) Plan-side TODO: rename the npm script away from `deploy` (e.g., `ship` or `deploy:vm`) so `pnpm <name>` is unambiguous.
 
-2. **Re-invoke the skill** (it loads the prompt templates):
-   `Skill('superpowers:subagent-driven-development')`
+2. **systemd-user PATH does not include `~/.local/bin`.** The plan's `ExecStart=/usr/bin/env node ...` failed because `env` couldn't find Node. Fix in `376f172`: `ExecStart=%h/.local/bin/node ...` (absolute path to the install location).
 
-3. **Pick up at M1.17.** This is the only remaining M1 task and it's mostly manual — it requires the user in the loop:
+3. **exe.dev proxies to port 8000 by default.** Our server listens on 3000. Fixed at the proxy with `ssh exe.dev share port panther-golem 3000` (one-time per VM). Could alternatively set `PORT=8000` in `apps/server/.env`; the proxy-side change is more compatible with running locally on 3000.
 
-   - **M1.17 First exe.dev deploy** (plan line 2426). Eight steps:
-     1. `ssh -o StrictHostKeyChecking=accept-new panther-golem.exe.xyz 'echo ...'` — verify SSH works
-     2. `scp .env panther-golem.exe.xyz:~/mysterio/.env` (then `chmod 600`) — provision env
-     3. `ssh ... 'node --version'` — verify Node ≥22 (install if missing per plan)
-     4. `ssh ... 'loginctl enable-linger $USER'` — keep service running without active SSH
-     5. `ssh exe.dev share set-public panther-golem` — make URL public
-     6. `pnpm deploy` from local — runs `scripts/deploy.sh`
-     7. iPad smoke test at `https://panther-golem.exe.xyz/` — pick player → category → difficulty → Start → loading screen → fake narrative
-     8. Optional empty commit with deploy notes
+4. **Corepack 0.29.4 (bundled with Node 22.11.0) has a known signature-verification bug** when fetching pnpm metadata. Workaround: `npm install -g corepack@latest` first, then `corepack prepare pnpm@9.12.0 --activate`. This needs to happen at VM provisioning time; M2 should add it to a one-time `scripts/bootstrap-vm.sh`.
 
-   M1.17 hits a public VM. Pause and ask the user how to drive it (they may run it themselves, or supervise the controller running each step).
+5. **Dual-`.env` file path mismatch (deviation #6 from earlier session state — now resolved).** Root `.env` had `DATABASE_PATH=./data/mysterio.db` (resolves under `apps/server/data/` because the server runs from `apps/server` cwd). `apps/server/.env` had `DATABASE_PATH=../../data/mysterio.db` (resolves under `~/mysterio/data/`). `db:migrate` used `apps/server/.env` and created the DB at the latter; the running server read root `.env` and tried to open the former → "no such table: mysteries". Fix in `675756b`: systemd unit now points at `apps/server/.env` exclusively. Both running server and migrate/seed scripts now agree on `~/mysterio/data/mysterio.db`.
 
-4. **Open issue carrying into M1.17.** Likely-to-bite issue from the M1.16 review:
+6. **`db:migrate` and `db:seed` are run on the VM** by the deploy script (under `bash -lc`). Both use `tsx` (a devDep) — that's why we dropped `--prod` from `pnpm install` in M1.16's `0a332b0`. Without that fix, deploy would have aborted at the migrate step.
 
-   - `db:migrate` uses `tsx --env-file=.env src/db/migrate.ts` from `apps/server/` cwd, so it expects `apps/server/.env` to exist on the VM. But the deploy script excludes `.env` from rsync and only enforces `~/mysterio/.env` (root) is present. Two paths to fix in M1.17:
-     - (A) `scp` `apps/server/.env` to VM in addition to root `.env`, OR
-     - (B) Change `db:migrate`/`db:seed` scripts to read root `.env` (e.g., `--env-file=../../.env`) — but that breaks local dev where the cwd-relative apps/server/.env is needed for path resolution.
-   - **Recommendation:** in M1.17, scp `apps/server/.env` to the VM as well. Easier than re-plumbing env files. Plan deviation #5 already documents the local-dev rationale.
+7. **VM had a leftover unrelated `~/mysterio/` directory** from a different project ("The Illusionist's Shell Game"). Wiped before deploy. M2 should add an "is this dir empty" guard in deploy.sh, or document that `MYSTERIO_REMOTE_DIR` should be unique to this project per VM.
 
-   - Also pre-deploy decision needed: where does data live in production? Per deviation #6, root `.env` `DATABASE_PATH=./data/mysterio.db` resolves to `apps/server/data/mysterio.db` since the server's WorkingDirectory is `apps/server/`. That's fine, just be aware.
+8. **Both `.env` files must be scp'd manually** before first deploy. `scripts/deploy.sh` excludes `.env` from rsync and only enforces `~/mysterio/.env` exists. We scp'd `~/mysterio/.env` AND `~/mysterio/apps/server/.env` separately. After fix #5 above, `~/mysterio/.env` (root) is unused by the running server but still required by deploy.sh's existence check. Could consolidate to single env file in M2 (recommended).
 
-## Cumulative deviations from the plan (carry forward)
+## Carry-forward open items for M2 onward
 
-These are intentional adaptations the plan should be updated to reflect:
-
-1. `apps/server/tsconfig.json` `rootDir: "./"` (not `"./src"`). Reason: TS strict mode rejects `include`'d files outside `rootDir`.
-2. `apps/server/src/index.ts` error handler uses `(err: FastifyError, ...)` (not bare `err`). Reason: TS strict mode infers `unknown` otherwise.
-3. `apps/server/src/index.ts` registers `setErrorHandler` BEFORE route registration (cleaner Fastify idiom, also lets the handler catch errors during plugin registration).
-4. `apps/server/src/routes/health.ts` does a real DB probe via `getSqlite().prepare("SELECT 1").run()` (M1.4 made this real, not a stub).
-5. `apps/server/.env` exists locally with `DATABASE_PATH=../../data/mysterio.db` and `AUDIO_DIR=../../data/audio` so DB scripts run correctly from `apps/server/` cwd.
-6. The root `.env` has `DATABASE_PATH=./data/mysterio.db` — relative to whatever cwd the production server runs from (which is `apps/server/`). Means data lives at `apps/server/data/mysterio.db` in production unless we change something. **TODO before deploy:** decide where data lives in production and update the env values consistently.
-7. `start` script is `node --env-file=.env dist/src/index.js` (not `dist/index.js`) because `rootDir: "./"` makes TS mirror the path. The systemd unit uses the same path for the same reason.
-8. M1.10 `apps/server/src/routes/static.ts`: `webDir = resolve("../web/dist")` (not plan's `"./apps/web/dist"`, which resolves wrong from `apps/server/` cwd) and `mkdirSync(webDir, { recursive: true })` added so `@fastify/static` doesn't crash before the web bundle exists.
-9. M1.16 systemd unit ExecStart uses `dist/src/index.js` (not plan's `dist/index.js`) — same reason as deviation #7.
-10. M1.16 deploy script uses `pnpm install --frozen-lockfile` (not plan's `pnpm install --prod --frozen-lockfile`). Reason: `db:migrate` and `db:seed` are run on the VM and they need `tsx` and `drizzle-kit`, both `devDependencies`. Caught by code-quality review on M1.16 before any deploy attempt.
+- **Consolidate to one `.env` file.** Currently two .env files exist; only `apps/server/.env` is meaningfully used. Drop root `.env` from local + deploy + the existence check, and have `bash scripts/deploy.sh` ensure `apps/server/.env` exists on the VM instead.
+- **VM bootstrap script.** Pull #2/#4/#7 from the deploy notes into a separate `scripts/bootstrap-vm.sh` so re-provisioning isn't ad-hoc next time.
+- **Rename `deploy` npm script** to avoid colliding with pnpm's built-in `deploy` subcommand.
+- **systemctl --user from non-login SSH** errors with "Failed to connect to bus" because `XDG_RUNTIME_DIR` isn't set. Cosmetic: deploy.sh's `systemctl --user --no-pager status` may print a warning even when the service is fine. Could prefix the call with `XDG_RUNTIME_DIR=/run/user/$(id -u)`.
+- **Pre-deploy decision (now decided):** data lives at `~/mysterio/data/` on the VM (sibling to apps/, packages/), matching what migrate creates with `apps/server/.env`'s relative path. Deviation #6 in earlier state file is resolved.
 
 ## Repo state on disk
 
-- `apps/server/`: full Fastify app (health/players/mysteries-stub/static); SQLite at `data/mysterio.db` with p1+p2 seeded. Production entry: `dist/src/index.js`.
-- `apps/server/systemd/mysterio.service`: systemd user-unit for the VM.
-- `packages/shared/`: types + constants (no Zod schemas yet — those come in M2.1).
-- `apps/web/`: full M1 web app:
-  - `api/` — `client.ts`, `players.ts`, `mysteries.ts` (M1.12)
-  - `components/Button.tsx` (M1.13)
-  - `state/playerStore.ts` — zustand + persist (M1.13)
-  - `screens/PlayerPicker.tsx` (M1.13)
-  - `screens/MainScreen/{MainScreen,CategoryGrid,DifficultyPicker,RecentList}.tsx` (M1.14)
-  - `hooks/useGenerationJob.ts` (M1.15)
-  - `screens/PlaybackScreen/{PlaybackScreen,LoadingMystery,FailedMystery}.tsx` (M1.15)
-  - `routes.tsx` wires PlayerPicker / MainScreen / PlaybackScreen; `/mysteries/:id/solve` is still a Placeholder (lands in M2 or later)
-- `apps/web/dist/`: present from M1.16 verification build (`pnpm build` was run).
-- `scripts/deploy.sh`: executable (mode 0755).
-- `data/mysterio.db`: present, has 2 player rows.
-- `data/audio/`: present (created lazily on server boot).
-- `.env` (root) and `apps/server/.env`: present locally (gitignored). **Neither has been scp'd to the VM yet** — that happens in M1.17 step 2.
+- `apps/server/`: full Fastify app (health/players/mysteries-stub/static); SQLite at `data/mysterio.db` (apps/server/data/) locally; remote DB lives at `~/mysterio/data/mysterio.db`.
+- `apps/server/systemd/mysterio.service`: ExecStart `%h/.local/bin/node`, env-file `%h/mysterio/apps/server/.env`.
+- `apps/server/.env` (local): `DATABASE_PATH=../../data/mysterio.db`, `AUDIO_DIR=../../data/audio`. Same file is used on the VM with the same relative paths — they resolve to `~/mysterio/data/...` from the systemd `WorkingDirectory=%h/mysterio/apps/server`.
+- `packages/shared/`: types + constants only. Zod schemas come in M2.1.
+- `apps/web/`: full M1 SPA (PlayerPicker → MainScreen → PlaybackScreen for stub flow). `/mysteries/:id/solve` is still a Placeholder (M2+).
+- `scripts/deploy.sh`: executable, uses `pnpm install --frozen-lockfile` (no `--prod`).
+- `.env` (root) and `apps/server/.env`: present locally, gitignored. Both are present on the VM (root is currently unused by the running server but still required by deploy.sh's existence check — open item).
 
-## Task list (snapshot at pause)
+## VM state (panther-golem.exe.xyz)
 
-Per the in-session task list:
-- #1 [completed] M1.12 API client wrappers
-- #2 [completed] M1.13 Player picker + player store
-- #3 [completed] M1.14 MainScreen
-- #4 [completed] M1.15 Generation hook + Loading/Failed/Playback stub
-- #5 [completed] M1.16 Build pipeline + deploy script
-- #6 [pending] M1.17 First exe.dev deploy
+- Linger=yes (service survives SSH disconnect).
+- Node v22.11.0 at `~/.local/node-v22.11.0-linux-x64/`, symlinks in `~/.local/bin/`.
+- Corepack upgraded to 0.34.7 (from 0.29.4) — pnpm@9.12.0 prepared+activated.
+- exe.dev proxy on port 3000, public.
+- mysterio.service enabled, running. PID rotates on each redeploy.
+- DB at `~/mysterio/data/mysterio.db`, 2 player rows seeded.
+
+## Next session — start at M2
+
+M2 goal (per plan §M2 / line 2500): replace stub generator with real Phase 1 (logic structure) + Phase 2 (validation), incl. 3-attempt regen loop with feedback notes. Persist `validation_passed` and `validation_notes` on every attempt.
+
+M2 acceptance: 20 generations (5 per category × 1 difficulty) against real Claude → ≥85% pass validation in ≤3 attempts.
+
+First task: **M2.1 LogicStructure Zod schema in shared package** (plan line 2508). Three steps: type definitions, zod schemas with superRefine cross-field rules, index.ts export. Read the full task text from the plan when resuming.
+
+**Resume checklist:**
+1. `git status` — should be clean.
+2. `git log --oneline -3` — confirm last commit is the M1.17 close-out.
+3. `Skill('superpowers:subagent-driven-development')`.
+4. Bump model from haiku → sonnet for M2 — Zod schema work involves real judgment (cross-field validation, edge cases for the validation grader, narrative grading prompts). Haiku worked for mechanical M1 plumbing but M2 is meaningfully more.
+5. Open question to surface to user before M2.1: where should the regen loop's feedback notes feed in? The plan has an answer (`previousFailureNotes` arg on the logic-generation prompt) but it's worth confirming the user is aligned on the architecture before wiring it.
 
 ## Notes for the next session
 
-- M1.12–M1.16 were all mechanical; haiku worked fine for implementer + both reviewers throughout. M1.16 review (haiku) caught a real Critical bug (`--prod` flag) that would have broken the first deploy — keep the two-stage review, especially the code-quality pass, for any task with shell/deploy/integration glue.
-- M1.17 is partially-manual deploy. The user opted to pause rather than have the controller drive it. When resuming, ask the user how they want to drive M1.17 (run themselves vs. supervise controller vs. fully delegate) before invoking the skill on it. Likely they'll want to run interactively because it touches a real VM and requires iPad-side verification.
-- The carry-forward issue most likely to bite during M1.17: `apps/server/.env` is needed on the VM for `db:migrate`/`db:seed` but isn't auto-deployed. See "Open issue" above. Prep an extra scp step.
-- Subagent prompts are long because they inline the full task code from the plan — keep doing that.
-- When using `superpowers:code-reviewer` subagent_type, pass BASE_SHA / HEAD_SHA as the previous-commit / current-commit pair so it can scope its diff. Provide the literal task requirements text, not just a pointer to the plan file.
+- M1 close-out: 17 tasks landed in ~one calendar week of part-time work. Subagent-driven flow worked well; the two-stage review (spec then code-quality) caught real bugs (M1.16's `--prod` flag would've broken the first deploy).
+- M1.17 deploy hit five distinct issues live (notes #1–#5 above). All fixed inline. The pattern is real: deploy plumbing is where assumptions surface. M2 should expect similar surprises when first wiring a real Claude API call (rate limits, prompt-cache misses, slow generations).
+- For M2 the cost calculus changes — each generation hits the API. The plan's solvability suite is nightly, not per-PR (per CLAUDE.md). Keep it that way.
+- Subagent prompts continue to inline full task text from the plan rather than pointing at a file.
+- For code-quality review: pass BASE_SHA / HEAD_SHA so the reviewer scopes its diff. Provide literal task requirements text.
