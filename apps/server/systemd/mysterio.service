@@ -6,7 +6,7 @@ After=network-online.target
 Type=simple
 WorkingDirectory=%h/mysterio/apps/server
 EnvironmentFile=%h/mysterio/.env
-ExecStart=/usr/bin/env node --env-file=%h/mysterio/.env dist/src/index.js
+ExecStart=%h/.local/bin/node --env-file=%h/mysterio/.env dist/src/index.js
 Restart=on-failure
 RestartSec=5
 
