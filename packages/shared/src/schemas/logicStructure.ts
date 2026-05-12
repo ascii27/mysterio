@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CATEGORY_IDS } from "../constants/categories.js";
+import type { CategoryId } from "../constants/categories.js";
 
 const idSchema = z.string().min(1).max(48).regex(/^[a-z0-9_-]+$/, "id must be lowercase kebab/snake");
 
@@ -33,7 +34,7 @@ export const trueSolutionSchema = z.object({
 });
 
 export const logicStructureSchema = z.object({
-  category: z.enum(CATEGORY_IDS as [string, ...string[]]),
+  category: z.enum(CATEGORY_IDS as unknown as [CategoryId, ...CategoryId[]]),
   setting: z.string().min(10).max(400),
   characters: z.array(characterSchema).min(3).max(8),
   essential_clues: z.array(essentialClueSchema).min(3).max(8),

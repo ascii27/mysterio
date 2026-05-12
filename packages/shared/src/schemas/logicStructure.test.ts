@@ -40,6 +40,11 @@ describe("logicStructureSchema", () => {
     bad.characters[1]!.is_culprit = false;
     const res = logicStructureSchema.safeParse(bad);
     expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(
+        res.error.issues.some((i) => i.message.includes("exactly one character")),
+      ).toBe(true);
+    }
   });
 
   it("rejects when true_solution.who_did_it does not match the culprit id", () => {
@@ -47,6 +52,23 @@ describe("logicStructureSchema", () => {
     bad.true_solution.who_did_it = "pemberton";
     const res = logicStructureSchema.safeParse(bad);
     expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(
+        res.error.issues.some((i) => i.message.includes("must match the culprit's character id")),
+      ).toBe(true);
+    }
+  });
+
+  it("rejects when true_solution.who_did_it references a non-existent character id", () => {
+    const bad = structuredClone(valid);
+    bad.true_solution.who_did_it = "ghost-character";
+    const res = logicStructureSchema.safeParse(bad);
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(
+        res.error.issues.some((i) => i.message.includes("reference an existing character")),
+      ).toBe(true);
+    }
   });
 
   it("rejects duplicate clue ids", () => {
@@ -54,6 +76,11 @@ describe("logicStructureSchema", () => {
     bad.false_clues.push({ id: "tuna-can", description: "Another tuna can." });
     const res = logicStructureSchema.safeParse(bad);
     expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(
+        res.error.issues.some((i) => i.message.includes("duplicate clue id")),
+      ).toBe(true);
+    }
   });
 
   it("rejects fewer than 3 essential clues", () => {
