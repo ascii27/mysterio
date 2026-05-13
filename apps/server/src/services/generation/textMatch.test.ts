@@ -3,7 +3,7 @@ import { findMissingClues, tokenSetRatio } from "./textMatch.js";
 
 describe("tokenSetRatio", () => {
   it("returns 1 when one set is a subset of the other", () => {
-    expect(tokenSetRatio("the muddy boots", "There were muddy boots by the back door")).toBeGreaterThanOrEqual(0.66);
+    expect(tokenSetRatio("the muddy boots", "There were muddy boots by the back door")).toBe(1);
   });
 
   it("returns 0 for unrelated strings", () => {

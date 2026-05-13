@@ -35,4 +35,9 @@ describe("redact", () => {
     const r = redact(ls);
     expect(r.essential_clues).toEqual(ls.essential_clues);
   });
+
+  it("has exactly the expected top-level keys", () => {
+    const r = redact(ls);
+    expect(Object.keys(r).sort()).toEqual(["category", "characters", "essential_clues", "setting"]);
+  });
 });
