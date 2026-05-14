@@ -32,7 +32,7 @@ export async function claudeText(opts: ClaudeJsonCallOptions): Promise<string> {
       : { type: "text" as const, text: s.text },
   );
 
-  const res = await client.beta.promptCaching.messages.create({
+  const res = await client.messages.create({
     model: env.ANTHROPIC_MODEL,
     max_tokens: opts.maxTokens ?? 4096,
     temperature: opts.temperature ?? 0.7,
@@ -41,7 +41,7 @@ export async function claudeText(opts: ClaudeJsonCallOptions): Promise<string> {
   });
 
   const text = res.content
-    .filter((b): b is { type: "text"; text: string } => b.type === "text")
+    .filter((b): b is Anthropic.Messages.TextBlock => b.type === "text")
     .map((b) => b.text)
     .join("\n");
 

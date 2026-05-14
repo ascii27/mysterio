@@ -16,7 +16,7 @@
     "db:seed": "tsx --env-file=.env scripts/seed-players.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
+    "@anthropic-ai/sdk": "^0.96.0",
     "@fastify/static": "^8.0.3",
     "@mysterio/shared": "workspace:*",
     "better-sqlite3": "^11.5.0",
