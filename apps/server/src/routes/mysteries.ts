@@ -3,7 +3,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { getDb } from "../db/client.js";
 import { mysteries } from "../db/schema.js";
-import { startStubGeneration } from "../services/stub/stubGenerator.js";
+import { runGeneration } from "../services/generation/orchestrator.js";
 import { mysteryId } from "../utils/ids.js";
 
 const generateBody = z.object({
@@ -29,7 +29,11 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       status: "pending",
     }).run();
 
-    startStubGeneration(id);
+    void runGeneration({
+      mysteryId: id,
+      category: parsed.data.category,
+      difficulty: parsed.data.difficulty,
+    });
 
     reply.status(202);
     return { mystery_id: id, status: "pending" };
