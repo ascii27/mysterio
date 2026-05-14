@@ -62,4 +62,3 @@ export const logicStructureSchema = z.object({
   }
 });
 
-export type LogicStructureZ = z.infer<typeof logicStructureSchema>;
