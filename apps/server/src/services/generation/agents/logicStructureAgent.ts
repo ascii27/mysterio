@@ -5,10 +5,10 @@ import {
   difficultyConfig,
   logicStructureSchema,
 } from "@mysterio/shared";
-import type { ZodError } from "zod";
 import { claudeText, extractJson } from "../../anthropic/client.js";
 import { buildLogicStructureSystem } from "../prompts/logicStructure.system.js";
 import { SAFETY_PREAMBLE } from "../prompts/shared.js";
+import { formatZodIssues } from "../zodFormat.js";
 
 export interface LogicStructureAgentInput {
   category: CategoryId;
@@ -89,6 +89,3 @@ function checkDifficultyCounts(ls: LogicStructure, difficulty: DifficultyId): st
   return issues.length === 0 ? null : issues.join("; ");
 }
 
-function formatZodIssues(err: ZodError): string {
-  return err.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`).join("; ");
-}

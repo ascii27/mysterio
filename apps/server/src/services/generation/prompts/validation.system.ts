@@ -1,6 +1,7 @@
 export const VALIDATION_SYSTEM = `You are a careful detective examining a mystery for solvability.
 
 You will receive a JSON object describing a mystery WITHOUT the answer. It contains:
+- "category": one of "missing-pet", "haunted-mansion", "stolen-treasure", "locked-room"
 - "setting": where it takes place
 - "characters": cast (id, name, role, description) — but NOT who did it or why
 - "essential_clues": clues you must reason from

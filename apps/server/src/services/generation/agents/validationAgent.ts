@@ -3,8 +3,9 @@ import { z } from "zod";
 import { claudeText, extractJson } from "../../anthropic/client.js";
 import { VALIDATION_SYSTEM } from "../prompts/validation.system.js";
 import { SAFETY_PREAMBLE } from "../prompts/shared.js";
+import { formatZodIssues } from "../zodFormat.js";
 
-const validationGuessSchema = z.object({
+export const validationGuessSchema = z.object({
   guess: z.object({
     who: z.string().min(1),
     how: z.string().min(3),
@@ -31,7 +32,7 @@ export async function runValidationAgent(
       label: `validationAgent:attempt${attempt}`,
       system: [
         { type: "text", text: SAFETY_PREAMBLE, cache: true },
-        { type: "text", text: VALIDATION_SYSTEM },
+        { type: "text", text: VALIDATION_SYSTEM, cache: true },
       ],
       user: `Solve this mystery from the essential clues alone.\n\n${JSON.stringify(redacted, null, 2)}${
         lastError ? `\n\nYour previous attempt was malformed: ${lastError}` : ""
@@ -50,12 +51,12 @@ export async function runValidationAgent(
     }
     const result = validationGuessSchema.safeParse(parsed);
     if (!result.success) {
-      lastError = `Zod failed: ${result.error.issues.map((i) => i.message).join("; ")}`;
+      lastError = `Zod failed: ${formatZodIssues(result.error)}`;
       continue;
     }
     const validIds = new Set(redacted.characters.map((c) => c.id));
     if (!validIds.has(result.data.guess.who)) {
-      lastError = `guess.who '${result.data.guess.who}' is not a character id in the supplied list`;
+      lastError = `guess.who '${result.data.guess.who}' is not a valid character id. Valid ids: ${[...validIds].join(", ")}`;
       continue;
     }
     return { ok: true, value: result.data };
