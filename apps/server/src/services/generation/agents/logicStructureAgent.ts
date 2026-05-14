@@ -2,9 +2,10 @@ import {
   type CategoryId,
   type DifficultyId,
   type LogicStructure,
+  difficultyConfig,
   logicStructureSchema,
 } from "@mysterio/shared";
-import { z } from "zod";
+import type { ZodError } from "zod";
 import { claudeText, extractJson } from "../../anthropic/client.js";
 import { buildLogicStructureSystem } from "../prompts/logicStructure.system.js";
 import { SAFETY_PREAMBLE } from "../prompts/shared.js";
@@ -48,13 +49,18 @@ export async function runLogicStructureAgent(
     }
     const result = logicStructureSchema.safeParse(parsed);
     if (result.success) {
+      const countIssue = checkDifficultyCounts(result.data, input.difficulty);
+      if (countIssue) {
+        errors.push(`Difficulty-count check failed: ${countIssue}`);
+        continue;
+      }
       return { ok: true, value: result.data, attemptsUsed: attempt };
     }
     errors.push(`Zod validation failed: ${formatZodIssues(result.error)}`);
   }
   return {
     ok: false,
-    error: `logic structure agent exhausted internal retries: ${errors.join(" | ")}`,
+    error: errors[errors.length - 1] ?? "logic structure agent failed without recording an error",
     attemptsUsed: MAX_INTERNAL_ATTEMPTS,
   };
 }
@@ -62,7 +68,8 @@ export async function runLogicStructureAgent(
 function buildUserMessage(input: LogicStructureAgentInput, lastError?: string): string {
   const base = `Generate a ${input.difficulty} ${input.category} mystery.`;
   if (input.previousFailureNotes) {
-    return `${base}\n\nYour previous attempt failed validation. Fix these issues:\n${input.previousFailureNotes}`;
+    const parseNote = lastError ? `\n\nNote: your most recent JSON output also had a structural problem: ${lastError}` : "";
+    return `${base}\n\nYour previous attempt failed validation. Fix these issues:\n${input.previousFailureNotes}${parseNote}`;
   }
   if (lastError) {
     return `${base}\n\nYour previous output had a problem: ${lastError}\nReturn a corrected JSON object that satisfies the schema exactly.`;
@@ -70,6 +77,18 @@ function buildUserMessage(input: LogicStructureAgentInput, lastError?: string): 
   return base;
 }
 
-function formatZodIssues(err: z.ZodError): string {
+function checkDifficultyCounts(ls: LogicStructure, difficulty: DifficultyId): string | null {
+  const d = difficultyConfig(difficulty);
+  const issues: string[] = [];
+  if (ls.essential_clues.length !== d.essentialClues) {
+    issues.push(`essential_clues.length must be ${d.essentialClues} (got ${ls.essential_clues.length})`);
+  }
+  if (ls.false_clues.length < d.falseCluesMin || ls.false_clues.length > d.falseCluesMax) {
+    issues.push(`false_clues.length must be ${d.falseCluesMin}-${d.falseCluesMax} (got ${ls.false_clues.length})`);
+  }
+  return issues.length === 0 ? null : issues.join("; ");
+}
+
+function formatZodIssues(err: ZodError): string {
   return err.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`).join("; ");
 }
