@@ -16,35 +16,45 @@ interface RunInput {
 }
 
 export async function runGeneration(input: RunInput): Promise<void> {
-  const db = getDb();
-  const env = loadEnv();
   const log = (msg: string, meta?: Record<string, unknown>) =>
     logger.info(msg, { mystery_id: input.mysteryId, ...meta });
 
   try {
+    const db = getDb();
+    const env = loadEnv();
     const validatedLogic = await regenLoop(input, env.MAX_VALIDATION_ATTEMPTS, log);
     if (!validatedLogic) {
-      db.update(mysteries).set({ status: "failed", failure_reason: "validation_exhausted" })
-        .where(eq(mysteries.id, input.mysteryId)).run();
+      db.update(mysteries).set({
+        status: "failed",
+        failure_reason: "validation_exhausted",
+        validation_attempts: env.MAX_VALIDATION_ATTEMPTS,
+        validation_passed: 0,
+      }).where(eq(mysteries.id, input.mysteryId)).run();
       return;
     }
-    db.update(mysteries).set({
-      status: "writing",
-      logic_structure_json: JSON.stringify(validatedLogic),
-      validation_passed: 1,
-    }).where(eq(mysteries.id, input.mysteryId)).run();
-
     // Phase 3 (narrative) and Phase 4 (TTS) come in M3 — for now we mark ready with placeholder text.
+    // When M3 lands and writing→synthesizing→ready becomes an observable transition (TTS takes 5-10s),
+    // this will be split back into separate writes.
     db.update(mysteries).set({
       status: "ready",
+      logic_structure_json: JSON.stringify(validatedLogic),
+      validation_passed: 1,
       title: makePlaceholderTitle(validatedLogic),
       narrative_text: "[Narrative + audio land in M3.]",
       ready_at: Math.floor(Date.now() / 1000),
     }).where(eq(mysteries.id, input.mysteryId)).run();
   } catch (err) {
     log("orchestrator_unhandled_error", { err: err instanceof Error ? err.message : String(err) });
-    db.update(mysteries).set({ status: "failed", failure_reason: "orchestrator_error" })
-      .where(eq(mysteries.id, input.mysteryId)).run();
+    try {
+      const db = getDb();
+      db.update(mysteries).set({ status: "failed", failure_reason: "orchestrator_error" })
+        .where(eq(mysteries.id, input.mysteryId)).run();
+    } catch (dbErr) {
+      log("orchestrator_catch_db_failed", {
+        err: dbErr instanceof Error ? dbErr.message : String(dbErr),
+      });
+      // mystery stays in non-terminal status; M1.9's startup cleanup will recover it
+    }
   }
 }
 
