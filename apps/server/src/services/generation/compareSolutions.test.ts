@@ -52,4 +52,10 @@ describe("compareSolutions", () => {
     const r = await compareSolutions(baseGuess, truth, { grader: passingGrader });
     expect(r.notes).toContain("Validation passed");
   });
+
+  it("passes when confidence is exactly 0.5 (floor is strict <)", async () => {
+    const r = await compareSolutions({ ...baseGuess, confidence: 0.5 }, truth, { grader: passingGrader });
+    expect(r.passed).toBe(true);
+    expect(r.confidence_floor_violated).toBe(false);
+  });
 });

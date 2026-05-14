@@ -16,13 +16,20 @@ export async function runGrader(candidate: string, reference: string): Promise<G
     label: "graderAgent",
     system: [
       { type: "text", text: SAFETY_PREAMBLE, cache: true },
-      { type: "text", text: GRADER_SYSTEM },
+      { type: "text", text: GRADER_SYSTEM, cache: true },
     ],
     user: `candidate: ${JSON.stringify(candidate)}\nreference: ${JSON.stringify(reference)}`,
     maxTokens: 256,
     temperature: 0.0,
   });
-  const parsed = graderResultSchema.safeParse(JSON.parse(extractJson(raw)));
+
+  let raw_parsed: unknown;
+  try {
+    raw_parsed = JSON.parse(extractJson(raw));
+  } catch (e) {
+    return { match: false, reason: `grader output not valid JSON: ${e instanceof Error ? e.message : String(e)}` };
+  }
+  const parsed = graderResultSchema.safeParse(raw_parsed);
   if (!parsed.success) {
     return { match: false, reason: `grader output malformed: ${formatZodIssues(parsed.error)}` };
   }
