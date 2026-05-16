@@ -1,15 +1,28 @@
-# Mysterio — Session State (M2 complete, paused 2026-05-16)
+# Mysterio — Session State (M2 + partial M3 shipped; M4 planned, ready to implement — paused 2026-05-16)
 
-> M2 done. Real logic-gen + validation regen loop wired into `/generate`; orchestrator replaces the M1 stub. Narrative + audio are placeholders — those land in M3. Re-invoke `superpowers:subagent-driven-development` when resuming.
+> M2 complete and deployed. M3.1 (narrative agent) + M3.2-new (narrative wiring into orchestrator) shipped: live VM now serves real LLM-written prose. Audio portion of M3 deferred. **NEXT: M4 (clue tracker + solve + hints) — fully planned in `docs/superpowers/plans/2026-05-16-m4-implementation.md`.** Resume by reading that plan, then invoking `superpowers:subagent-driven-development` to begin Task M4.1.
+
+## Milestone re-sequencing (decided 2026-05-16 mid-session)
+
+Original plan was M2 → M3 (narrative+audio) → M4 (clue tracker+solve) → M5 (hints+polish). After M3.2-new shipped real narrative, the user pivoted to **validate the read/solve/hint experience on iPad before investing in TTS**. New sequence:
+
+1. ✅ M2 (logic + validation regen loop) — done, deployed
+2. ✅ M3.1 + M3.2-new (narrative agent + orchestrator wiring) — done, deployed
+3. **➡️ M4 (clue tracker + solve + hints)** — planned, ready for fresh-session implementation
+4. M3.3-new through M3.6 (TTS provider + storage + orchestrator wiring + AudioPlayer + TranscriptPanel) — deferred until M4 lands and is validated on iPad
+5. M5 (polish: error boundaries, responsiveness, favicon, real-kid smoke test) — slimmer than original (hints already absorbed into M4)
+
+Design doc for the M4 pivot: `docs/superpowers/specs/2026-05-16-m4-with-hints-design.md` (approved 2026-05-16).
 
 ## Where we are
 
-- **Branch:** `feat/mysterio-implementation` (off `main`). 17 M2 commits on top of the M1.17 close-out (`12d60a5`). Not merged or PR'd.
-- **Last commit:** `f3836fb` — M2.8 live LLM acceptance test (skipped by default; user ran it manually after the commit landed — see "M2.8 live-test result" below).
-- **Plan in flight:** `docs/superpowers/plans/2026-05-04-mysterio-implementation.md`.
-- **Spec:** `docs/superpowers/specs/2026-05-04-mysterio-prd.md`.
-- **Live URL:** `https://panther-golem.exe.xyz/` — currently still running M1.17 (stub). M2 NOT yet redeployed.
-- **Execution mode:** subagent-driven (skill `superpowers:subagent-driven-development`). Model: sonnet for every M2 task (per pre-session note about the model bump from haiku — schema/agent work needs real judgment).
+- **Branch:** `feat/mysterio-implementation` (off `main`). 22+ commits on top of the M1.17 close-out (`12d60a5`). Not merged or PR'd.
+- **Last commit:** `1bde79c` — M4-design spec doc (+ new commit when M4 plan lands).
+- **Live URL:** `https://panther-golem.exe.xyz/` — **runs M3.2-new (real narrative, no audio).** Last deploy 2026-05-16.
+- **Plan to execute next:** `docs/superpowers/plans/2026-05-16-m4-implementation.md` — 7 implementation tasks (M4.1-M4.7) + M4.8 verification-only.
+- **Original PLAN.md:** `docs/superpowers/plans/2026-05-04-mysterio-implementation.md` — still useful as code reference (M4 plan lifts most of its code from there).
+- **Spec PRD:** `docs/superpowers/specs/2026-05-04-mysterio-prd.md`.
+- **Execution mode:** subagent-driven. Model: **sonnet** for both implementer and reviewer subagents (per `workflow_model_selection` memory).
 
 ## M2 completed (M2.1 – M2.8 + two pre-M2.4 prep commits)
 
@@ -98,31 +111,42 @@ Surface these before they bite:
 
 ## VM state (panther-golem.exe.xyz)
 
-Unchanged since M1.17 close-out:
+Updated 2026-05-16:
 - Linger=yes, Node v22.11.0, Corepack 0.34.7, pnpm@9.12.0.
 - exe.dev proxy on port 3000, public.
-- mysterio.service running M1.17 build (stub). Re-deploy needed for M2.
+- mysterio.service running the **M3.2-new build** (real narrative; null audio). Last deploy 2026-05-16.
+- `apps/server/.env` on VM has real ANTHROPIC + OPENAI keys. Root `.env` still placeholder (only used for `deploy.sh` existence check).
 
-## Next session — start at M3
+## Next session — start at M4
 
-M3 goal (per plan §M3): replace the placeholder narrative + title with a real `narrativeAgent` that turns a validated `LogicStructure` into a 700-1500 word children's mystery, and a real `ttsAgent` that synthesizes audio. Section 5 of `PLAN.md` covers ElevenLabs vs OpenAI TTS (CLAUDE.md notes the project picked OpenAI TTS — verify in `env.ts` which is already wired).
+**Plan file:** `docs/superpowers/plans/2026-05-16-m4-implementation.md`. Read it end-to-end before starting.
+**Design spec:** `docs/superpowers/specs/2026-05-16-m4-with-hints-design.md`. Read for context if needed.
 
-M3 acceptance (per plan): `/generate` produces a real audible MP3 for all 8 categories at all 3 difficulties; every essential clue text-matches into the narrative (`tokenSetRatio` ≥ 0.75 via `findMissingClues` from M2.3).
+**Goal:** Add clue tracker (bottom-sheet drawer on PlaybackScreen), solve flow (SolutionScreen with picker + form + reveal), and two-tier hint system (≤2 hint nudges + give-up). All audio dependencies deliberately deferred — no `usePlaybackStore`, no `TranscriptPanel`, `audio_timestamp_ms` always null. **First task: M4.1 (shared Clue/Solution/Hint types).**
 
-First task: **M3.1 narrative system prompt + agent** (plan line ~3811). Subsequent: M3.2 essential-clue text-match retry, M3.3 TTS agent + S3/MinIO storage, M3.4 wire into orchestrator, M3.5 frontend playback verification.
-
-**M3 decisions taken at start (2026-05-16):**
-- **TTS provider: OpenAI** (env.ts already wired with `OPENAI_TTS_MODEL=tts-1-hd`, `OPENAI_TTS_VOICE=fable`). Implementer should build `services/openai/tts.ts` behind the `TTSProvider` interface (per CLAUDE.md swappable-adapter posture); ignore PLAN.md §M3.3's `services/elevenlabs/client.ts` literal — the *interface* and storage flow apply, only the provider differs.
-- **Narrative model: Sonnet 4.5** (same as M2 agents). Build the agent so model is configurable in one place; revisit only if essential-clue text-match retries fire frequently or narrative quality reads flat in M3.5 manual playback.
-- **Narrator voice strategy: single voice (`fable`) across all 8 categories.** Per-category voices is v2 work; CLAUDE.md flags it as a known spec gap.
+**Decisions baked in (don't re-litigate):**
+- **Hint design = spec PRD as-is**: ≤2 nudges + 1 give-up, all on SolutionScreen, server-enforced cap.
+- **ClueTracker = bottom-sheet drawer** (per design spec §5; user picked layout B in brainstorming).
+- **Audio decoupling**: `audio_timestamp_ms` stays in the Zod schema as optional, ClueTracker omits it from POST body, column persists `null`.
+- **TranscriptPanel deferred**: PlaybackScreen keeps existing prose div.
+- **explanationAgent (M4.4) and hintAgent (M4.6)**: both fail-soft. Try/catch wraps BOTH the Claude call AND the JSON.parse so a malformed LLM response can't crash uncaught (per M2.6 reviewer's catch-pattern).
+- **Endpoint paths** match plan's existing frontend code: `/submit-solution`, `/give-up`, `/solution`, `/hints`.
 
 **Resume checklist:**
-1. `git status` — should be clean after the two post-M2 commits (M2-post fix + SESSION_STATE update).
-2. `git log --oneline 12d60a5..HEAD` — confirm 17 M2 commits + 2 post-M2 commits.
-3. M2.8 acceptance test: **DONE, PASSED 24/24** on 2026-05-16. M3 prompt-tuning gate cleared.
-4. M2 VM deploy: **DONE** at `https://panther-golem.exe.xyz/`; live smoke generation tested end-to-end.
-5. `Skill('superpowers:subagent-driven-development')` for M3.1 work.
-6. Sonnet for the implementer subagents (M3 has real prompt-design + agent code).
+1. `git status` — should be clean after the M4-design + M4-plan commits land.
+2. `git log --oneline 12d60a5..HEAD` — confirm M2 (17 commits) + post-M2 (2 commits) + M3.1 + M3.2-new + M4-design + M4-plan commits.
+3. M2.8 live acceptance: **DONE, PASSED 24/24**. M3 narrative + orchestrator wiring: **DONE, deployed**.
+4. M4 plan: **READY** — `docs/superpowers/plans/2026-05-16-m4-implementation.md`. 7 implementation tasks + 1 verification task (M4.8).
+5. `Skill('superpowers:subagent-driven-development')` to begin Task M4.1.
+6. Use **sonnet** for implementer + reviewer subagents (per `workflow_model_selection` memory).
+7. After M4.7 lands, run M4.8 (deploy + iPad smoke test) before moving to M3.3-new (OpenAI TTS).
+
+**Key things the implementer must NOT do (per design spec §8 + memory):**
+- Add `usePlaybackStore`, `useAudioPlayer`, or any audio-store dep.
+- Pull `TranscriptPanel` forward — keep current PlaybackScreen prose div.
+- Add `audio_timestamp_ms` to the createClue client call.
+- Skip the M2.6-pattern try/catch on hintAgent + explanationAgent (both Claude call AND JSON parse must be inside the try).
+- Skip the per-task spec compliance review + code quality review subagent pair (every M2/M3 reviewer found a real bug).
 
 ## Notes for the next session
 
