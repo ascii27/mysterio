@@ -4,3 +4,6 @@ export * from "./constants/voices.js";
 export * from "./types/mystery.js";
 export * from "./types/logicStructure.js";
 export * from "./schemas/logicStructure.js";
+export * from "./types/clue.js";
+export * from "./types/solution.js";
+export * from "./types/hint.js";
