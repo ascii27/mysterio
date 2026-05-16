@@ -31,7 +31,8 @@ export function GuessForm({
           onChange={(e) => setHow(e.target.value)}
           rows={3}
           placeholder="A sentence or two"
-          style={{ width: "100%", padding: 10, borderRadius: 10, background: "var(--surface)", color: "var(--text)", border: "1px solid var(--surface-2)" }}
+          aria-label="How did they do it?"
+          style={{ width: "100%", padding: 10, fontSize: 16, borderRadius: 10, background: "var(--surface)", color: "var(--text)", border: "1px solid var(--surface-2)" }}
         />
       </section>
       <section>
@@ -41,7 +42,8 @@ export function GuessForm({
           onChange={(e) => setWhy(e.target.value)}
           rows={3}
           placeholder="A sentence or two"
-          style={{ width: "100%", padding: 10, borderRadius: 10, background: "var(--surface)", color: "var(--text)", border: "1px solid var(--surface-2)" }}
+          aria-label="Why did they do it?"
+          style={{ width: "100%", padding: 10, fontSize: 16, borderRadius: 10, background: "var(--surface)", color: "var(--text)", border: "1px solid var(--surface-2)" }}
         />
       </section>
       <Button

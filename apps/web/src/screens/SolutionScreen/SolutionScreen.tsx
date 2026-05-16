@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { getMystery } from "../../api/mysteries.js";
 import { getSolution, submitSolution } from "../../api/solutions.js";
@@ -10,12 +10,13 @@ export function SolutionScreen() {
   const { id } = useParams<{ id: string }>();
   const mysteryId = id!;
 
+  const qc = useQueryClient();
   const mysteryQ = useQuery({ queryKey: ["mystery", mysteryId], queryFn: () => getMystery(mysteryId) });
   const solutionQ = useQuery({ queryKey: ["solution", mysteryId], queryFn: () => getSolution(mysteryId), retry: false });
 
   const submitM = useMutation({
     mutationFn: (g: { guess_who: string; guess_how: string; guess_why: string }) => submitSolution(mysteryId, g),
-    onSuccess: () => { solutionQ.refetch(); },
+    onSuccess: (data) => { qc.setQueryData(["solution", mysteryId], data); },
   });
 
   if (!mysteryQ.data) return <div style={{ padding: 24 }}>Loading...</div>;
