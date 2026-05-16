@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Clue } from "@mysterio/shared";
 
 export function ClueEditor({
@@ -13,6 +13,10 @@ export function ClueEditor({
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(clue.content);
 
+  useEffect(() => {
+    if (!editing) setDraft(clue.content);
+  }, [clue.content, editing]);
+
   if (editing) {
     return (
       <div style={{ display: "flex", gap: 6, padding: 8, background: "var(--surface-2)", borderRadius: 8 }}>
@@ -20,7 +24,7 @@ export function ClueEditor({
           autoFocus
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          style={{ flex: 1, padding: 6, borderRadius: 6, border: "1px solid var(--surface)", background: "var(--bg)", color: "var(--text)" }}
+          style={{ flex: 1, padding: 6, borderRadius: 6, border: "1px solid var(--surface)", background: "var(--bg)", color: "var(--text)", fontSize: 16 }}
         />
         <button
           onClick={() => { onSave(draft); setEditing(false); }}

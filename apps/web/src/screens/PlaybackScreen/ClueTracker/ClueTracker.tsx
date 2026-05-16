@@ -116,8 +116,8 @@ export function ClueTracker({ mysteryId }: { mysteryId: string }) {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Write a clue..."
-            style={{ flex: 1, padding: 10, borderRadius: 6, border: "1px solid var(--surface-2)", background: "var(--bg)", color: "var(--text)" }}
-            onKeyDown={(e) => { if (e.key === "Enter" && draft.trim()) createM.mutate(); }}
+            style={{ flex: 1, padding: 10, borderRadius: 6, border: "1px solid var(--surface-2)", background: "var(--bg)", color: "var(--text)", fontSize: 16 }}
+            onKeyDown={(e) => { if (e.key === "Enter" && draft.trim() && !createM.isPending) createM.mutate(); }}
           />
           <Button disabled={!draft.trim() || createM.isPending} onClick={() => createM.mutate()}>Add</Button>
         </div>
