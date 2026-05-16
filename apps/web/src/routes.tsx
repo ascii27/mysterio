@@ -2,11 +2,8 @@ import { Navigate, Route, Routes as RRRoutes } from "react-router-dom";
 import { MainScreen } from "./screens/MainScreen/MainScreen.js";
 import { PlayerPicker } from "./screens/PlayerPicker.js";
 import { PlaybackScreen } from "./screens/PlaybackScreen/PlaybackScreen.js";
+import { SolutionScreen } from "./screens/SolutionScreen/SolutionScreen.js";
 import { usePlayerStore } from "./state/playerStore.js";
-
-function Placeholder({ name }: { name: string }) {
-  return <div style={{ padding: 24 }}>{name} (placeholder)</div>;
-}
 
 function Home() {
   const activePlayerId = usePlayerStore((s) => s.activePlayerId);
@@ -19,7 +16,7 @@ export function Routes() {
     <RRRoutes>
       <Route path="/" element={<Home />} />
       <Route path="/mysteries/:id" element={<PlaybackScreen />} />
-      <Route path="/mysteries/:id/solve" element={<Placeholder name="Solve" />} />
+      <Route path="/mysteries/:id/solve" element={<SolutionScreen />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </RRRoutes>
   );
