@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { getDb } from "../db/client.js";
@@ -43,15 +43,16 @@ export async function cluesRoutes(app: FastifyInstance): Promise<void> {
     const parsed = patchBody.safeParse(req.body);
     if (!parsed.success) { reply.status(400); return { error: "invalid_body", issues: parsed.error.issues }; }
     const db = getDb();
-    db.update(clues).set({ content: parsed.data.content }).where(eq(clues.id, req.params.clueId)).run();
-    const row = db.select().from(clues).where(eq(clues.id, req.params.clueId)).get();
+    const where = and(eq(clues.id, req.params.clueId), eq(clues.mystery_id, req.params.id));
+    db.update(clues).set({ content: parsed.data.content }).where(where).run();
+    const row = db.select().from(clues).where(where).get();
     if (!row) { reply.status(404); return { error: "not_found" }; }
     return { clue: row };
   });
 
   app.delete<{ Params: { id: string; clueId: string } }>("/mysteries/:id/clues/:clueId", async (req, reply) => {
     const db = getDb();
-    db.delete(clues).where(eq(clues.id, req.params.clueId)).run();
+    db.delete(clues).where(and(eq(clues.id, req.params.clueId), eq(clues.mystery_id, req.params.id))).run();
     reply.status(204);
   });
 }
