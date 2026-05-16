@@ -4,6 +4,7 @@ import { getMystery } from "../../api/mysteries.js";
 import { getSolution, submitSolution } from "../../api/solutions.js";
 import { ClueSummary } from "./ClueSummary.js";
 import { GuessForm } from "./GuessForm.js";
+import { HintControls } from "./HintControls.js";
 import { RevealPanel } from "./RevealPanel.js";
 
 export function SolutionScreen() {
@@ -32,6 +33,7 @@ export function SolutionScreen() {
       </header>
 
       {!showReveal && <ClueSummary mysteryId={mysteryId} />}
+      {!showReveal && <HintControls mysteryId={mysteryId} onGaveUp={() => solutionQ.refetch()} />}
       {!showReveal && (
         <GuessForm
           characters={characters}
