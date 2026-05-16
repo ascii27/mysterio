@@ -1,6 +1,6 @@
-# Mysterio — Session State (M2 + partial M3 shipped; M4 planned, ready to implement — paused 2026-05-16)
+# Mysterio — Session State (M2 + partial M3 + M4 shipped — paused 2026-05-16)
 
-> M2 complete and deployed. M3.1 (narrative agent) + M3.2-new (narrative wiring into orchestrator) shipped: live VM now serves real LLM-written prose. Audio portion of M3 deferred. **NEXT: M4 (clue tracker + solve + hints) — fully planned in `docs/superpowers/plans/2026-05-16-m4-implementation.md`.** Resume by reading that plan, then invoking `superpowers:subagent-driven-development` to begin Task M4.1.
+> M2 complete and deployed. M3.1 + M3.2-new shipped. **M4 (clue tracker + solve + hints) shipped 2026-05-16: 11 commits, all 7 implementation tasks + verification done.** Live VM at panther-golem.exe.xyz runs M4 + pre-existing SPA-fallback bug fix. Local end-to-end smoke confirmed full kid loop (clues → hints → submit → reveal + give-up). **iPad walkthrough still pending the user.** Audio portion of M3 still deferred. **NEXT: iPad smoke on M4 (user), then M3.3-new (OpenAI TTS provider).**
 
 ## Milestone re-sequencing (decided 2026-05-16 mid-session)
 
@@ -117,7 +117,7 @@ Updated 2026-05-16:
 - mysterio.service running the **M3.2-new build** (real narrative; null audio). Last deploy 2026-05-16.
 - `apps/server/.env` on VM has real ANTHROPIC + OPENAI keys. Root `.env` still placeholder (only used for `deploy.sh` existence check).
 
-## Next session — start at M4
+## Original M4 plan reference (pre-execution)
 
 **Plan file:** `docs/superpowers/plans/2026-05-16-m4-implementation.md`. Read it end-to-end before starting.
 **Design spec:** `docs/superpowers/specs/2026-05-16-m4-with-hints-design.md`. Read for context if needed.
@@ -147,6 +147,52 @@ Updated 2026-05-16:
 - Add `audio_timestamp_ms` to the createClue client call.
 - Skip the M2.6-pattern try/catch on hintAgent + explanationAgent (both Claude call AND JSON parse must be inside the try).
 - Skip the per-task spec compliance review + code quality review subagent pair (every M2/M3 reviewer found a real bug).
+
+## M4 completed (M4.1 – M4.8 + 1 carry-forward fix, 2026-05-16)
+
+| Task | Commits | Notes |
+|---|---|---|
+| M4.1 shared Clue/Solution/Hint types | `8df75e3` | plain TS interfaces (no Zod); row-shape mirrors snake_case columns |
+| M4.2 clues router (CRUD) | `4376c6b` + `42f0984` | review caught cross-mystery clueId access: PATCH/DELETE used only `clueId` in WHERE, allowing edits of another mystery's clues; fix adds `and(eq(clues.id), eq(clues.mystery_id))` to both UPDATE and read-back SELECT |
+| M4.3 ClueTracker bottom-sheet UI | `b0ab1d6` + `3a59154` | review caught 3 issues: ClueEditor draft state never re-synced after refetch (stale text on Edit-after-Save); both inputs missed `fontSize: 16` triggering iPad Safari auto-zoom; Enter-key add didn't check `createM.isPending`, allowing duplicate POSTs from rapid mashing |
+| M4.4 solutions endpoints + explanationAgent | `488578f` | grader-backed who/how/why match, M2.6-style fail-soft on explanation (try/catch around BOTH claudeText AND JSON.parse); GET /solution returns 200+null for unsolved (intentional — frontend's `solution !== null` check handles it; M4.5 designed against this contract) |
+| M4.5 SolutionScreen UI | `cb7cff7` + `e4d6783` | review caught iPad Safari textarea auto-zoom (`fontSize: 16` on both textareas), brief double-submit race (`refetch()` → `qc.setQueryData` for synchronous transition), missing `aria-label` on textareas; M4.7 was instructed to preserve setQueryData over plan-text's refetch regression |
+| M4.6 hintAgent + hints endpoint | `547bf2a` | 2-cap enforced at route; POST 409 ordering (mystery_not_ready → already_solved → hint_limit_reached); fail-soft hintAgent with FALLBACK string |
+| M4.7 HintControls on SolutionScreen | `4e78162` | nudge button + 2-step give-up confirm; preserved M4.5-fix's setQueryData pattern (didn't regress to refetch as plan-text would have) |
+| M4.8 prep: SPA fallback fix | `eb6db7b` | carry-forward bug from M1.10: both static registrations had `decorateReply: false`, so `reply.sendFile` was never decorated → notFoundHandler crashed on every direct URL hit to `/mysteries/*`. Fixed by removing `decorateReply: false` from the audio registration (first registration decorates per fastify-static rule). |
+
+**Total: 11 commits.** Subagent-driven: every task = implementer → spec-review → code-quality review → fix → re-review. Pattern continues to pay — code-quality reviewer found a real Important/Critical issue in M4.2, M4.3, M4.5 (each ≥1 fix-pass commit landed). M4.4, M4.6, M4.7 passed code-quality with no required fixes.
+
+## M4 acceptance verification (2026-05-16)
+
+**Local end-to-end smoke (live LLM, real mystery `x3ag3dj9juc0`):**
+- ✅ Add 2 clues across 2 tabs, edit one, delete one — verified via curl
+- ✅ Request 1 hint (`remaining=1`), 2nd hint (`remaining=0`, different essential clue), 3rd POST → 409 `hint_limit_reached`
+- ✅ Submit CORRECT solution with all 3 fields → `is_correct=1`, all match flags = 1, `hints_used=1`, 785-char kid-friendly explanation
+- ✅ Resubmit → 409 `already_solved`
+- ✅ Give-up on second mystery → `gave_up=1`, all guess fields null, 765-char explanation; resubmit → 409
+- ✅ All 11 M4 commits build + typecheck + tests clean (14 passed + 1 skipped throughout)
+
+**Pre-existing bug discovered during M4.8 deploy:** `apps/server/src/routes/static.ts` had both fastify-static registrations set to `decorateReply: false`, so `reply.sendFile` was never added to the reply prototype. Every direct URL hit to a React Router path (e.g., `/mysteries/abc/solve`) crashed with 500. Pre-existing since M1.10 (`a14162f`), but would bite the M4.8 iPad smoke since kids refreshing mid-flow would see a hard error. Fixed in `eb6db7b` and redeployed; SPA fallback now works on prod.
+
+**Deploy:** `bash scripts/deploy.sh` ran clean (3m wall, build + rsync + install + migrate + systemd restart). Service running, `/api/health` returns `{"ok":true,"db":true}`, `/mysteries/abc/solve` now serves index.html (was 500), all API endpoints respond.
+
+**iPad smoke (M4.8 step 2) — STILL PENDING.** Controller-driven walkthrough on a real iPad against https://panther-golem.exe.xyz/ is the next user-driven step before moving to M3.3-new (TTS). The 12-step kid-loop checklist is in `docs/superpowers/plans/2026-05-16-m4-implementation.md` M4.8 step 2.
+
+## Open/deferred items flagged during M4
+
+These were called out by reviewers + judgment-called as out-of-scope-for-now:
+
+- **`solutions.ts` POST hints race window:** prior-count SELECT → runHintAgent (~3-5s) → INSERT is wider than M4.2's clue race. Two concurrent POSTs both pass `prior.length < MAX_HINTS` and both INSERT → 3 hints possible. Accepted for single-device MVP. `Math.max(0, ...)` in GET prevents `remaining` from going negative.
+- **`hints.ts` post-INSERT SELECT is superfluous** (re-reads the row to pick up `created_at`); introduces a latent `undefined` type hole on the return path. Reviewer suggested constructing the response inline. Deferred — not blocking M4.7.
+- **No mutation error UI** anywhere in M4 (no toasts on createClue / askHint / giveUp / submitSolution failures). Frontend silently swallows API errors. Plan is fail-soft (retry by user action). Worth adding in a future hardening pass.
+- **`CLUE_TABS` import path from sibling screen** (`ClueSummary.tsx` imports `../PlaybackScreen/ClueTracker/ClueCategoryTabs.js`). Cross-screen coupling. Move to `@mysterio/shared/constants` when next touched.
+- **`HintAgent` may name the culprit** if the LLM breaks the soft "never say a character's name if they're the culprit" rule in `hint.system.ts`. No server-side check today. Add post-processing in `hintAgent.ts` (between safeParse and return) before Hard mode ships:
+  ```ts
+  if (parsed.success && parsed.data.hint.toLowerCase().includes(ls.true_solution.who_did_it.toLowerCase())) return FALLBACK;
+  ```
+- **`runExplanation` is called inline on the submit-solution / give-up path** — adds ~3-5s to the POST. Frontend shows "Checking..." spinner; acceptable. Could parallelize with the grader pair in a future refactor (outcome is the only dep, and outcome can be computed without explanation).
+- **Cache-miss on Sonnet still present** (SAFETY_PREAMBLE alone is below the minimum cacheable threshold). Not flagged anew in M4 — already a tracked pre-M3 nice-to-have.
 
 ## Notes for the next session
 
