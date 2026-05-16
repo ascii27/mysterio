@@ -14,7 +14,6 @@ export async function staticRoutes(app: FastifyInstance): Promise<void> {
   await app.register(fastifyStatic, {
     root: audioDir,
     prefix: "/audio/",
-    decorateReply: false,
     cacheControl: true,
     maxAge: "365d",
     immutable: true,
