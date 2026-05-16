@@ -3,6 +3,7 @@ import type { FastifyError } from "fastify";
 import { loadEnv } from "./config/env.js";
 import { cluesRoutes } from "./routes/clues.js";
 import { healthRoutes } from "./routes/health.js";
+import { hintsRoutes } from "./routes/hints.js";
 import { mysteriesRoutes } from "./routes/mysteries.js";
 import { playersRoutes } from "./routes/players.js";
 import { solutionsRoutes } from "./routes/solutions.js";
@@ -25,6 +26,7 @@ async function main(): Promise<void> {
   await app.register(mysteriesRoutes, { prefix: "/api" });
   await app.register(cluesRoutes, { prefix: "/api" });
   await app.register(solutionsRoutes, { prefix: "/api" });
+  await app.register(hintsRoutes, { prefix: "/api" });
   await app.register(staticRoutes);
 
   markStaleMysteriesFailed();
