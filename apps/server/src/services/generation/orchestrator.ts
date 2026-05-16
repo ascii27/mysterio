@@ -5,6 +5,7 @@ import { getDb } from "../../db/client.js";
 import { mysteries } from "../../db/schema.js";
 import { logger } from "../../utils/logger.js";
 import { runLogicStructureAgent } from "./agents/logicStructureAgent.js";
+import { runNarrativeAgent } from "./agents/narrativeAgent.js";
 import { runValidationAgent } from "./agents/validationAgent.js";
 import { compareSolutions } from "./compareSolutions.js";
 import { redact } from "./redact.js";
@@ -32,15 +33,37 @@ export async function runGeneration(input: RunInput): Promise<void> {
       }).where(eq(mysteries.id, input.mysteryId)).run();
       return;
     }
-    // Phase 3 (narrative) and Phase 4 (TTS) come in M3 — for now we mark ready with placeholder text.
-    // When M3 lands and writing→synthesizing→ready becomes an observable transition (TTS takes 5-10s),
-    // this will be split back into separate writes.
+    // Transition to "writing" — logic is locked in, narrative agent is about to run.
     db.update(mysteries).set({
-      status: "ready",
+      status: "writing",
       logic_structure_json: JSON.stringify(validatedLogic),
       validation_passed: 1,
-      title: makePlaceholderTitle(validatedLogic),
-      narrative_text: "[Narrative + audio land in M3.]",
+    }).where(eq(mysteries.id, input.mysteryId)).run();
+
+    // Phase 3: narrative
+    const narrativeRes = await runNarrativeAgent({
+      logicStructure: validatedLogic,
+      difficulty: input.difficulty,
+      maxAttempts: env.MAX_NARRATIVE_ATTEMPTS,
+    });
+    log("narrative_done", { ok: narrativeRes.ok, attempts: narrativeRes.attemptsUsed });
+
+    if (!narrativeRes.ok) {
+      db.update(mysteries).set({
+        status: "failed",
+        failure_reason: "narrative_clue_coverage",
+        validation_notes: `narrative agent could not include all essential clues. last missing: ${
+          narrativeRes.missingCluesByAttempt[narrativeRes.missingCluesByAttempt.length - 1]?.join(", ") ?? "?"
+        }`,
+      }).where(eq(mysteries.id, input.mysteryId)).run();
+      return;
+    }
+
+    // Narrative succeeded. TTS lands in M3.4-new — for now, jump straight to "ready" with audio_path unset.
+    db.update(mysteries).set({
+      status: "ready",
+      title: narrativeRes.value.title,
+      narrative_text: narrativeRes.value.narrative_text,
       ready_at: Math.floor(Date.now() / 1000),
     }).where(eq(mysteries.id, input.mysteryId)).run();
   } catch (err) {
@@ -99,7 +122,3 @@ async function regenLoop(
   return null;
 }
 
-function makePlaceholderTitle(ls: LogicStructure): string {
-  const parts = ls.setting.split(/[\s.]+/).slice(0, 3).join(" ");
-  return parts.length > 0 ? `Mystery at ${parts}` : "An Untitled Mystery";
-}
