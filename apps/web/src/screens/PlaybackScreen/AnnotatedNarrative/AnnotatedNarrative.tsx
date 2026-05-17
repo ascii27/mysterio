@@ -1,14 +1,15 @@
+import { type ReactNode } from "react";
 import type { NarrativeAnnotation } from "@mysterio/shared";
 import type { PublicCharacter } from "../../../api/mysteries.js";
 
 const PERSON_ROLE_COLOR: Record<string, string> = {
-  suspect: "#ff8c8c",
+  suspect: "var(--bad)",
   witness: "#9ad4ff",
   bystander: "var(--text-dim)",
 };
 
 const PERSON_ROLE_BG: Record<string, string> = {
-  suspect: "rgba(255,140,140,0.18)",
+  suspect: "rgba(231,115,115,0.18)",
   witness: "rgba(154,212,255,0.18)",
   bystander: "rgba(185,179,214,0.15)",
 };
@@ -33,7 +34,7 @@ export function AnnotatedNarrative({
   const charById = new Map<string, PublicCharacter>();
   for (const c of characters) charById.set(c.id, c);
 
-  const pieces: React.ReactNode[] = [];
+  const pieces: ReactNode[] = [];
   let cursor = 0;
   for (const ann of sorted) {
     // Skip annotations that would overlap with the previous one — defense against parser oddities.
@@ -85,6 +86,7 @@ function AnnotatedSpan({
   }
   return (
     <button
+      type="button"
       onClick={() => onTap(annotation)}
       aria-label={aria}
       style={{
