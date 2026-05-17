@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import type { Clue, ClueCategoryType } from "@mysterio/shared";
+import type { ClueCategoryType } from "@mysterio/shared";
 import { createClue, deleteClue, listClues, updateClue } from "../../../api/clues.js";
 import { Button } from "../../../components/Button.js";
 import { ClueCategoryTabs } from "./ClueCategoryTabs.js";
@@ -24,15 +24,17 @@ export function ClueTracker({
   const cluesQ = useQuery({ queryKey: ["clues", mysteryId], queryFn: () => listClues(mysteryId) });
 
   const allClues = cluesQ.data?.clues ?? [];
-  const focusedClue = focusedClueId ? allClues.find((c) => c.id === focusedClueId) : undefined;
 
-  // When focusedClueId changes, expand the drawer and switch to that clue's tab.
+  // When focusedClueId changes OR fresh clue data arrives, expand the drawer
+  // and switch to the focused clue's tab.
   useEffect(() => {
-    if (focusedClueId && focusedClue) {
+    if (!focusedClueId) return;
+    const clue = allClues.find((c) => c.id === focusedClueId);
+    if (clue) {
       setExpanded(true);
-      setActiveTab(focusedClue.category_type);
+      setActiveTab(clue.category_type);
     }
-  }, [focusedClueId, focusedClue]);
+  }, [focusedClueId, cluesQ.dataUpdatedAt]);
 
   // Scroll the focused row into view once the tab matches.
   useEffect(() => {

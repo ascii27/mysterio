@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import type { Clue } from "@mysterio/shared";
 
 export function ClueEditor({
@@ -21,7 +21,7 @@ export function ClueEditor({
 
   const isAuto = clue.source === "annotation";
 
-  const wrapperStyle: React.CSSProperties = {
+  const wrapperStyle: CSSProperties = {
     display: "flex",
     gap: 6,
     alignItems: "center",
