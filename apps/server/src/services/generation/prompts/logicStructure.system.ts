@@ -45,8 +45,21 @@ SCHEMA:
 
 DESIGN RULES:
 - The mystery MUST be solvable from the essential_clues alone, by a careful eight-year-old, without ever needing the false_clues or off-screen knowledge.
-- Each essential clue must point uniquely toward the culprit's identity, method, or motive — not all three. Spread coverage across clues.
+- Spread coverage across clues: collectively they must support deducing who, how, AND why. Individual clues should cover different aspects.
 - The logic_chain must be tight: each step reasons from clues introduced earlier, ending in the true_solution.
 - Characters must have distinct, age-appropriate names — no real famous people.
-- Setting must be plausible for the category (a backyard for missing-pet, an old country house for haunted-mansion, a museum/attic/treehouse for stolen-treasure, a locked study/bedroom/treehouse for locked-room).`;
+- Setting must be plausible for the category (a backyard for missing-pet, an old country house for haunted-mansion, a museum/attic/treehouse for stolen-treasure, a locked study/bedroom/treehouse for locked-room).
+
+CLUE OBFUSCATION (very important — kids should DEDUCE, not READ the answer):
+- An essential_clue's description must be an OBSERVATION about the scene, an item, or an event — NOT an identification of any character by name.
+- Do NOT name any suspect, witness, or bystander character in an essential_clue description. (You may name the detective character freely — they are the listener's stand-in.)
+- Do NOT include first initials, monograms, or signatures that uniquely identify one character. ("A note signed '— T.'" is bad if Theo is the only T-named character.)
+- Identifying details that point at a suspect (clothing color, signature gift/treat, distinct mannerism, habitual location, family pet, etc.) must live in that character's DESCRIPTION — not in the clue.
+- The kid solves by COMBINING ≥2 pieces: a clue's observation + a character's description trait. Example:
+    GOOD: clue.description = "A trail of fresh dandelion leaves leads from the hutch gate to a gap in the back fence."
+          + character.description (for Theo) = "He lives on the other side of the back fence. He often picks dandelion leaves to slip through the slats as a treat for Rosie."
+    BAD:  clue.description = "Grandma saw Theo carrying something through the fence at dawn." (names the culprit directly)
+    BAD:  clue.description = "A handwritten note signed '— T.'" (unique initial = identification)
+- A witness can be a clue source, but their statement must be about WHAT they saw (a bundled jacket, the direction someone went, a sound), not WHO. Save the WHO for the kid to deduce.
+- The logic_chain entries SHOULD name characters explicitly (it's the answer key — only read by the validation/explanation agents); essential_clues should NOT.`;
 }

@@ -17,7 +17,9 @@ CRITICAL RULES:
 - POV: third-person limited, following the detective character.
 - Tone: warm, observant, gently curious. Spookiness only if the category warrants it; never gory.
 - INCLUDE EVERY ESSENTIAL CLUE. Each essential_clues[i].description must appear in the prose, either verbatim or as a clear paraphrase using the same key nouns. False clues should appear too, but framed as plausible distractions, not as the answer.
-- Do NOT name the culprit explicitly. Do NOT reveal the true_solution in the prose. The story ends BEFORE the detective announces the answer — the kid will solve it themselves afterward.
+- Do NOT name the culprit explicitly in the prose, and do NOT reveal the true_solution. The story ends BEFORE the detective announces the answer — the kid solves it themselves afterward.
+- PRESERVE THE CLUE'S LEVEL OF AMBIGUITY. When weaving in a clue, keep the same level of detail the clue itself provides. If the clue says "a person carrying a bundled blue jacket through the fence", the prose says "a person carrying a bundled blue jacket through the fence" — do NOT add the suspect's name even though you know who it is. The ambiguity is what the kid deduces FROM.
+- You may describe a character's traits (clothing, hobbies, where they live) in the prose, and you may have the detective notice and write things down in their notebook — but do NOT connect the observed clue to the culprit on the kid's behalf. ("Maya underlined Theo's name twice" after a clue about a blue jacket is too on-the-nose. "Maya wrote: Dandelion trail → fence gap." is fine.)
 - Do NOT use the words "culprit", "essential clue", "logic chain", or refer to the JSON structure.
 - Avoid real brand names, real public figures, anything that dates the story.
 - Use age-appropriate vocabulary with occasional richer words for flavor.
