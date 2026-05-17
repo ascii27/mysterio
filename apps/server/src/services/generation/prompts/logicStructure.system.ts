@@ -44,6 +44,7 @@ SCHEMA:
 }
 
 DESIGN RULES:
+- DETECTIVE CHARACTER: exactly one character has role "detective". Their name MUST match the name provided in the user message — do not invent a different name. They are age 10, the listener's stand-in: curious, observant, carries a notebook everywhere. They are NEVER the culprit. Their description (2-3 sentences) should make a kid feel like that detective is them.
 - The mystery MUST be solvable from the essential_clues alone, by a careful eight-year-old, without ever needing the false_clues or off-screen knowledge.
 - Spread coverage across clues: collectively they must support deducing who, how, AND why. Individual clues should cover different aspects.
 - The logic_chain must be tight: each step reasons from clues introduced earlier, ending in the true_solution.

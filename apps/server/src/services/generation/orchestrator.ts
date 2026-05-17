@@ -14,6 +14,7 @@ interface RunInput {
   mysteryId: string;
   category: CategoryId;
   difficulty: DifficultyId;
+  playerName: string;
 }
 
 export async function runGeneration(input: RunInput): Promise<void> {
@@ -95,6 +96,7 @@ async function regenLoop(
     const logicRes = await runLogicStructureAgent({
       category: input.category,
       difficulty: input.difficulty,
+      playerName: input.playerName,
       previousFailureNotes,
     });
     if (!logicRes.ok) {

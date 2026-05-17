@@ -2,7 +2,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { getDb } from "../db/client.js";
-import { mysteries } from "../db/schema.js";
+import { mysteries, players } from "../db/schema.js";
 import { runGeneration } from "../services/generation/orchestrator.js";
 import { mysteryId } from "../utils/ids.js";
 
@@ -19,8 +19,13 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       reply.status(400);
       return { error: "invalid_body", issues: parsed.error.issues };
     }
-    const id = mysteryId();
     const db = getDb();
+    const player = db.select().from(players).where(eq(players.id, parsed.data.player_id)).get();
+    if (!player) {
+      reply.status(404);
+      return { error: "player_not_found" };
+    }
+    const id = mysteryId();
     db.insert(mysteries).values({
       id,
       player_id: parsed.data.player_id,
@@ -33,6 +38,7 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       mysteryId: id,
       category: parsed.data.category,
       difficulty: parsed.data.difficulty,
+      playerName: player.name,
     });
 
     reply.status(202);
