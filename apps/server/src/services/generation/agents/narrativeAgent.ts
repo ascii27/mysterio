@@ -1,9 +1,11 @@
 import {
   type DifficultyId,
   type LogicStructure,
+  type NarrativeAnnotation,
 } from "@mysterio/shared";
 import { z } from "zod";
 import { claudeText, extractJson } from "../../anthropic/client.js";
+import { parseNarrativeAnnotations } from "../parseAnnotations.js";
 import { buildNarrativeSystem } from "../prompts/narrative.system.js";
 import { SAFETY_PREAMBLE } from "../prompts/shared.js";
 import { findMissingClues } from "../textMatch.js";
@@ -13,7 +15,11 @@ const narrativeOutputSchema = z.object({
   narrative_text: z.string().min(200),
 });
 
-export type NarrativeOutput = z.infer<typeof narrativeOutputSchema>;
+export interface NarrativeOutput {
+  title: string;
+  narrative_text: string;
+  annotations: NarrativeAnnotation[];
+}
 
 export type NarrativeAgentResult =
   | { ok: true; value: NarrativeOutput; attemptsUsed: number; missingCluesByAttempt: string[][] }
@@ -63,10 +69,22 @@ export async function runNarrativeAgent(input: NarrativeAgentInput): Promise<Nar
       continue;
     }
 
-    const missing = findMissingClues(input.logicStructure.essential_clues, result.data.narrative_text, 0.75);
+    // Strip [p:…]/[c:…] tags from the LLM output before running the coverage check,
+    // so the text-match runs against the same clean prose the kid will read.
+    const { text: cleanText, annotations } = parseNarrativeAnnotations(
+      result.data.narrative_text,
+      input.logicStructure,
+    );
+
+    const missing = findMissingClues(input.logicStructure.essential_clues, cleanText, 0.75);
     missingByAttempt.push(missing);
     if (missing.length === 0) {
-      return { ok: true, value: result.data, attemptsUsed: attempt, missingCluesByAttempt: missingByAttempt };
+      return {
+        ok: true,
+        value: { title: result.data.title, narrative_text: cleanText, annotations },
+        attemptsUsed: attempt,
+        missingCluesByAttempt: missingByAttempt,
+      };
     }
     lastErr = `narrative missing clues: ${missing.join(", ")}`;
   }

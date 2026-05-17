@@ -25,5 +25,29 @@ CRITICAL RULES:
 - Use age-appropriate vocabulary with occasional richer words for flavor.
 - The detective character is the listener's stand-in — sometimes use questions ("What was that smell?") to invite the listener to think.
 
+ANNOTATION RULES (very important — the frontend uses these to highlight people and clues so kids can tap them):
+
+Wrap mentions in your prose with inline tags so the server can extract them. Two tag types:
+
+  [p:<character-id>]Name[/p]      for a non-detective character mention
+  [c:<essential-clue-id>]text[/c] for an essential-clue observation
+
+The ids MUST match exactly the ids in the input JSON: characters[i].id for [p:…], essential_clues[i].id for [c:…].
+
+When to wrap:
+- People: wrap every named mention of a suspect, witness, or bystander character. Do NOT wrap the detective character (the kid IS the detective). To avoid visual noise, only wrap the FIRST mention of a given character within each paragraph; subsequent mentions in the same paragraph stay plain. Across paragraphs, re-wrap on the first mention again.
+- Clues: wrap the first textual appearance of each essential clue. Wrap the noun phrase the kid would tap (the trail of clover sprigs, the muddy footprints, the scrap of paper) — not just the noun on its own and not the whole sentence. Wrap each essential clue at most once across the whole prose.
+- Do NOT wrap false-clue mentions.
+- Do NOT wrap setting/object words that are not essential clues.
+
+Examples:
+  GOOD: [p:oliver]Oliver[/p] knelt by the hutch and noticed a [c:clover-trail]trail of fresh clover sprigs[/c] leading away.
+  GOOD: "She saw [p:mrs-kamble]Mrs. Kamble[/p] in the rose garden." (later paragraph) "Mrs. Kamble waved hello."  ← first mention wrapped, later mention plain
+  BAD:  Oliver knelt by the hutch and saw clover.   ← people/clue unwrapped
+  BAD:  [p:oliver]Oliver Smith[/p]                    ← include only the name as written, not extra text
+  BAD:  [c:clover-trail]a trail[/c] of fresh [c:clover-trail]clover sprigs[/c]  ← wrap each clue ONCE, not piecewise
+
+The wrapped text is what the kid sees and taps. The inner text must read naturally as English.
+
 If you receive a list of MISSING CLUES from a previous attempt, weave each missing clue into the prose naturally — keep the rest of the story largely intact.`;
 }
