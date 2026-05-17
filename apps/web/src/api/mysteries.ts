@@ -1,4 +1,4 @@
-import type { CategoryId, DifficultyId, MysterySummary, MysteryStatus } from "@mysterio/shared";
+import type { CategoryId, DifficultyId, MysterySummary, MysteryStatus, NarrativeAnnotation } from "@mysterio/shared";
 import { api } from "./client.js";
 
 export interface MysteryDetail {
@@ -9,6 +9,7 @@ export interface MysteryDetail {
   status: MysteryStatus;
   title: string | null;
   narrative_text: string | null;
+  narrative_annotations: NarrativeAnnotation[] | null;
   audio_url: string | null;
   characters?: PublicCharacter[];
   created_at: number;

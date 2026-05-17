@@ -7,7 +7,12 @@ export function listClues(mysteryId: string): Promise<{ clues: Clue[] }> {
 
 export function createClue(
   mysteryId: string,
-  body: { category_type: ClueCategoryType; content: string },
+  body: {
+    category_type: ClueCategoryType;
+    content: string;
+    source?: "manual" | "annotation";
+    annotation_id?: string;
+  },
 ): Promise<{ clue: Clue }> {
   return api(`/api/mysteries/${mysteryId}/clues`, { method: "POST", body: JSON.stringify(body) });
 }
