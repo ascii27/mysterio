@@ -49,8 +49,9 @@ export async function cluesRoutes(app: FastifyInstance): Promise<void> {
       source,
       annotation_id,
     }).run();
-    reply.status(201);
     const row = db.select().from(clues).where(eq(clues.id, id)).get();
+    if (!row) { reply.status(500); return { error: "internal_server_error" }; }
+    reply.status(201);
     return { clue: row };
   });
 
