@@ -67,6 +67,7 @@ export async function runLogicStructureAgent(
 }
 
 function buildUserMessage(input: LogicStructureAgentInput, lastError?: string): string {
+  // NOTE: player.name is interpolated raw. When player rename lands, cap length and sanitize for prompt-injection.
   const base = `Generate a ${input.difficulty} ${input.category} mystery. The detective character's name MUST be exactly: ${input.playerName}.`;
   if (input.previousFailureNotes) {
     const parseNote = lastError ? `\n\nNote: your most recent JSON output also had a structural problem: ${lastError}` : "";

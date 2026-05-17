@@ -53,6 +53,22 @@ export const logicStructureSchema = z.object({
   if (!charIds.has(val.true_solution.who_did_it)) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, message: "true_solution.who_did_it must reference an existing character id" });
   }
+  // Exactly one detective
+  const detectives = val.characters.filter((c) => c.role === "detective");
+  if (detectives.length !== 1) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `exactly one character must have role "detective" (found ${detectives.length})`,
+    });
+  }
+  // Detective is never the culprit
+  const detective = detectives[0];
+  if (detective && detective.is_culprit) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `the detective character must not be the culprit`,
+    });
+  }
   const seenClueIds = new Set<string>();
   for (const c of [...val.essential_clues, ...val.false_clues]) {
     if (seenClueIds.has(c.id)) {

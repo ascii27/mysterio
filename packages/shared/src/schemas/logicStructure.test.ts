@@ -89,4 +89,31 @@ describe("logicStructureSchema", () => {
     const res = logicStructureSchema.safeParse(bad);
     expect(res.success).toBe(false);
   });
+
+  it("rejects when there is no detective character", () => {
+    const bad = structuredClone(valid);
+    bad.characters[0]!.role = "witness";
+    const res = logicStructureSchema.safeParse(bad);
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(
+        res.error.issues.some((i) => i.message.includes(`exactly one character must have role "detective"`)),
+      ).toBe(true);
+    }
+  });
+
+  it("rejects when the detective character is also the culprit", () => {
+    const bad = structuredClone(valid);
+    // Flip culprit from suspect to detective
+    bad.characters[1]!.is_culprit = false;
+    bad.characters[0]!.is_culprit = true;
+    bad.true_solution.who_did_it = bad.characters[0]!.id;
+    const res = logicStructureSchema.safeParse(bad);
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(
+        res.error.issues.some((i) => i.message.includes("detective character must not be the culprit")),
+      ).toBe(true);
+    }
+  });
 });
