@@ -42,6 +42,23 @@ export function MainScreen() {
         </button>
       </header>
 
+      <div
+        style={{
+          background: "var(--surface)",
+          padding: 16,
+          borderRadius: "var(--radius)",
+          borderLeft: "3px solid var(--accent)",
+          marginBottom: 24,
+        }}
+      >
+        <div style={{ fontSize: 12, color: "var(--text-dim)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          Welcome back
+        </div>
+        <div style={{ fontSize: 22, fontWeight: 700, marginTop: 4 }}>
+          Detective {player?.name ?? "Detective"} 🕵️
+        </div>
+      </div>
+
       <section style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: 18, marginBottom: 12 }}>Pick a mystery</h2>
         <CategoryGrid selected={category} onSelect={setCategory} />
