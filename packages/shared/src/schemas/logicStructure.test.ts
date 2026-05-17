@@ -23,6 +23,16 @@ const valid = {
     how: "Lulu coaxed Biscuit into her playhouse with tuna and shut the door.",
     why: "She wanted to keep Biscuit as her own pet for the morning.",
   },
+  how_distractors: [
+    "Mr. Pemberton scared Biscuit through the open window into the playhouse.",
+    "A neighbor's dog chased Biscuit into the playhouse for safety.",
+    "Hazel was practicing hide-and-seek with Biscuit and locked the door by accident.",
+  ],
+  why_distractors: [
+    "She wanted to hide Biscuit from Mr. Pemberton.",
+    "She thought Biscuit was lost and was rescuing him.",
+    "She was practicing taking care of pets for school.",
+  ],
   logic_chain: [
     "The tuna can in the playhouse means someone lured Biscuit there.",
     "The ribbon belongs to Lulu and was snagged on the playhouse latch.",
@@ -114,6 +124,46 @@ describe("logicStructureSchema", () => {
       expect(
         res.error.issues.some((i) => i.message.includes("detective character must not be the culprit")),
       ).toBe(true);
+    }
+  });
+
+  it("rejects when how_distractors contains the true solution's how", () => {
+    const bad = structuredClone(valid);
+    bad.how_distractors[0] = bad.true_solution.how;
+    const res = logicStructureSchema.safeParse(bad);
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(res.error.issues.some((i) => i.message.includes("how_distractors must not contain the true solution"))).toBe(true);
+    }
+  });
+
+  it("rejects when how_distractors has duplicates", () => {
+    const bad = structuredClone(valid);
+    bad.how_distractors[1] = bad.how_distractors[0]!;
+    const res = logicStructureSchema.safeParse(bad);
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(res.error.issues.some((i) => i.message.includes("how_distractors must contain 3 distinct strings"))).toBe(true);
+    }
+  });
+
+  it("rejects when why_distractors contains the true solution's why", () => {
+    const bad = structuredClone(valid);
+    bad.why_distractors[0] = bad.true_solution.why;
+    const res = logicStructureSchema.safeParse(bad);
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(res.error.issues.some((i) => i.message.includes("why_distractors must not contain the true solution"))).toBe(true);
+    }
+  });
+
+  it("rejects when why_distractors has duplicates", () => {
+    const bad = structuredClone(valid);
+    bad.why_distractors[1] = bad.why_distractors[0]!;
+    const res = logicStructureSchema.safeParse(bad);
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(res.error.issues.some((i) => i.message.includes("why_distractors must contain 3 distinct strings"))).toBe(true);
     }
   });
 });

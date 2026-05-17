@@ -12,6 +12,8 @@ const ls: LogicStructure = {
   essential_clues: [{ id: "a", description: "x".repeat(20), category_type: "item" }],
   false_clues: [{ id: "b", description: "x".repeat(20) }],
   true_solution: { who_did_it: "l", how: "x".repeat(20), why: "x".repeat(20) },
+  how_distractors: ["aaa", "bbb", "ccc"],
+  why_distractors: ["ddd", "eee", "fff"],
   logic_chain: ["x".repeat(20), "y".repeat(20), "z".repeat(20)],
 };
 

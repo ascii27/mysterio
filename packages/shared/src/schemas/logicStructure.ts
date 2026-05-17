@@ -40,6 +40,8 @@ export const logicStructureSchema = z.object({
   essential_clues: z.array(essentialClueSchema).min(3).max(8),
   false_clues: z.array(falseClueSchema).min(0).max(10),
   true_solution: trueSolutionSchema,
+  how_distractors: z.array(z.string().min(3).max(200)).length(3),
+  why_distractors: z.array(z.string().min(3).max(200)).length(3),
   logic_chain: z.array(z.string().min(10).max(400)).min(3).max(8),
 }).superRefine((val, ctx) => {
   const culprits = val.characters.filter((c) => c.is_culprit);
@@ -75,6 +77,19 @@ export const logicStructureSchema = z.object({
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: `duplicate clue id: ${c.id}` });
     }
     seenClueIds.add(c.id);
+  }
+  // M6: distractors must be distinct from the true answer and from each other
+  if (val.how_distractors.includes(val.true_solution.how)) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "how_distractors must not contain the true solution's how" });
+  }
+  if (new Set(val.how_distractors).size !== val.how_distractors.length) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "how_distractors must contain 3 distinct strings" });
+  }
+  if (val.why_distractors.includes(val.true_solution.why)) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "why_distractors must not contain the true solution's why" });
+  }
+  if (new Set(val.why_distractors).size !== val.why_distractors.length) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "why_distractors must contain 3 distinct strings" });
   }
 });
 
