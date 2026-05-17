@@ -111,7 +111,12 @@ function redactForNarrative(ls: LogicStructure) {
   return {
     category: ls.category,
     setting: ls.setting,
-    characters: ls.characters,
+    characters: ls.characters.map((c) => ({
+      id: c.id,
+      name: c.name,
+      role: c.role,
+      description: c.description,
+    })),
     essential_clues: ls.essential_clues,
     false_clues: ls.false_clues,
     // omit true_solution and logic_chain — narrative shouldn't peek at the answer
