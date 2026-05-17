@@ -65,6 +65,7 @@ export async function runGeneration(input: RunInput): Promise<void> {
       status: "ready",
       title: narrativeRes.value.title,
       narrative_text: narrativeRes.value.narrative_text,
+      narrative_annotations: JSON.stringify(narrativeRes.value.annotations),
       ready_at: Math.floor(Date.now() / 1000),
     }).where(eq(mysteries.id, input.mysteryId)).run();
   } catch (err) {

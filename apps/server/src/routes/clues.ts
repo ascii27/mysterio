@@ -9,7 +9,12 @@ const createBody = z.object({
   category_type: z.enum(["character", "item", "location", "event", "note"]),
   content: z.string().min(1).max(500),
   audio_timestamp_ms: z.number().int().nonnegative().optional(),
-});
+  source: z.enum(["manual", "annotation"]).optional(),
+  annotation_id: z.string().min(1).max(120).optional(),
+}).refine(
+  (b) => !(b.source === "annotation") || (typeof b.annotation_id === "string"),
+  { message: "annotation_id required when source is 'annotation'" },
+);
 
 const patchBody = z.object({
   content: z.string().min(1).max(500),
@@ -20,6 +25,20 @@ export async function cluesRoutes(app: FastifyInstance): Promise<void> {
     const parsed = createBody.safeParse(req.body);
     if (!parsed.success) { reply.status(400); return { error: "invalid_body", issues: parsed.error.issues }; }
     const db = getDb();
+    const source = parsed.data.source ?? "manual";
+    const annotation_id = parsed.data.annotation_id ?? null;
+
+    // Dedupe annotation-sourced clues by (mystery_id, annotation_id) so re-taps return the existing row.
+    if (source === "annotation" && annotation_id) {
+      const existing = db.select().from(clues)
+        .where(and(eq(clues.mystery_id, req.params.id), eq(clues.annotation_id, annotation_id)))
+        .get();
+      if (existing) {
+        reply.status(200);
+        return { clue: existing };
+      }
+    }
+
     const id = shortId();
     db.insert(clues).values({
       id,
@@ -27,6 +46,8 @@ export async function cluesRoutes(app: FastifyInstance): Promise<void> {
       category_type: parsed.data.category_type,
       content: parsed.data.content,
       audio_timestamp_ms: parsed.data.audio_timestamp_ms ?? null,
+      source,
+      annotation_id,
     }).run();
     reply.status(201);
     const row = db.select().from(clues).where(eq(clues.id, id)).get();

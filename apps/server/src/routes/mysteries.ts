@@ -63,6 +63,12 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
         }
       } catch { /* swallow — surface as missing */ }
     }
+    let narrative_annotations: unknown = null;
+    if (row.status === "ready" && row.narrative_annotations) {
+      try {
+        narrative_annotations = JSON.parse(row.narrative_annotations);
+      } catch { /* swallow — leave null so client renders plain prose */ }
+    }
     return {
       id: row.id,
       player_id: row.player_id,
@@ -71,6 +77,7 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       status: row.status,
       title: row.title,
       narrative_text: row.status === "ready" ? row.narrative_text : null,
+      narrative_annotations,
       audio_url: row.audio_path ? `/audio/${row.audio_path}` : null,
       characters,
       created_at: row.created_at,
