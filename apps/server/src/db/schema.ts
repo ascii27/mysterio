@@ -19,6 +19,7 @@ export const mysteries = sqliteTable("mysteries", {
   title: text("title"),
   logic_structure_json: text("logic_structure_json"),
   narrative_text: text("narrative_text"),
+  narrative_annotations: text("narrative_annotations"),
   audio_path: text("audio_path"),
   validation_passed: integer("validation_passed"),
   validation_attempts: integer("validation_attempts").notNull().default(0),
@@ -42,13 +43,22 @@ export const clues = sqliteTable("clues", {
   category_type: text("category_type").notNull(),
   content: text("content").notNull(),
   audio_timestamp_ms: integer("audio_timestamp_ms"),
+  source: text("source").notNull().default("manual"),
+  annotation_id: text("annotation_id"),
   created_at: integer("created_at").notNull().default(sql`(unixepoch())`),
 }, (t) => ({
   categoryCheck: check(
     "clues_category_chk",
     sql`${t.category_type} IN ('character','item','location','event','note')`,
   ),
+  sourceCheck: check(
+    "clues_source_chk",
+    sql`${t.source} IN ('manual','annotation')`,
+  ),
   mysteryIdx: index("idx_clues_mystery").on(t.mystery_id),
+  annotationUniq: uniqueIndex("clues_mystery_annotation_uniq")
+    .on(t.mystery_id, t.annotation_id)
+    .where(sql`${t.annotation_id} IS NOT NULL`),
 }));
 
 export const solutions = sqliteTable("solutions", {
