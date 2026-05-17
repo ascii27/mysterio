@@ -1,6 +1,6 @@
-# Mysterio — Session State (M2 + partial M3 + M4 shipped — paused 2026-05-16)
+# Mysterio — Session State (M2 + partial M3 + M4 + M5a shipped — paused 2026-05-17)
 
-> M2 complete and deployed. M3.1 + M3.2-new shipped. **M4 (clue tracker + solve + hints) shipped 2026-05-16: 11 commits, all 7 implementation tasks + verification done.** Live VM at panther-golem.exe.xyz runs M4 + pre-existing SPA-fallback bug fix. Local end-to-end smoke confirmed full kid loop (clues → hints → submit → reveal + give-up). **iPad walkthrough still pending the user.** Audio portion of M3 still deferred. **NEXT: iPad smoke on M4 (user), then M3.3-new (OpenAI TTS provider).**
+> M2 + M3.1/M3.2-new + M4 shipped. **M5a (kid-onboarding: player-name detective + main-page hero + briefing card) shipped 2026-05-17 after 10yo daughter playtest feedback on M4 ("story confusing", "didn't know I was Maya", "didn't know suspects", "problem unclear"). 7 commits land M5a. Local Playwright verification confirms hero greets "Detective Player One 🕵️", BriefingCard shows category emoji + title + sorted cast roster (detective → 2 suspects → witness → bystander) + "Start the story" gate; narrative refers to the detective by player name throughout.** Deployed; first prod gen hit pre-existing M3.1 narrative_clue_coverage failure but detective name DID land correctly; second prod gen succeeded clean. **iPad walkthrough still pending the user.** M5b (annotated narrative + auto-Notes) queued behind M5a iPad validation. Audio (M3.3-new) still deferred.
 
 ## Milestone re-sequencing (decided 2026-05-16 mid-session)
 
@@ -193,6 +193,40 @@ These were called out by reviewers + judgment-called as out-of-scope-for-now:
   ```
 - **`runExplanation` is called inline on the submit-solution / give-up path** — adds ~3-5s to the POST. Frontend shows "Checking..." spinner; acceptable. Could parallelize with the grader pair in a future refactor (outcome is the only dep, and outcome can be computed without explanation).
 - **Cache-miss on Sonnet still present** (SAFETY_PREAMBLE alone is below the minimum cacheable threshold). Not flagged anew in M4 — already a tracked pre-M3 nice-to-have.
+
+## M5a completed (2026-05-17) — kid-onboarding (identity + briefing)
+
+Triggered by 10yo daughter playtest feedback on the M4 build. 7 commits on `feat/mysterio-implementation`:
+
+| Task | Commits | Notes |
+|---|---|---|
+| M5a.1 player-name detective + LogicStructure rule | `df3b028` + `5af7427` | review caught: detective invariants ("exactly one", "never the culprit") were enforced only by prompt instruction; promoted to `superRefine` checks alongside the existing culprit checks, +2 tests pin them |
+| M5a.2 MainScreen hero greeting | `56fd950` + `9d952e8` | review caught "Detective Detective 🕵️" flash during query-load window (default fallback was literal "Detective"); empty-string fallback collapses to "Detective  🕵️" then resolves |
+| M5a.3 BriefingCard + PlaybackScreen gate | `a35c6bf` + `905a9ef` | review caught (1) locked-room emoji 🔐 didn't match CategoryGrid's 🔒; (2) cast roster order was non-deterministic — added ROLE_ORDER priority map (suspect → witness → bystander) |
+| M5a.4 live LLM verification | none (verification only) | 2 fresh local gens both single-attempt success; detective name = player name for both; Playwright snapshot of MainScreen hero + BriefingCard cast roster confirms render |
+| M5a.5 deploy + iPad handoff | none (deploy only) | `bash scripts/deploy.sh` clean; remote spot-check: 1st gen failed at narrative_clue_coverage (existing M3.1 stochastic issue, not M5a regression) but detective name still landed; 2nd gen succeeded end-to-end |
+
+**Total: 7 commits.** Subagent-driven (sonnet for implementer + reviewer) per `workflow_subagent_driven`. Code-quality reviewer found a real bug in 3/3 implementation tasks (M5a.1 schema gap, M5a.2 UX flash, M5a.3 icon mismatch + role-sort) — the two-stage review pattern continues to pay.
+
+## M5a design + plan + memory artifacts
+
+- Design: `docs/superpowers/specs/2026-05-17-m5-kid-onboarding-design.md` — covers M5a (shipped) + M5b (queued)
+- Implementation plan: `docs/superpowers/plans/2026-05-17-m5a-implementation.md` — 5 tasks
+- Brainstorming visual artifacts: `.superpowers/brainstorm/91398-1778981903/content/` (hero-treatments, briefing-card, highlight-styles, tap-detail-behavior)
+- Local Playwright screenshots: `.playwright-mcp/m5a-main-hero.png`, `.playwright-mcp/m5a-briefing-card.png`
+
+## M5b queued behind M5a iPad validation
+
+Per `docs/superpowers/specs/2026-05-17-m5-kid-onboarding-design.md` § M5b — the bigger redesign:
+- Inline-delimiter narrative output (`[p:<char-id>]…[/p]`, `[c:<clue-id>]…[/c]`)
+- Server-side parser (~50 lines) strips tags into clean text + annotations array
+- 2 DB migrations: `mysteries.narrative_annotations` JSONB + `clues.source` / `clues.annotation_id` with unique partial index
+- New `AnnotatedNarrative` component renders pill highlights (style A — pill backgrounds)
+- `ClueTracker` gains "focused" mode + dedupe by annotation_id
+- Tap a highlight → auto-POST clue + open drawer focused on it
+- ~2-3 days of subagent work (~10 tasks)
+
+**Do NOT begin M5b until the user has done the iPad walkthrough on M5a and signed off.**
 
 ## Notes for the next session
 
