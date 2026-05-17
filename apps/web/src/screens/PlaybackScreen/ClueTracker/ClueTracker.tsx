@@ -1,18 +1,45 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import type { ClueCategoryType } from "@mysterio/shared";
+import { useEffect, useRef, useState } from "react";
+import type { Clue, ClueCategoryType } from "@mysterio/shared";
 import { createClue, deleteClue, listClues, updateClue } from "../../../api/clues.js";
 import { Button } from "../../../components/Button.js";
 import { ClueCategoryTabs } from "./ClueCategoryTabs.js";
 import { ClueEditor } from "./ClueEditor.js";
 
-export function ClueTracker({ mysteryId }: { mysteryId: string }) {
+export function ClueTracker({
+  mysteryId,
+  focusedClueId,
+  onClearFocus,
+}: {
+  mysteryId: string;
+  focusedClueId?: string | null;
+  onClearFocus?: () => void;
+}) {
   const qc = useQueryClient();
   const [expanded, setExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<ClueCategoryType>("character");
   const [draft, setDraft] = useState("");
+  const focusedRowRef = useRef<HTMLDivElement | null>(null);
 
   const cluesQ = useQuery({ queryKey: ["clues", mysteryId], queryFn: () => listClues(mysteryId) });
+
+  const allClues = cluesQ.data?.clues ?? [];
+  const focusedClue = focusedClueId ? allClues.find((c) => c.id === focusedClueId) : undefined;
+
+  // When focusedClueId changes, expand the drawer and switch to that clue's tab.
+  useEffect(() => {
+    if (focusedClueId && focusedClue) {
+      setExpanded(true);
+      setActiveTab(focusedClue.category_type);
+    }
+  }, [focusedClueId, focusedClue]);
+
+  // Scroll the focused row into view once the tab matches.
+  useEffect(() => {
+    if (focusedClueId && expanded && focusedRowRef.current) {
+      focusedRowRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [focusedClueId, expanded, activeTab]);
 
   const createM = useMutation({
     mutationFn: () => createClue(mysteryId, { category_type: activeTab, content: draft.trim() }),
@@ -27,8 +54,12 @@ export function ClueTracker({ mysteryId }: { mysteryId: string }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["clues", mysteryId] }),
   });
 
-  const allClues = cluesQ.data?.clues ?? [];
   const visible = allClues.filter((c) => c.category_type === activeTab);
+
+  function closeDrawer() {
+    setExpanded(false);
+    if (onClearFocus) onClearFocus();
+  }
 
   if (!expanded) {
     return (
@@ -68,7 +99,7 @@ export function ClueTracker({ mysteryId }: { mysteryId: string }) {
   return (
     <>
       <div
-        onClick={() => setExpanded(false)}
+        onClick={closeDrawer}
         style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 10 }}
         aria-hidden="true"
       />
@@ -92,7 +123,7 @@ export function ClueTracker({ mysteryId }: { mysteryId: string }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <h3 style={{ margin: 0 }}>Clue Tracker</h3>
           <button
-            onClick={() => setExpanded(false)}
+            onClick={closeDrawer}
             style={{ background: "transparent", border: "none", color: "var(--text-dim)", fontSize: 24, cursor: "pointer", padding: 4 }}
             aria-label="Close clue tracker"
           >▼</button>
@@ -102,14 +133,19 @@ export function ClueTracker({ mysteryId }: { mysteryId: string }) {
           {visible.length === 0 && (
             <p style={{ color: "var(--text-dim)", fontSize: 13, margin: 0 }}>{emptyCopy(activeTab)}</p>
           )}
-          {visible.map((c) => (
-            <ClueEditor
-              key={c.id}
-              clue={c}
-              onSave={(content) => updateM.mutate({ clueId: c.id, content })}
-              onDelete={() => deleteM.mutate(c.id)}
-            />
-          ))}
+          {visible.map((c) => {
+            const isFocused = c.id === focusedClueId;
+            return (
+              <div key={c.id} ref={isFocused ? focusedRowRef : undefined}>
+                <ClueEditor
+                  clue={c}
+                  focused={isFocused}
+                  onSave={(content) => updateM.mutate({ clueId: c.id, content })}
+                  onDelete={() => deleteM.mutate(c.id)}
+                />
+              </div>
+            );
+          })}
         </div>
         <div style={{ display: "flex", gap: 6 }}>
           <input

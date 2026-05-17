@@ -3,10 +3,12 @@ import type { Clue } from "@mysterio/shared";
 
 export function ClueEditor({
   clue,
+  focused,
   onSave,
   onDelete,
 }: {
   clue: Clue;
+  focused?: boolean;
   onSave: (content: string) => void;
   onDelete: () => void;
 }) {
@@ -17,9 +19,22 @@ export function ClueEditor({
     if (!editing) setDraft(clue.content);
   }, [clue.content, editing]);
 
+  const isAuto = clue.source === "annotation";
+
+  const wrapperStyle: React.CSSProperties = {
+    display: "flex",
+    gap: 6,
+    alignItems: "center",
+    padding: 8,
+    background: "var(--surface-2)",
+    borderRadius: 8,
+    border: focused ? "2px solid var(--accent)" : "2px solid transparent",
+    transition: "border-color 120ms ease",
+  };
+
   if (editing) {
     return (
-      <div style={{ display: "flex", gap: 6, padding: 8, background: "var(--surface-2)", borderRadius: 8 }}>
+      <div style={wrapperStyle}>
         <input
           autoFocus
           value={draft}
@@ -38,7 +53,13 @@ export function ClueEditor({
     );
   }
   return (
-    <div style={{ display: "flex", gap: 6, alignItems: "center", padding: 8, background: "var(--surface-2)", borderRadius: 8 }}>
+    <div style={wrapperStyle}>
+      {isAuto && (
+        <span
+          title="Added by tapping a highlight in the story"
+          style={{ fontSize: 11, color: "var(--accent)", flexShrink: 0 }}
+        >✨</span>
+      )}
       <span style={{ flex: 1 }}>{clue.content}</span>
       <button
         onClick={() => setEditing(true)}
