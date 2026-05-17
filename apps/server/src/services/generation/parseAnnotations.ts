@@ -9,7 +9,7 @@ export function parseNarrativeAnnotations(
 ): { text: string; annotations: NarrativeAnnotation[] } {
   // Pre-compute id lookups
   const characterIds = new Set(ls.characters.filter((c) => c.role !== "detective").map((c) => c.id));
-  const clueIds = new Set(ls.essential_clues.map((c) => c.id));
+  const clueIds = new Set([...ls.essential_clues, ...ls.false_clues].map((c) => c.id));
 
   // Walk the input once, building the clean text + annotations.
   const annotations: NarrativeAnnotation[] = [];

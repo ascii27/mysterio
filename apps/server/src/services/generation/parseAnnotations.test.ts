@@ -16,9 +16,13 @@ function ls(): LogicStructure {
       { id: "empty-hutch", description: "Sounds from an empty hutch.", category_type: "location" },
       { id: "grandma-note", description: "A note about a grandma visiting.", category_type: "note" },
     ],
-    false_clues: [],
+    false_clues: [
+      { id: "muddy-footprints", description: "Muddy footprints near the gate (Jasper's morning run distractor)." },
+    ],
     true_solution: { who_did_it: "oliver", how: "x", why: "y" },
     logic_chain: ["a", "b", "c"],
+    how_distractors: ["aa", "bb", "cc"],
+    why_distractors: ["xx", "yy", "zz"],
   } as LogicStructure;
 }
 
@@ -73,7 +77,7 @@ describe("parseNarrativeAnnotations", () => {
     expect(out.annotations).toEqual([]);
   });
 
-  it("drops a clue tag whose id is not in essential_clues", () => {
+  it("drops a clue tag whose id is not in essential_clues OR false_clues", () => {
     const input = "[c:bogus-id]thing[/c] was there.";
     const out = parseNarrativeAnnotations(input, ls());
     expect(out.text).toBe("thing was there.");
@@ -96,6 +100,15 @@ describe("parseNarrativeAnnotations", () => {
     expect(out.text).toBe("Found a note: (handwritten) note about grandma. Curious.");
     expect(out.annotations).toEqual([
       { type: "clue", id: "grandma-note", offset: 14, length: 33, text: "(handwritten) note about grandma." },
+    ]);
+  });
+
+  it("keeps a clue tag pointing at a false_clue id (M6: false clues are highlighted too)", () => {
+    const input = "She noticed [c:muddy-footprints]muddy footprints near the gate[/c].";
+    const out = parseNarrativeAnnotations(input, ls());
+    expect(out.text).toBe("She noticed muddy footprints near the gate.");
+    expect(out.annotations).toEqual([
+      { type: "clue", id: "muddy-footprints", offset: 12, length: 30, text: "muddy footprints near the gate" },
     ]);
   });
 });
