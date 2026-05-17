@@ -37,6 +37,12 @@ SCHEMA:
     "how": "<one sentence describing the method>",
     "why": "<one sentence describing the motive>"
   },
+  "how_distractors": [
+    "<wrong how option 1>", "<wrong how option 2>", "<wrong how option 3>"
+  ],
+  "why_distractors": [
+    "<wrong why option 1>", "<wrong why option 2>", "<wrong why option 3>"
+  ],
   "logic_chain": [
     "<each entry combines clues already introduced to deduce part of the true_solution; ordered>",
     ... (3-8 entries)
@@ -62,5 +68,18 @@ CLUE OBFUSCATION (very important — kids should DEDUCE, not READ the answer):
     BAD:  clue.description = "Grandma saw Theo carrying something through the fence at dawn." (names the culprit directly)
     BAD:  clue.description = "A handwritten note signed '— T.'" (unique initial = identification)
 - A witness can be a clue source, but their statement must be about WHAT they saw (a bundled jacket, the direction someone went, a sound), not WHO. Save the WHO for the kid to deduce.
-- The logic_chain entries SHOULD name characters explicitly (it's the answer key — only read by the validation/explanation agents); essential_clues should NOT.`;
+- The logic_chain entries SHOULD name characters explicitly (it's the answer key — only read by the validation/explanation agents); essential_clues should NOT.
+
+DISTRACTOR OPTIONS for multiple-choice solve:
+- Generate exactly 3 distinct distractors for how_distractors[] and 3 for why_distractors[].
+- Each distractor must be a PLAUSIBLE-sounding but WRONG explanation. A careful eight-year-old reading the clues should be able to rule them out, but a kid skimming should find them tempting.
+- Distractors should match the style and length of the true how/why (one sentence each).
+- Do NOT make distractors that are obviously wrong (e.g., "the rabbit teleported"). Subtle plausibility = better puzzle.
+- Distractors must be DISTINCT from the true solution and from each other.
+- Examples for a missing-pet mystery where the true how is "Theo unlatched the hutch and lured Rosie with clover":
+    GOOD how_distractors:
+      - "A fox dug under the hutch and pulled Rosie out through the back."
+      - "The latch was old and finally broke open on its own overnight."
+      - "Priya climbed the fence to play with Rosie and left the door open."
+    BAD: "Rosie unlocked the latch herself and walked away." (too implausible)`;
 }
