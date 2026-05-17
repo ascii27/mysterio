@@ -1,6 +1,6 @@
-# Mysterio — Session State (M2 + partial M3 + M4 + M5a + M5b shipped — paused 2026-05-17)
+# Mysterio — Session State (M2 + partial M3 + M4 + M5a + M5b + M6 shipped — paused 2026-05-17)
 
-> M2 + M3.1/M3.2-new + M4 + M5a shipped. **M5b (annotated narrative + auto-Notes) shipped 2026-05-17. 15 commits land M5b: 1 DB migration, NarrativeAnnotation shared type, parseAnnotations util (9 tests), narrative prompt teaches inline `[p:<id>]…[/p]` and `[c:<id>]…[/c]` tags, narrativeAgent parses internally + redacts is_culprit/motive, orchestrator persists annotations, mysteries GET returns them, clues POST dedupes by (mystery_id, annotation_id) with 200 on re-tap, AnnotatedNarrative component renders pill highlights (role-colored), ClueTracker focused-mode with ✨ auto-added badge, PlaybackScreen wires tap → auto-create + drawer-focus.** Local Playwright + curl verification confirms end-to-end: 2 fresh gens produced 7 annotations each (4 persons + 3 clues), GET returns annotations, tap auto-POSTs (1st 201, 2nd 200 dedupe), drawer opens focused with rich content (character name + role + description). Deployed; first prod gen hit pre-existing M3.1 narrative_clue_coverage stochastic failure but second gen succeeded clean (7 annotations, detective name correct). **iPad walkthrough on M5b still pending the user.** Audio (M3.3-new) still deferred.
+> M2 + M3.1/M3.2-new + M4 + M5a + M5b shipped. **M6 (reduce info leakage + multi-choice solve) shipped 2026-05-17. 9 commits land M6: parseAnnotations accepts false-clue ids (kid can't tell essential from false by pill formatting), narrative prompt instructs LLM to wrap both, role visuals collapsed on client (BriefingCard + AnnotatedNarrative + CharacterPicker — all non-detective characters now use a single 🤔 emoji + red color, no Suspect/Witness/Bystander labels), LogicStructure schema gains how_distractors[3] + why_distractors[3] with 4 superRefine invariants + 4 tests, LogicStructure prompt instructs LLM to generate plausible-but-wrong distractors, new GET /solve-options endpoint returns characters (no role) + shuffled how_options[4] + why_options[4], submit-solution replaces runGrader with === string compare (saves ~5s + $0.005/submit), new multi-choice GuessForm with OptionPicker for HOW/WHY.** Local Playwright + curl verification confirms end-to-end: 2 fresh gens produced 3 distinct distractors per field, false clue annotated alongside essentials, /solve-options returns expected shape, tap-through with correct answers yields ✓ Correct with 853-char explanation. Deployed; prod fresh gen ready in single attempt with 4 characters + 4 how_options + 4 why_options. **iPad walkthrough on M5b + M6 still pending the user.** Audio (M3.3-new) still deferred. **Tuning concern flagged from M6.8:** some why_distractor sets name the culprit in all 4 options (M6.5 prompt didn't constrain "use same naming style across true + distractors"), making the WHO trivially derivable. Easy follow-up tuning commit; not a blocker for ship.
 
 ## Milestone re-sequencing (decided 2026-05-16 mid-session)
 
@@ -240,19 +240,25 @@ Triggered by 10yo daughter playtest feedback on the M4 build. 7 commits on `feat
 - Implementation plan: `docs/superpowers/plans/2026-05-17-m5b-implementation.md` — 10 tasks
 - Local Playwright screenshot: `.playwright-mcp/m5b-annotated-narrative.png` (drawer-focused-on-Priya snapshot)
 
-## iPad smoke checklist for the user
+## iPad smoke checklist for the user (M5b + M6)
 
 Live at https://panther-golem.exe.xyz/
 
 1. Pick a player; generate a fresh Easy missing-pet mystery; wait ~90s for ready.
-2. Tap "📖 Start the story" on the BriefingCard.
-3. Confirm pill highlights in the prose: 🤔 red suspects, 👀 blue witnesses, 🧍 grey bystanders, 🔍 gold clues.
-4. Tap a SUSPECT pill (e.g. "Oliver") — drawer slides up, switches to Characters tab, the row has ✨ + yellow outline + the character's role + description.
+2. Tap "📖 Start the story" on the BriefingCard. Confirm the "You'll meet" roster shows ONLY names (no suspect/witness/bystander labels) — every non-detective is just "🤔 Name". **M6.3.**
+3. Confirm the narrative has MORE gold pills than M5b — false clues are also highlighted; you can't tell essential from false by looking. All non-detective people are the same red color (no role leak via pill color). **M6.1 + M6.2.**
+4. Tap a person pill (e.g. "Oliver") — drawer slides up, switches to Characters tab, the row has ✨ + yellow outline + the character's role + description. **M5b.7.**
 5. Edit the row, add a personal note ("I think he did it").
-6. Tap the SAME suspect pill again — drawer reopens focused on the same row (no duplicate, edit preserved).
+6. Tap the SAME person pill again — drawer reopens focused on the same row (no duplicate, edit preserved). **M5b.5 dedupe.**
 7. Tap a CLUE pill — drawer switches to Notes tab, focuses the new ✨ row with the clue text.
 8. Tap backdrop to collapse drawer.
-9. Tap "I think I know!" → solve flow still works.
+9. Tap "I think I know!" → SolutionScreen loads.
+10. Confirm WHO is a button grid of 🤔 + name (no role text under any name). **M6.3.**
+11. Confirm HOW + WHY are vertical button rows of 4 options each (no textareas). **M6.7.**
+12. Tap a suspect, tap a HOW option, tap a WHY option, then Submit. RevealPanel renders with the badge + 100-150 word explanation. **M6.6 === grader.**
+13. On a second fresh mystery, try give-up — RevealPanel renders the gave-up badge.
+
+Known tuning concern from M6.8 verification: in some mysteries the why_distractors all name the culprit by name, which makes the WHO trivially derivable from reading the WHY options. Easy follow-up: tighten M6.5 DISTRACTOR OPTIONS prompt to constrain "use the same naming style (named-by-character OR generic 'the person') across the true + 3 distractors so the kid can't pattern-match by name frequency."
 
 ## Notes for the next session
 
