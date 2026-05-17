@@ -7,3 +7,4 @@ export * from "./schemas/logicStructure.js";
 export * from "./types/clue.js";
 export * from "./types/solution.js";
 export * from "./types/hint.js";
+export * from "./types/narrativeAnnotation.js";
