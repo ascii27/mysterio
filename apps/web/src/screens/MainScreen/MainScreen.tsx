@@ -55,7 +55,7 @@ export function MainScreen() {
           Welcome back
         </div>
         <div style={{ fontSize: 22, fontWeight: 700, marginTop: 4 }}>
-          Detective {player?.name ?? "Detective"} 🕵️
+          Detective {player?.name ?? ""} 🕵️
         </div>
       </div>
 
