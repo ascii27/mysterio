@@ -5,7 +5,7 @@ const CATEGORY_EMOJI: Record<string, string> = {
   "missing-pet": "🐾",
   "haunted-mansion": "👻",
   "stolen-treasure": "💎",
-  "locked-room": "🔐",
+  "locked-room": "🔒",
 };
 
 const ROLE_BADGE: Record<string, { emoji: string; label: string; color: string }> = {
@@ -13,6 +13,12 @@ const ROLE_BADGE: Record<string, { emoji: string; label: string; color: string }
   suspect:   { emoji: "🤔", label: "Suspect", color: "var(--bad)" },
   witness:   { emoji: "👀", label: "Witness", color: "#9ad4ff" },
   bystander: { emoji: "🧍", label: "Bystander", color: "var(--text-dim)" },
+};
+
+const ROLE_ORDER: Record<string, number> = {
+  suspect: 0,
+  witness: 1,
+  bystander: 2,
 };
 
 export function BriefingCard({
@@ -24,7 +30,10 @@ export function BriefingCard({
 }) {
   const characters: PublicCharacter[] = mystery.characters ?? [];
   const detective = characters.find((c) => c.role === "detective");
-  const others = characters.filter((c) => c.role !== "detective");
+  const others = characters
+    .filter((c) => c.role !== "detective")
+    .slice()
+    .sort((a, b) => (ROLE_ORDER[a.role] ?? 99) - (ROLE_ORDER[b.role] ?? 99));
   const icon = CATEGORY_EMOJI[mystery.category] ?? "🔎";
 
   return (
