@@ -32,6 +32,9 @@ export function PlaybackScreen() {
           : a.text;
       const category_type = a.type === "person" ? "character" : guessClueCategory(a, data);
       const annotation_id = `${a.type === "person" ? "p" : "c"}-${a.id}`;
+      // Server dedupes by (mystery_id, annotation_id) per the partial unique index
+      // from M5b.1 — a re-tap returns 200 with the existing row, not 409. onSuccess
+      // fires for both 200 and 201 with the same clue id, focusing the existing row.
       return createClue(mysteryId, {
         category_type,
         content,
@@ -42,6 +45,10 @@ export function PlaybackScreen() {
     onSuccess: (res) => {
       setFocusedClueId(res.clue.id);
       qc.invalidateQueries({ queryKey: ["clues", mysteryId] });
+    },
+    onError: (err) => {
+      // Silent-failure posture matches the rest of the MVP, but log for M5b.9 debugging.
+      console.error("[tapAnnotation]", err);
     },
   });
 
