@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "../../components/Button.js";
 import { useGenerationJob } from "../../hooks/useGenerationJob.js";
+import { BriefingCard } from "./BriefingCard/BriefingCard.js";
 import { ClueTracker } from "./ClueTracker/ClueTracker.js";
 import { FailedMystery } from "./FailedMystery.js";
 import { LoadingMystery } from "./LoadingMystery.js";
@@ -8,11 +10,16 @@ import { LoadingMystery } from "./LoadingMystery.js";
 export function PlaybackScreen() {
   const { id } = useParams<{ id: string }>();
   const { data, isLoading, isError } = useGenerationJob(id!);
+  const [started, setStarted] = useState(false);
 
   if (isLoading || !data) return <LoadingMystery status="pending" />;
   if (isError) return <FailedMystery reason={null} />;
   if (data.status === "failed") return <FailedMystery reason={data.failure_reason} />;
   if (data.status !== "ready") return <LoadingMystery status={data.status} />;
+
+  if (!started) {
+    return <BriefingCard mystery={data} onStart={() => setStarted(true)} />;
+  }
 
   return (
     <>
