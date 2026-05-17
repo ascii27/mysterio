@@ -36,9 +36,8 @@ The ids MUST match exactly the ids in the input JSON: characters[i].id for [p:�
 
 When to wrap:
 - People: wrap every named mention of a suspect, witness, or bystander character. Do NOT wrap the detective character (the kid IS the detective). To avoid visual noise, only wrap the FIRST mention of a given character within each paragraph; subsequent mentions in the same paragraph stay plain. Across paragraphs, re-wrap on the first mention again.
-- Clues: wrap the first textual appearance of each essential clue. Wrap the noun phrase the kid would tap (the trail of clover sprigs, the muddy footprints, the scrap of paper) — not just the noun on its own and not the whole sentence. Wrap each essential clue at most once across the whole prose.
-- Do NOT wrap false-clue mentions.
-- Do NOT wrap setting/object words that are not essential clues.
+- Clues: wrap the first textual appearance of each CLUE (essential AND false). Wrap the noun phrase the kid would tap (the trail of clover sprigs, the muddy footprints, the scrap of paper) — not just the noun on its own and not the whole sentence. Wrap each clue at most once across the whole prose. Use the clue's id from essential_clues[i].id OR false_clues[i].id — the inline tag form is the same: [c:<clue-id>]…[/c]. The kid should NOT be able to tell essential from false by looking at the prose; that's the deduction.
+- Setting/object words that are NOT in essential_clues or false_clues remain plain (don't wrap them).
 
 Examples:
   GOOD: [p:oliver]Oliver[/p] knelt by the hutch and noticed a [c:clover-trail]trail of fresh clover sprigs[/c] leading away.
@@ -46,6 +45,7 @@ Examples:
   BAD:  Oliver knelt by the hutch and saw clover.   ← people/clue unwrapped
   BAD:  [p:oliver]Oliver Smith[/p]                    ← include only the name as written, not extra text
   BAD:  [c:clover-trail]a trail[/c] of fresh [c:clover-trail]clover sprigs[/c]  ← wrap each clue ONCE, not piecewise
+  BAD:  Skipping a false_clue mention because "it's not the answer"  ← wrap false clues too; the kid figures out which is decisive
 
 The wrapped text is what the kid sees and taps. The inner text must read naturally as English.
 
