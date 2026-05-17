@@ -63,7 +63,6 @@ export function PlaybackScreen() {
 
   const text = data.narrative_text ?? "";
   const annotations = data.narrative_annotations ?? [];
-  const characters = data.characters ?? [];
 
   return (
     <>
@@ -79,7 +78,6 @@ export function PlaybackScreen() {
         <AnnotatedNarrative
           text={text}
           annotations={annotations}
-          characters={characters}
           onTap={(a) => tapAnnotation.mutate(a)}
         />
       </div>

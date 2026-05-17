@@ -1,18 +1,8 @@
 import { type ReactNode } from "react";
 import type { NarrativeAnnotation } from "@mysterio/shared";
-import type { PublicCharacter } from "../../../api/mysteries.js";
 
-const PERSON_ROLE_COLOR: Record<string, string> = {
-  suspect: "var(--bad)",
-  witness: "#9ad4ff",
-  bystander: "var(--text-dim)",
-};
-
-const PERSON_ROLE_BG: Record<string, string> = {
-  suspect: "rgba(231,115,115,0.18)",
-  witness: "rgba(154,212,255,0.18)",
-  bystander: "rgba(185,179,214,0.15)",
-};
+const PERSON_COLOR = "var(--bad)";
+const PERSON_BG = "rgba(231,115,115,0.18)";
 
 const CLUE_COLOR = "#f5c84c";
 const CLUE_BG = "rgba(245,200,76,0.20)";
@@ -20,19 +10,14 @@ const CLUE_BG = "rgba(245,200,76,0.20)";
 export function AnnotatedNarrative({
   text,
   annotations,
-  characters,
   onTap,
 }: {
   text: string;
   annotations: NarrativeAnnotation[];
-  characters: PublicCharacter[];
   onTap: (annotation: NarrativeAnnotation) => void;
 }) {
   // Sort by offset so we can splice the text in order.
   const sorted = [...annotations].sort((a, b) => a.offset - b.offset);
-
-  const charById = new Map<string, PublicCharacter>();
-  for (const c of characters) charById.set(c.id, c);
 
   const pieces: ReactNode[] = [];
   let cursor = 0;
@@ -47,7 +32,6 @@ export function AnnotatedNarrative({
       <AnnotatedSpan
         key={`${ann.type}-${ann.id}-${ann.offset}`}
         annotation={ann}
-        characters={charById}
         onTap={onTap}
       />
     );
@@ -66,11 +50,9 @@ export function AnnotatedNarrative({
 
 function AnnotatedSpan({
   annotation,
-  characters,
   onTap,
 }: {
   annotation: NarrativeAnnotation;
-  characters: Map<string, PublicCharacter>;
   onTap: (a: NarrativeAnnotation) => void;
 }) {
   const inner = annotation.text;
@@ -78,11 +60,9 @@ function AnnotatedSpan({
   let bg = CLUE_BG;
   let aria = `Clue: ${inner}`;
   if (annotation.type === "person") {
-    const c = characters.get(annotation.id);
-    const role = c?.role ?? "bystander";
-    color = PERSON_ROLE_COLOR[role] ?? PERSON_ROLE_COLOR["bystander"] ?? "var(--text-dim)";
-    bg = PERSON_ROLE_BG[role] ?? PERSON_ROLE_BG["bystander"] ?? "rgba(185,179,214,0.15)";
-    aria = `${role.charAt(0).toUpperCase() + role.slice(1)}: ${inner}`;
+    color = PERSON_COLOR;
+    bg = PERSON_BG;
+    aria = `Person: ${inner}`;
   }
   return (
     <button

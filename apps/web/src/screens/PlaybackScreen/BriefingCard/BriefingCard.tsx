@@ -8,18 +8,8 @@ const CATEGORY_EMOJI: Record<string, string> = {
   "locked-room": "🔒",
 };
 
-const ROLE_BADGE: Record<string, { emoji: string; label: string; color: string }> = {
-  detective: { emoji: "🕵️", label: "You", color: "var(--accent)" },
-  suspect:   { emoji: "🤔", label: "Suspect", color: "var(--bad)" },
-  witness:   { emoji: "👀", label: "Witness", color: "#9ad4ff" },
-  bystander: { emoji: "🧍", label: "Bystander", color: "var(--text-dim)" },
-};
-
-const ROLE_ORDER: Record<string, number> = {
-  suspect: 0,
-  witness: 1,
-  bystander: 2,
-};
+const DETECTIVE_BADGE = { emoji: "🕵️", label: "You", color: "var(--accent)" };
+const PERSON_BADGE = { emoji: "🤔", color: "var(--bad)" };
 
 export function BriefingCard({
   mystery,
@@ -33,7 +23,7 @@ export function BriefingCard({
   const others = characters
     .filter((c) => c.role !== "detective")
     .slice()
-    .sort((a, b) => (ROLE_ORDER[a.role] ?? 99) - (ROLE_ORDER[b.role] ?? 99));
+    .sort((a, b) => a.name.localeCompare(b.name));
   const icon = CATEGORY_EMOJI[mystery.category] ?? "🔎";
 
   return (
@@ -81,24 +71,21 @@ export function BriefingCard({
         <div style={{ display: "grid", gap: 4, textAlign: "left" }}>
           {detective && (
             <CastRow
-              emoji="🕵️"
-              label="You"
-              labelColor="var(--accent)"
+              emoji={DETECTIVE_BADGE.emoji}
+              label={DETECTIVE_BADGE.label}
+              labelColor={DETECTIVE_BADGE.color}
               name={`Detective ${detective.name}`}
             />
           )}
-          {others.map((c) => {
-            const badge = ROLE_BADGE[c.role] ?? { emoji: "🧍", label: "Bystander", color: "var(--text-dim)" };
-            return (
-              <CastRow
-                key={c.id}
-                emoji={badge.emoji}
-                label={badge.label}
-                labelColor={badge.color}
-                name={c.name}
-              />
-            );
-          })}
+          {others.map((c) => (
+            <CastRow
+              key={c.id}
+              emoji={PERSON_BADGE.emoji}
+              label=""
+              labelColor={PERSON_BADGE.color}
+              name={c.name}
+            />
+          ))}
         </div>
 
         <Button size="lg" onClick={onStart} style={{ width: "100%", marginTop: 20 }}>
@@ -126,8 +113,8 @@ function CastRow({
       }}
     >
       <span>{emoji}</span>
-      <span style={{ color: labelColor, fontWeight: 600 }}>{label}</span>
-      <span style={{ color: "var(--text-dim)" }}>—</span>
+      {label && <span style={{ color: labelColor, fontWeight: 600 }}>{label}</span>}
+      {label && <span style={{ color: "var(--text-dim)" }}>—</span>}
       <span>{name}</span>
     </div>
   );

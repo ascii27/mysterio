@@ -1,12 +1,5 @@
 import type { PublicCharacter } from "../../api/mysteries.js";
 
-const ROLE_EMOJI: Record<string, string> = {
-  detective: "🕵️",
-  suspect: "🤔",
-  witness: "👀",
-  bystander: "🧍",
-};
-
 export function CharacterPicker({
   characters,
   selected,
@@ -24,6 +17,7 @@ export function CharacterPicker({
         const active = selected === c.id;
         return (
           <button
+            type="button"
             key={c.id}
             onClick={() => onSelect(c.id)}
             style={{
@@ -36,9 +30,8 @@ export function CharacterPicker({
               cursor: "pointer",
             }}
           >
-            <div style={{ fontSize: 32 }}>{ROLE_EMOJI[c.role] ?? "🧍"}</div>
+            <div style={{ fontSize: 32 }}>🤔</div>
             <div style={{ fontWeight: 700 }}>{c.name}</div>
-            <div style={{ fontSize: 12, opacity: 0.85 }}>{c.role}</div>
           </button>
         );
       })}
