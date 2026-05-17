@@ -1,6 +1,6 @@
-# Mysterio — Session State (M2 + partial M3 + M4 + M5a shipped — paused 2026-05-17)
+# Mysterio — Session State (M2 + partial M3 + M4 + M5a + M5b shipped — paused 2026-05-17)
 
-> M2 + M3.1/M3.2-new + M4 shipped. **M5a (kid-onboarding: player-name detective + main-page hero + briefing card) shipped 2026-05-17 after 10yo daughter playtest feedback on M4 ("story confusing", "didn't know I was Maya", "didn't know suspects", "problem unclear"). 7 commits land M5a. Local Playwright verification confirms hero greets "Detective Player One 🕵️", BriefingCard shows category emoji + title + sorted cast roster (detective → 2 suspects → witness → bystander) + "Start the story" gate; narrative refers to the detective by player name throughout.** Deployed; first prod gen hit pre-existing M3.1 narrative_clue_coverage failure but detective name DID land correctly; second prod gen succeeded clean. **iPad walkthrough still pending the user.** M5b (annotated narrative + auto-Notes) queued behind M5a iPad validation. Audio (M3.3-new) still deferred.
+> M2 + M3.1/M3.2-new + M4 + M5a shipped. **M5b (annotated narrative + auto-Notes) shipped 2026-05-17. 15 commits land M5b: 1 DB migration, NarrativeAnnotation shared type, parseAnnotations util (9 tests), narrative prompt teaches inline `[p:<id>]…[/p]` and `[c:<id>]…[/c]` tags, narrativeAgent parses internally + redacts is_culprit/motive, orchestrator persists annotations, mysteries GET returns them, clues POST dedupes by (mystery_id, annotation_id) with 200 on re-tap, AnnotatedNarrative component renders pill highlights (role-colored), ClueTracker focused-mode with ✨ auto-added badge, PlaybackScreen wires tap → auto-create + drawer-focus.** Local Playwright + curl verification confirms end-to-end: 2 fresh gens produced 7 annotations each (4 persons + 3 clues), GET returns annotations, tap auto-POSTs (1st 201, 2nd 200 dedupe), drawer opens focused with rich content (character name + role + description). Deployed; first prod gen hit pre-existing M3.1 narrative_clue_coverage stochastic failure but second gen succeeded clean (7 annotations, detective name correct). **iPad walkthrough on M5b still pending the user.** Audio (M3.3-new) still deferred.
 
 ## Milestone re-sequencing (decided 2026-05-16 mid-session)
 
@@ -215,18 +215,44 @@ Triggered by 10yo daughter playtest feedback on the M4 build. 7 commits on `feat
 - Brainstorming visual artifacts: `.superpowers/brainstorm/91398-1778981903/content/` (hero-treatments, briefing-card, highlight-styles, tap-detail-behavior)
 - Local Playwright screenshots: `.playwright-mcp/m5a-main-hero.png`, `.playwright-mcp/m5a-briefing-card.png`
 
-## M5b queued behind M5a iPad validation
+## M5b completed (2026-05-17) — annotated narrative + auto-Notes
 
-Per `docs/superpowers/specs/2026-05-17-m5-kid-onboarding-design.md` § M5b — the bigger redesign:
-- Inline-delimiter narrative output (`[p:<char-id>]…[/p]`, `[c:<clue-id>]…[/c]`)
-- Server-side parser (~50 lines) strips tags into clean text + annotations array
-- 2 DB migrations: `mysteries.narrative_annotations` JSONB + `clues.source` / `clues.annotation_id` with unique partial index
-- New `AnnotatedNarrative` component renders pill highlights (style A — pill backgrounds)
-- `ClueTracker` gains "focused" mode + dedupe by annotation_id
-- Tap a highlight → auto-POST clue + open drawer focused on it
-- ~2-3 days of subagent work (~10 tasks)
+15 commits on `feat/mysterio-implementation`:
 
-**Do NOT begin M5b until the user has done the iPad walkthrough on M5a and signed off.**
+| Task | Commits | Notes |
+|---|---|---|
+| M5b.1 DB migration | `1020c47` | drizzle-kit recreate-table workaround for CHECK; manual patch of generated INSERT to use literal 'manual'/NULL for new columns (drizzle-kit bug on SQLite add-column-with-CHECK). 4 files. |
+| M5b.2 shared types | `61672f0` | NarrativeAnnotation interface, ClueSource type, Clue.source/annotation_id additions. |
+| M5b.3 parseAnnotations util + 9 tests | `654a18f` | Pure regex walker; drops invalid ids + detective ids; computes offsets in clean text. TDD-followed. |
+| M5b.4 narrative prompt + agent integration | `b3f4687` + `48591ff` | ANNOTATION RULES section in narrative.system.ts. Agent parses tags internally; coverage check runs on clean text. **Fix-pass:** `redactForNarrative` now strips `is_culprit` + `motive` from characters (was leaking the answer to the LLM; safe under prompt rules but the new tag surface made the leak load-bearing). |
+| M5b.5 orchestrator + routes | `645c07d` + `105cadc` | Orchestrator persists annotations; mysteries GET returns them; clues POST accepts source+annotation_id with dedupe (200 on re-tap, 201 on insert). **Fix-pass:** added guard after read-back SELECT so 201+undefined can't be returned to client. |
+| M5b.6 AnnotatedNarrative component | `1fec2cd` + `29cc3a3` | Pill rendering with role-color background; `type="button"`; ReactNode type imported explicitly; suspect color aligned to `var(--bad)` matching BriefingCard. |
+| M5b.7 ClueTracker focused-mode + ClueEditor ✨ badge | `c684e19` + `dd65595` | useEffect deps use stable scalars (`[focusedClueId, cluesQ.dataUpdatedAt]`) so the drawer opens reliably even when the cluesQ refetch is still in flight. `CSSProperties` imported explicitly. |
+| M5b.8 PlaybackScreen wiring | `2bcb20c` + `424bd74` | Tap → auto-create clue with composite annotation_id (`p-<id>` / `c-<id>`); on success, focus the new row in ClueTracker. Inline polish: server-dedupe comment + onError logger. |
+| M5b.9 live verification | none (verification only) | 2 fresh local gens both produced 7 annotations (4 persons + 3 clues). Tap-add flow verified via Playwright: tap → drawer opens focused on auto-added row with ✨ badge + rich content. Curl-level dedupe: 1st tap 201, 2nd tap 200 with same clue id. |
+| M5b.10 deploy + iPad handoff | (this commit) | `bash scripts/deploy.sh` clean; remote schema confirms 2 new columns + unique partial index; first prod gen hit M3.1 narrative_clue_coverage stochastic failure but second gen succeeded with 7 annotations + correct detective name. iPad smoke pending user. |
+
+**Total: 15 commits.** Subagent-driven (sonnet for implementer + reviewer). Code-quality reviewer found a real bug in 7/8 implementation tasks — the two-stage review pattern continues to pay (caught: drizzle-kit SQL bug, schema invariants, `is_culprit` leak, SELECT-after-INSERT guard, suspect color mismatch, React import fragility, effect-dep object-identity bug, focusedClueId race).
+
+## M5b design + plan + memory artifacts
+
+- Design: `docs/superpowers/specs/2026-05-17-m5-kid-onboarding-design.md` § M5b
+- Implementation plan: `docs/superpowers/plans/2026-05-17-m5b-implementation.md` — 10 tasks
+- Local Playwright screenshot: `.playwright-mcp/m5b-annotated-narrative.png` (drawer-focused-on-Priya snapshot)
+
+## iPad smoke checklist for the user
+
+Live at https://panther-golem.exe.xyz/
+
+1. Pick a player; generate a fresh Easy missing-pet mystery; wait ~90s for ready.
+2. Tap "📖 Start the story" on the BriefingCard.
+3. Confirm pill highlights in the prose: 🤔 red suspects, 👀 blue witnesses, 🧍 grey bystanders, 🔍 gold clues.
+4. Tap a SUSPECT pill (e.g. "Oliver") — drawer slides up, switches to Characters tab, the row has ✨ + yellow outline + the character's role + description.
+5. Edit the row, add a personal note ("I think he did it").
+6. Tap the SAME suspect pill again — drawer reopens focused on the same row (no duplicate, edit preserved).
+7. Tap a CLUE pill — drawer switches to Notes tab, focuses the new ✨ row with the clue text.
+8. Tap backdrop to collapse drawer.
+9. Tap "I think I know!" → solve flow still works.
 
 ## Notes for the next session
 
