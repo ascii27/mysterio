@@ -1,0 +1,14 @@
+[Unit]
+Description=Mysterio mystery game server
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/mysterio/apps/server
+EnvironmentFile=%h/mysterio/apps/server/.env
+ExecStart=%h/.local/bin/node --env-file=%h/mysterio/apps/server/.env dist/src/index.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

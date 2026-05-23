@@ -1,0 +1,19 @@
+:root {
+  --bg: #1a1530;
+  --surface: #251c44;
+  --surface-2: #2f235a;
+  --text: #f5f1ff;
+  --text-dim: #c3b6e8;
+  --accent: #ffb74d;
+  --accent-2: #f06292;
+  --good: #66bb6a;
+  --bad: #e57373;
+  --radius: 14px;
+  --pad: 16px;
+  --pad-lg: 24px;
+  font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); }
+button { font-family: inherit; cursor: pointer; border: none; }
+input, textarea { font-family: inherit; }
