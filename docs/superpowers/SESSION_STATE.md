@@ -1,4 +1,25 @@
-# Mysterio — Session State (M2 + partial M3 + M4 + M5a + M5b + M6 shipped — paused 2026-05-17)
+# Mysterio — Session State (M6 merged + M3.3 design + plan committed — paused 2026-05-23)
+
+> **Most recent state (2026-05-23):** M6 merged to `main` via PR #1 (merge commit `a5b6e81`). Branched `feat/m3.3-tts-voice` off `main` for the voice feature. Two commits on the new branch: `61fa8bf` M3.3-design (`docs/superpowers/specs/2026-05-23-m3.3-tts-voice-design.md`) + `b05394f` M3.3-plan (`docs/superpowers/plans/2026-05-23-m3.3-tts-voice-implementation.md`). **Implementation has NOT started — next session should open the plan and execute task-by-task via subagent-driven-development.**
+>
+> **What M3.3 ships:** server-side OpenAI TTS pipeline (`services/tts/` provider interface + adapter + storage helper + dedicated `ttsAgent`) + orchestrator wiring (`synthesizing` status, 1 retry, soft-fail to `ready` with `audio_path: null` on persistent failure) + native `<audio controls>` on `PlaybackScreen`. 8 tasks in the plan: openai dep → provider+adapter+singleton+test → storage+test → ttsAgent+test → orchestrator wiring → frontend audio element → local smoke → deploy + iPad smoke.
+>
+> **Pre-decided by env scaffolding (already in code, do not relitigate):** provider=OpenAI; model=`tts-1-hd`; voice=`fable` (single narrator, not per-category); storage=local FS at `AUDIO_DIR` (default `./data/audio`); `routes/static.ts` already serves `/audio/*` with 1-year immutable cache; `mysteries.audio_path` column + `'synthesizing'` status both already exist; GET DTO already maps `audio_path → audio_url`. **Decisions made in brainstorming on 2026-05-23:** scope=backend + minimal Play button (no custom AudioPlayer / transcript sync this slice); failure=1 retry then soft-fail (no `failure_reason` set — kid still gets the on-screen narrative); shape=provider interface + agent + storage helper (matches PLAN.md §5 verbatim).
+>
+> **Outstanding carry-overs from prior sessions** that the user wanted to address eventually but are not part of M3.3:
+> 1. iPad walkthrough on M5b + M6 still pending — the M3.3 iPad smoke (Task 8 step 5) effectively covers this too (M5b annotated narrative + M6 multi-choice solve are both visible on the same playback flow).
+> 2. `why_distractor` naming-style tuning (some sets name the culprit in all 4 options, leaking WHO). One-line prompt tightening in `apps/server/src/services/generation/prompts/logicStructure.system.ts`. Not blocking M3.3.
+> 3. Grader cleanup commit — delete `apps/server/src/services/generation/agents/graderAgent.ts`, `prompts/grader.system.ts`, `compareSolutions.ts`, and the `runGrader` imports. Dead code since M6.6. Not blocking M3.3.
+>
+> **Next-session checklist:**
+> 1. `git checkout feat/m3.3-tts-voice` (already created; confirm `git log --oneline -3` shows `b05394f`, `61fa8bf`, `a5b6e81`)
+> 2. Read `docs/superpowers/plans/2026-05-23-m3.3-tts-voice-implementation.md`
+> 3. Invoke `superpowers:subagent-driven-development` (per `workflow_subagent_driven` memory: implementer → spec-review → code-quality review → fix → re-review). Sonnet for both implementer and reviewers (per `workflow_model_selection`).
+> 4. After all 8 tasks ship and tests pass, deploy via `./scripts/deploy.sh` and hand off the iPad checklist to the user.
+
+---
+
+## Prior section (M6 ship — paused 2026-05-17, kept for reference)
 
 > M2 + M3.1/M3.2-new + M4 + M5a + M5b shipped. **M6 (reduce info leakage + multi-choice solve) shipped 2026-05-17. 9 commits land M6: parseAnnotations accepts false-clue ids (kid can't tell essential from false by pill formatting), narrative prompt instructs LLM to wrap both, role visuals collapsed on client (BriefingCard + AnnotatedNarrative + CharacterPicker — all non-detective characters now use a single 🤔 emoji + red color, no Suspect/Witness/Bystander labels), LogicStructure schema gains how_distractors[3] + why_distractors[3] with 4 superRefine invariants + 4 tests, LogicStructure prompt instructs LLM to generate plausible-but-wrong distractors, new GET /solve-options endpoint returns characters (no role) + shuffled how_options[4] + why_options[4], submit-solution replaces runGrader with === string compare (saves ~5s + $0.005/submit), new multi-choice GuessForm with OptionPicker for HOW/WHY.** Local Playwright + curl verification confirms end-to-end: 2 fresh gens produced 3 distinct distractors per field, false clue annotated alongside essentials, /solve-options returns expected shape, tap-through with correct answers yields ✓ Correct with 853-char explanation. Deployed; prod fresh gen ready in single attempt with 4 characters + 4 how_options + 4 why_options. **iPad walkthrough on M5b + M6 still pending the user.** Audio (M3.3-new) still deferred. **Tuning concern flagged from M6.8:** some why_distractor sets name the culprit in all 4 options (M6.5 prompt didn't constrain "use same naming style across true + distractors"), making the WHO trivially derivable. Easy follow-up tuning commit; not a blocker for ship.
 
