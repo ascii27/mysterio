@@ -6,6 +6,7 @@ import { mysteries } from "../../db/schema.js";
 import { logger } from "../../utils/logger.js";
 import { runLogicStructureAgent } from "./agents/logicStructureAgent.js";
 import { runNarrativeAgent } from "./agents/narrativeAgent.js";
+import { runTtsAgent } from "./agents/ttsAgent.js";
 import { runValidationAgent } from "./agents/validationAgent.js";
 import { compareSolutions } from "./compareSolutions.js";
 import { redact } from "./redact.js";
@@ -60,14 +61,33 @@ export async function runGeneration(input: RunInput): Promise<void> {
       return;
     }
 
-    // Narrative succeeded. TTS lands in M3.4-new — for now, jump straight to "ready" with audio_path unset.
+    // Narrative succeeded — persist it and transition to 'synthesizing' before TTS.
     db.update(mysteries).set({
-      status: "ready",
+      status: "synthesizing",
       title: narrativeRes.value.title,
       narrative_text: narrativeRes.value.narrative_text,
       narrative_annotations: JSON.stringify(narrativeRes.value.annotations),
-      ready_at: Math.floor(Date.now() / 1000),
     }).where(eq(mysteries.id, input.mysteryId)).run();
+
+    const ttsRes = await runTtsAgent({
+      mysteryId: input.mysteryId,
+      narrativeText: narrativeRes.value.narrative_text,
+    });
+    log("tts_done", ttsRes.ok ? { ok: true, audioPath: ttsRes.audioPath } : { ok: false, error: ttsRes.error });
+
+    if (ttsRes.ok) {
+      db.update(mysteries).set({
+        status: "ready",
+        audio_path: ttsRes.audioPath,
+        ready_at: Math.floor(Date.now() / 1000),
+      }).where(eq(mysteries.id, input.mysteryId)).run();
+    } else {
+      // Soft-fail: kid still gets the on-screen narrative. audio_path stays NULL; no failure_reason.
+      db.update(mysteries).set({
+        status: "ready",
+        ready_at: Math.floor(Date.now() / 1000),
+      }).where(eq(mysteries.id, input.mysteryId)).run();
+    }
   } catch (err) {
     log("orchestrator_unhandled_error", { err: err instanceof Error ? err.message : String(err) });
     try {
