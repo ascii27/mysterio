@@ -75,6 +75,15 @@ export function PlaybackScreen() {
         <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 16 }}>
           Tap a highlighted name or clue to add it to your notes.
         </p>
+        {data.audio_url && (
+          <audio
+            src={data.audio_url}
+            controls
+            preload="metadata"
+            playsInline
+            style={{ width: "100%", marginBottom: 16 }}
+          />
+        )}
         <AnnotatedNarrative
           text={text}
           annotations={annotations}
