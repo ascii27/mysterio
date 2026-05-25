@@ -15,6 +15,7 @@ const ls: LogicStructure = {
   how_distractors: ["aaa", "bbb", "ccc"],
   why_distractors: ["ddd", "eee", "fff"],
   logic_chain: ["x".repeat(20), "y".repeat(20), "z".repeat(20)],
+  central_question: "Who took the pet, how did they get in, and why would they do it?",
 };
 
 describe("redact", () => {
