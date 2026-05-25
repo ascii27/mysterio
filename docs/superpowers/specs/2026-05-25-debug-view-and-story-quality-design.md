@@ -78,7 +78,7 @@ If `logic_structure_json` is absent (still generating, or a failed-before-logic 
 
 - Add `central_question: string` (non-empty) to the `LogicStructure` Zod schema; the `LogicStructure` type is re-derived via `z.infer`.
 - Logic-structure prompt: produce a single-sentence question, in the story's own terms, that names the WHO/HOW/WHY the kid must figure out, **without naming or revealing the culprit** (same plain-sight rule as essential clues). Example: *"Who slipped Rosie out of the locked hutch overnight, how did they get past the latched gate, and why would anyone want to?"*
-- **Non-spoiler:** `central_question` is the objective, not the answer, so it is **kept through redaction** (the validation agent receives it but it does not give away who/how/why) and is **exposed on the public GET DTO**.
+- **Non-spoiler:** `central_question` is the objective, not the answer. The orchestrator stores the **full** structure (`JSON.stringify(validatedLogic)`), so `central_question` automatically reaches storage and is **exposed on the public GET DTO**. It is deliberately **not** threaded through `redact()` into the validation agent — the validator does not need it, and keeping the validator input unchanged avoids perturbing the M2.8 pass-rate.
 - Add a guard (prompt rule + a lightweight check in the logic-structure agent, alongside the existing difficulty-count check) that the `central_question` does not contain the culprit's name.
 - Frontend: show it on the **BriefingCard** ("Your case: …") and at the top of **PlaybackScreen**.
 
@@ -118,7 +118,7 @@ The logic-structure prompt references `d.misdirection` (it already interpolates 
 
 ```
 generate → logicStructureAgent (now also emits central_question, uses PUZZLE_CRAFT + d.misdirection)
-        → validation (redacted structure KEEPS central_question; still no true_solution/false_clues)
+        → validation (redacted structure unchanged; central_question lives only in the full stored structure)
         → narrativeAgent (uses PROSE_CRAFT; existing clue-coverage retry)
         → ready
 
