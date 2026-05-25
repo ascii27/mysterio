@@ -2,6 +2,7 @@ import { Navigate, Route, Routes as RRRoutes } from "react-router-dom";
 import { MainScreen } from "./screens/MainScreen/MainScreen.js";
 import { PlayerPicker } from "./screens/PlayerPicker.js";
 import { PlaybackScreen } from "./screens/PlaybackScreen/PlaybackScreen.js";
+import { SettingsScreen } from "./screens/SettingsScreen/SettingsScreen.js";
 import { SolutionScreen } from "./screens/SolutionScreen/SolutionScreen.js";
 import { usePlayerStore } from "./state/playerStore.js";
 
@@ -17,6 +18,7 @@ export function Routes() {
       <Route path="/" element={<Home />} />
       <Route path="/mysteries/:id" element={<PlaybackScreen />} />
       <Route path="/mysteries/:id/solve" element={<SolutionScreen />} />
+      <Route path="/settings" element={<SettingsScreen />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </RRRoutes>
   );
