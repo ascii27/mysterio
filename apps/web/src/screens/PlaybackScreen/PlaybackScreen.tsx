@@ -5,9 +5,11 @@ import type { NarrativeAnnotation } from "@mysterio/shared";
 import { createClue } from "../../api/clues.js";
 import { Button } from "../../components/Button.js";
 import { useGenerationJob } from "../../hooks/useGenerationJob.js";
+import { useSettingsStore } from "../../state/settingsStore.js";
 import { AnnotatedNarrative } from "./AnnotatedNarrative/AnnotatedNarrative.js";
 import { BriefingCard } from "./BriefingCard/BriefingCard.js";
 import { ClueTracker } from "./ClueTracker/ClueTracker.js";
+import { DebugPanel } from "./DebugPanel/DebugPanel.js";
 import { FailedMystery } from "./FailedMystery.js";
 import { LoadingMystery } from "./LoadingMystery.js";
 
@@ -18,6 +20,7 @@ export function PlaybackScreen() {
   const [started, setStarted] = useState(false);
   const [focusedClueId, setFocusedClueId] = useState<string | null>(null);
   const qc = useQueryClient();
+  const debugEnabled = useSettingsStore((s) => s.debugEnabled);
 
   const tapAnnotation = useMutation({
     mutationFn: (a: NarrativeAnnotation) => {
@@ -72,6 +75,11 @@ export function PlaybackScreen() {
           <Link to={`/mysteries/${mysteryId}/solve`}><Button>I think I know!</Button></Link>
         </header>
         <h1 style={{ fontSize: 28, marginBottom: 8 }}>{data.title}</h1>
+        {data.central_question && (
+          <p style={{ fontSize: 15, color: "var(--text)", marginBottom: 8 }}>
+            <b>Your case:</b> {data.central_question}
+          </p>
+        )}
         <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 16 }}>
           Tap a highlighted name or clue to add it to your notes.
         </p>
@@ -89,6 +97,7 @@ export function PlaybackScreen() {
           annotations={annotations}
           onTap={(a) => tapAnnotation.mutate(a)}
         />
+        {debugEnabled && <DebugPanel mysteryId={mysteryId} />}
       </div>
       <ClueTracker
         mysteryId={mysteryId}
