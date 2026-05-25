@@ -7,6 +7,7 @@ export const DIFFICULTIES = [
     falseCluesMax: 2,
     targetWords: 600,
     wordToleranceFraction: 0.15,
+    misdirection: "1-2 simple red herrings that a careful kid can rule out quickly on their own.",
   },
   {
     id: "medium",
@@ -16,6 +17,7 @@ export const DIFFICULTIES = [
     falseCluesMax: 4,
     targetWords: 900,
     wordToleranceFraction: 0.15,
+    misdirection: "3-4 moderately plausible red herrings that require comparing two or more clues to dismiss.",
   },
   {
     id: "hard",
@@ -25,6 +27,7 @@ export const DIFFICULTIES = [
     falseCluesMax: 7,
     targetWords: 1200,
     wordToleranceFraction: 0.15,
+    misdirection: "5-7 interlocking red herrings, including a deliberately misleading obvious suspect who turns out to be innocent.",
   },
 ] as const;
 
