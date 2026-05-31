@@ -29,6 +29,7 @@ export interface NarrativeAgentInput {
   logicStructure: LogicStructure;
   difficulty: DifficultyId;
   maxAttempts: number;
+  extraNotes?: string;
 }
 
 export async function runNarrativeAgent(input: NarrativeAgentInput): Promise<NarrativeAgentResult> {
@@ -39,7 +40,11 @@ export async function runNarrativeAgent(input: NarrativeAgentInput): Promise<Nar
   const safeForNarrative = redactForNarrative(input.logicStructure);
 
   for (let attempt = 1; attempt <= input.maxAttempts; attempt++) {
-    const userMsg = buildUserMessage(safeForNarrative, missingByAttempt[missingByAttempt.length - 1]);
+    const userMsg = buildUserMessage(
+      safeForNarrative,
+      missingByAttempt[missingByAttempt.length - 1],
+      input.extraNotes,
+    );
     let raw: string;
     try {
       raw = await claudeText({
@@ -91,7 +96,11 @@ export async function runNarrativeAgent(input: NarrativeAgentInput): Promise<Nar
   return { ok: false, error: lastErr, attemptsUsed: input.maxAttempts, missingCluesByAttempt: missingByAttempt };
 }
 
-function buildUserMessage(safe: ReturnType<typeof redactForNarrative>, missingPrev?: string[]): string {
+function buildUserMessage(
+  safe: ReturnType<typeof redactForNarrative>,
+  missingPrev?: string[],
+  extraNotes?: string,
+): string {
   const baseLines = [
     "Write the narration for this mystery. Output JSON as instructed.",
     "",
@@ -103,6 +112,9 @@ function buildUserMessage(safe: ReturnType<typeof redactForNarrative>, missingPr
       .map((c) => `- ${c.id}: ${c.description}`)
       .join("\n");
     baseLines.push("", "MISSING CLUES from your previous attempt — make sure these appear naturally in the new draft:", list);
+  }
+  if (extraNotes) {
+    baseLines.push("", "A TEST READER FOUND PROBLEMS with the previous version — fix these in the new draft:", extraNotes);
   }
   return baseLines.join("\n");
 }
