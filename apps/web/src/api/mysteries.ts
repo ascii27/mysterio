@@ -72,3 +72,7 @@ export function getMysteryDebug(id: string): Promise<MysteryDebug> {
 export function listMysteries(playerId: string, limit = 10): Promise<{ mysteries: MysterySummary[] }> {
   return api(`/api/mysteries?player_id=${encodeURIComponent(playerId)}&limit=${limit}`);
 }
+
+export function generateAudio(id: string): Promise<{ audio_url: string }> {
+  return api(`/api/mysteries/${id}/audio`, { method: "POST" });
+}
