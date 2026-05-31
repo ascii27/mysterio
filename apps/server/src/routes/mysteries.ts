@@ -4,8 +4,10 @@ import { z } from "zod";
 import { getDb } from "../db/client.js";
 import { mysteries, players } from "../db/schema.js";
 import { runGeneration } from "../services/generation/orchestrator.js";
+import { runTtsAgent } from "../services/generation/agents/ttsAgent.js";
 import { mysteryId } from "../utils/ids.js";
 import { buildDebugView } from "./debugView.js";
+import { resolveMysteryAudio } from "./mysteryAudio.js";
 
 const generateBody = z.object({
   player_id: z.string().min(1),
@@ -113,6 +115,22 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       validation_attempts: row.validation_attempts,
       validation_notes: row.validation_notes,
     });
+  });
+
+  app.post<{ Params: { id: string } }>("/mysteries/:id/audio", async (req, reply) => {
+    const db = getDb();
+    const row = db.select().from(mysteries).where(eq(mysteries.id, req.params.id)).get();
+    const outcome = await resolveMysteryAudio(row, {
+      generateAudio: async (id, narrativeText) => {
+        const r = await runTtsAgent({ mysteryId: id, narrativeText });
+        return r.ok ? { ok: true, audioPath: r.audioPath } : { ok: false, error: r.error };
+      },
+      persistAudioPath: (id, audioPath) => {
+        db.update(mysteries).set({ audio_path: audioPath }).where(eq(mysteries.id, id)).run();
+      },
+    });
+    reply.status(outcome.status);
+    return outcome.body;
   });
 
   app.get<{ Querystring: { player_id?: string; limit?: string } }>("/mysteries", async (req, reply) => {
