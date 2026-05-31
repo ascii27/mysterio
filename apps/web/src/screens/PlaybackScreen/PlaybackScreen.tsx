@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { NarrativeAnnotation } from "@mysterio/shared";
 import { createClue } from "../../api/clues.js";
+import { generateAudio } from "../../api/mysteries.js";
 import { Button } from "../../components/Button.js";
 import { useGenerationJob } from "../../hooks/useGenerationJob.js";
 import { useSettingsStore } from "../../state/settingsStore.js";
@@ -21,6 +22,7 @@ export function PlaybackScreen() {
   const [focusedClueId, setFocusedClueId] = useState<string | null>(null);
   const qc = useQueryClient();
   const debugEnabled = useSettingsStore((s) => s.debugEnabled);
+  const audioEnabled = useSettingsStore((s) => s.audioEnabled);
 
   const tapAnnotation = useMutation({
     mutationFn: (a: NarrativeAnnotation) => {
@@ -83,15 +85,7 @@ export function PlaybackScreen() {
         <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 16 }}>
           Tap a highlighted name or clue to add it to your notes.
         </p>
-        {data.audio_url && (
-          <audio
-            src={data.audio_url}
-            controls
-            preload="metadata"
-            playsInline
-            style={{ width: "100%", marginBottom: 16 }}
-          />
-        )}
+        {audioEnabled && <AudioSection mysteryId={mysteryId} audioUrl={data.audio_url} />}
         <AnnotatedNarrative
           text={text}
           annotations={annotations}
@@ -120,4 +114,36 @@ function guessClueCategory(
   void annotation;
   void mystery;
   return "note";
+}
+
+function AudioSection({ mysteryId, audioUrl }: { mysteryId: string; audioUrl: string | null }) {
+  const qc = useQueryClient();
+  const gen = useMutation({
+    mutationFn: () => generateAudio(mysteryId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["mystery", mysteryId] }),
+  });
+
+  if (audioUrl) {
+    return (
+      <audio
+        src={audioUrl}
+        controls
+        preload="metadata"
+        playsInline
+        style={{ width: "100%", marginBottom: 16 }}
+      />
+    );
+  }
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <Button variant="secondary" disabled={gen.isPending} onClick={() => gen.mutate()}>
+        {gen.isPending ? "Generating audio…" : "🔊 Generate audio"}
+      </Button>
+      {gen.isError && (
+        <p style={{ color: "var(--bad)", fontSize: 13, marginTop: 6 }}>
+          Couldn't generate audio. Try again.
+        </p>
+      )}
+    </div>
+  );
 }
