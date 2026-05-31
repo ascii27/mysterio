@@ -1,7 +1,9 @@
-import type { LogicStructure, TrueSolution } from "@mysterio/shared";
+import type { DifficultyId, LogicStructure, TrueSolution } from "@mysterio/shared";
 import { logger } from "../../utils/logger.js";
 import { runContinuityAuditAgent } from "./agents/continuityAuditAgent.js";
 import type { ContinuityAuditInput, ContinuityAuditResult } from "./agents/continuityAuditAgent.js";
+import { runNarrativeAgent } from "./agents/narrativeAgent.js";
+import type { NarrativeAgentResult, NarrativeOutput } from "./agents/narrativeAgent.js";
 import { runProseSolverAgent } from "./agents/proseSolverAgent.js";
 import type { ProseSolverInput } from "./agents/proseSolverAgent.js";
 import type { ValidationAgentResult, ValidationGuess } from "./agents/validationAgent.js";
@@ -72,4 +74,56 @@ export async function runReadthroughGate(
     parts.push(`The story never establishes things the answer depends on — set these up earlier in the prose: ${dangling.join("; ")}.`);
   }
   return { passed: false, notes: parts.join(" ") };
+}
+
+export interface WriteAndVerifyInput {
+  logicStructure: LogicStructure;
+  difficulty: DifficultyId;
+  maxNarrativeAttempts: number;
+  maxReadthroughAttempts: number;
+}
+
+export interface WriteAndVerifyDeps {
+  narrative?: (extraNotes?: string) => Promise<NarrativeAgentResult>;
+  gate?: (narrativeText: string) => Promise<ReadthroughVerdict>;
+}
+
+export type WriteAndVerifyResult =
+  | { ok: true; value: NarrativeOutput }
+  | { ok: false; escalationNotes: string };
+
+export async function writeAndVerifyProse(
+  input: WriteAndVerifyInput,
+  deps: WriteAndVerifyDeps = {},
+): Promise<WriteAndVerifyResult> {
+  const narrative =
+    deps.narrative ??
+    ((extraNotes?: string) =>
+      runNarrativeAgent({
+        logicStructure: input.logicStructure,
+        difficulty: input.difficulty,
+        maxAttempts: input.maxNarrativeAttempts,
+        extraNotes,
+      }));
+  const gate =
+    deps.gate ??
+    ((narrativeText: string) =>
+      runReadthroughGate({ logicStructure: input.logicStructure, narrativeText }));
+
+  let notes: string | undefined;
+  for (let attempt = 1; attempt <= input.maxReadthroughAttempts; attempt++) {
+    const draft = await narrative(notes);
+    if (!draft.ok) {
+      notes = `The writer could not include all essential clues: ${draft.error}`;
+      continue;
+    }
+    const verdict = await gate(draft.value.narrative_text);
+    logger.info("readthrough_attempt", { attempt, passed: verdict.passed });
+    if (verdict.passed) return { ok: true, value: draft.value };
+    notes = verdict.notes;
+  }
+  return {
+    ok: false,
+    escalationNotes: `The prose could not be made solvable after ${input.maxReadthroughAttempts} attempts. Last problem: ${notes ?? "unknown"}`,
+  };
 }

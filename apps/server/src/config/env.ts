@@ -12,6 +12,7 @@ const envSchema = z.object({
   AUDIO_DIR: z.string().default("./data/audio"),
   MAX_VALIDATION_ATTEMPTS: z.coerce.number().int().positive().default(3),
   MAX_NARRATIVE_ATTEMPTS: z.coerce.number().int().positive().default(2),
+  MAX_READTHROUGH_ATTEMPTS: z.coerce.number().int().positive().default(2),
 });
 
 export type Env = z.infer<typeof envSchema>;

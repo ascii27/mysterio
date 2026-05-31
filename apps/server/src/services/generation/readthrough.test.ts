@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { LogicStructure } from "@mysterio/shared";
 import { runReadthroughGate } from "./readthrough.js";
+import { writeAndVerifyProse } from "./readthrough.js";
 
 const logic = {
   category: "missing-pet",
@@ -103,5 +104,54 @@ describe("runReadthroughGate", () => {
       },
     );
     expect(auditorDown.passed).toBe(true);
+  });
+});
+
+const narrativeOk = {
+  ok: true as const,
+  value: { title: "The Case", narrative_text: "...", annotations: [] },
+  attemptsUsed: 1,
+  missingCluesByAttempt: [],
+};
+
+describe("writeAndVerifyProse", () => {
+  it("returns ok on the first draft when the gate passes", async () => {
+    let calls = 0;
+    const r = await writeAndVerifyProse(
+      { logicStructure: logic, difficulty: "easy", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
+      {
+        narrative: async () => { calls++; return narrativeOk; },
+        gate: async () => ({ passed: true, notes: "ok" }),
+      },
+    );
+    expect(r.ok).toBe(true);
+    expect(calls).toBe(1);
+  });
+
+  it("retries prose with the gate notes, then succeeds", async () => {
+    let calls = 0;
+    let secondCallNotes: string | undefined;
+    const r = await writeAndVerifyProse(
+      { logicStructure: logic, difficulty: "easy", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
+      {
+        narrative: async (extraNotes) => { calls++; if (calls === 2) secondCallNotes = extraNotes; return narrativeOk; },
+        gate: async () => (calls < 2 ? { passed: false, notes: "the latch is missing" } : { passed: true, notes: "ok" }),
+      },
+    );
+    expect(r.ok).toBe(true);
+    expect(calls).toBe(2);
+    expect(secondCallNotes).toContain("the latch is missing");
+  });
+
+  it("escalates after readthrough attempts are exhausted", async () => {
+    const r = await writeAndVerifyProse(
+      { logicStructure: logic, difficulty: "easy", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
+      {
+        narrative: async () => narrativeOk,
+        gate: async () => ({ passed: false, notes: "still unsolvable" }),
+      },
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.escalationNotes).toContain("still unsolvable");
   });
 });
