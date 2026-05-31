@@ -38,6 +38,7 @@ const valid = {
     "The ribbon belongs to Lulu and was snagged on the playhouse latch.",
     "The warm blanket means Biscuit was inside recently — therefore Lulu brought him there.",
   ],
+  central_question: "Who coaxed Biscuit the cat into the playhouse and shut the door, and why?",
 };
 
 describe("logicStructureSchema", () => {
@@ -164,6 +165,33 @@ describe("logicStructureSchema", () => {
     expect(res.success).toBe(false);
     if (!res.success) {
       expect(res.error.issues.some((i) => i.message.includes("why_distractors must contain 3 distinct strings"))).toBe(true);
+    }
+  });
+
+  it("accepts a valid central_question that does not name the culprit", () => {
+    const ok = structuredClone(valid);
+    ok.central_question = "Who slipped the rabbit out of the locked hutch overnight, and how did they get past the gate?";
+    expect(logicStructureSchema.safeParse(ok).success).toBe(true);
+  });
+
+  it("rejects a missing central_question", () => {
+    const bad = structuredClone(valid) as Record<string, unknown>;
+    delete bad.central_question;
+    const res = logicStructureSchema.safeParse(bad);
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(res.error.issues.some((i) => i.path.includes("central_question"))).toBe(true);
+    }
+  });
+
+  it("rejects a central_question that names the culprit", () => {
+    const bad = structuredClone(valid);
+    const culprit = bad.characters.find((c) => c.is_culprit)!;
+    bad.central_question = `Did ${culprit.name} take the cat, and how did they do it without being seen?`;
+    const res = logicStructureSchema.safeParse(bad);
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(res.error.issues.some((i) => i.message.includes("central_question must not name the culprit"))).toBe(true);
     }
   });
 });

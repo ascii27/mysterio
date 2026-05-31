@@ -53,7 +53,11 @@ export function BriefingCard({
           {mystery.title ?? "Untitled Mystery"}
         </div>
         <div style={{ fontSize: 14, color: "var(--text)", margin: "16px 0", lineHeight: 1.5 }}>
-          Your job: figure out <b>who</b> did it, <b>how</b>, and <b>why</b>.
+          {mystery.central_question ? (
+            <><b>Your case:</b> {mystery.central_question}</>
+          ) : (
+            <>Your job: figure out <b>who</b> did it, <b>how</b>, and <b>why</b>.</>
+          )}
         </div>
 
         <div

@@ -111,6 +111,7 @@ function redactForNarrative(ls: LogicStructure) {
   return {
     category: ls.category,
     setting: ls.setting,
+    central_question: ls.central_question,
     characters: ls.characters.map((c) => ({
       id: c.id,
       name: c.name,
