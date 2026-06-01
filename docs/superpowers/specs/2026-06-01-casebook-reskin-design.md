@@ -36,7 +36,9 @@ primitives (Folder, Stamp, SceneFrame, etc.) that specs 2–4 reuse.
 - No new screens (world / Town / Who's Who / Trophy Room / character-creation).
 - No DB, API, or generation-pipeline changes.
 - No folder-grouped HQ "desk" layout (belongs with the reputation/world work).
-- No real cover/portrait **image pipeline** (SceneArt provides storybook stand-ins).
+- No real cover **image pipeline** — that is the companion spec
+  `2026-06-01-casebook-image-generation-design.md`, sequenced immediately after. This
+  spec only builds the `SceneFrame`/`SceneArt` placeholder + fallback layer it fills.
 - No Settings gate or expanded admin panel (Spec 4). `SettingsScreen` is only
   recolored; its two existing toggles stay as-is.
 - No update to the stale "pre-implementation" claim in `CLAUDE.md`.
@@ -111,10 +113,16 @@ ported from the prototype's `ui.jsx` and typed in TSX:
   `children`, `style?`.
 - **`SceneArt`** — procedural storybook-scene SVG (the `SCENE` palette map +
   `SceneShapes`). Renders a tinted scene for a given `scene` key; optional `prompt`
-  caption (`✦ AI`), `kicker`, `height`, `radius`, `tape`. This is what gives cases &
-  category tiles casebook **covers** without a real image pipeline.
+  caption (`✦ AI`), `kicker`, `height`, `radius`, `tape`. This is the **placeholder +
+  fallback** layer: it gives cases & category tiles casebook covers while a real cover
+  is generating, if generation fails, or if cover images are toggled off. The real
+  AI-generated cover (see the companion spec
+  `2026-06-01-casebook-image-generation-design.md`) drops into `SceneFrame` in front
+  of it.
 - **`SceneFrame`** — evidence-photo frame wrapper (cream border + tape + shadow) that
-  wraps either a real `<img>` or a `SceneArt`/children. Used for mystery covers.
+  wraps **either** a real `<img>` (the generated cover, when present) **or** a
+  `SceneArt` fallback. Built here so the image-generation spec only has to feed it a
+  URL. Used for mystery covers.
 - **`Chip`** — typewriter filing-tag. Props: `tone?`
   (`ink`/`amber`/`rose`/`teal`/`good`/`cream`), `children`, `style?`.
 - **`Kicker`** — mono uppercase section label. Props: `children`, `style?`.
