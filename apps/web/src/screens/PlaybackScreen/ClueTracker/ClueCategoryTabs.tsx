@@ -19,13 +19,16 @@ export function ClueCategoryTabs({
           key={t.id}
           onClick={() => onChange(t.id)}
           style={{
-            padding: "6px 10px",
-            borderRadius: 8,
+            padding: "6px 12px",
+            borderRadius: "8px 8px 4px 4px",
             border: "none",
             background: active === t.id ? "var(--accent)" : "var(--surface-2)",
-            color: active === t.id ? "#1a1530" : "var(--text)",
-            fontSize: 13,
-            fontWeight: 600,
+            color: active === t.id ? "#33240c" : "var(--text-dim)",
+            fontSize: 11.5,
+            fontWeight: 700,
+            fontFamily: "var(--mono)",
+            textTransform: "uppercase",
+            letterSpacing: "0.04em",
             whiteSpace: "nowrap",
             cursor: "pointer",
           }}
