@@ -1,19 +1,66 @@
 :root {
-  --bg: #1a1530;
-  --surface: #251c44;
-  --surface-2: #2f235a;
-  --text: #f5f1ff;
-  --text-dim: #c3b6e8;
-  --accent: #ffb74d;
-  --accent-2: #f06292;
-  --good: #66bb6a;
-  --bad: #e57373;
+  /* Detective casebook: warm manila paper + ink, brass & case-red accents.
+     Existing variable NAMES are kept so screens recolor in place; values now
+     describe PAPER surfaces (light) with dark ink text. */
+  --bg: #e6d7b2;          /* app base paper */
+  --surface: #fbf5e5;     /* index-card paper */
+  --surface-2: #efe2c2;   /* manila / inputs */
+  --text: #2c2318;        /* dark ink */
+  --text-dim: #7c6a4e;    /* faded ink */
+  --accent: #c0892b;      /* brass — primary accent */
+  --accent-2: #b2392f;    /* case red — secondary / stamps */
+  --good: #3f8a5c;        /* solved green */
+  --bad: #b2392f;         /* error / wrong */
+
+  /* added casebook tokens */
+  --ink: #2c2318;
+  --ink-dim: #7c6a4e;
+  --line: rgba(74, 52, 24, 0.22);
+  --cream: #fbf4e3;       /* casefile sheet */
+  --cream-2: #efe1c1;
+  --cream-ink: #2c2318;
+  --cream-ink-dim: #8a7757;
+  --cream-line: #dcc89e;
+  --gold: #b58324;        /* rank & trophy gold */
+  --teal: #2f7d6b;
+
   --radius: 14px;
+  --radius-lg: 14px;
   --pad: 16px;
   --pad-lg: 24px;
-  font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, sans-serif;
+
+  --display: "Zilla Slab", Georgia, serif;
+  --body: "Zilla Slab", Georgia, serif;
+  --mono: "Courier Prime", ui-monospace, Menlo, monospace;
+  --hand: "Patrick Hand", "Comic Sans MS", cursive;
+
+  font-family: var(--body);
 }
-* { box-sizing: border-box; }
-html, body, #root { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body, #root { margin: 0; min-height: 100%; color: var(--text); }
+body {
+  font-family: var(--body);
+  /* aged-paper texture: faint fibres + warm wash */
+  background:
+    radial-gradient(60% 50% at 18% 8%, rgba(255, 250, 235, 0.6), transparent 60%),
+    radial-gradient(70% 60% at 92% 96%, rgba(150, 118, 66, 0.16), transparent 60%),
+    repeating-linear-gradient(96deg, rgba(120, 92, 46, 0.035) 0 2px, transparent 2px 5px),
+    linear-gradient(160deg, #ece0c1, #e3d3ac);
+  background-attachment: fixed;
+}
+h1, h2, h3 { font-family: var(--display); line-height: 1.1; }
 button { font-family: inherit; cursor: pointer; border: none; }
 input, textarea { font-family: inherit; }
+
+/* casebook flourishes */
+.stamp {
+  font-family: var(--mono); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--accent-2); border: 2.5px solid var(--accent-2);
+  border-radius: 5px; padding: 5px 10px; opacity: 0.85; white-space: nowrap;
+}
+.ruled { background-image: repeating-linear-gradient(0deg, transparent 0 27px, rgba(120,92,46,0.15) 27px 28px); }
+
+@keyframes pop { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.12); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes stampin { 0% { transform: scale(2.4) rotate(-8deg); opacity: 0; } 55% { opacity: 1; } 70% { transform: scale(0.92) rotate(-8deg); } 100% { transform: scale(1) rotate(-8deg); opacity: 0.85; } }
