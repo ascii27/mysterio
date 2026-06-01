@@ -12,6 +12,9 @@
     "lint": "echo \"no lint configured\" && exit 0"
   },
   "dependencies": {
+    "@fontsource/courier-prime": "^5.2.8",
+    "@fontsource/patrick-hand": "^5.2.8",
+    "@fontsource/zilla-slab": "^5.2.8",
     "@mysterio/shared": "workspace:*",
     "@tanstack/react-query": "^5.59.0",
     "react": "^19.0.0",
