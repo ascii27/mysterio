@@ -1,3 +1,4 @@
+import React from "react";
 import type { CSSProperties, ReactNode } from "react";
 
 export type SceneKey =
@@ -123,6 +124,7 @@ export function SceneArt({
   scene?: SceneKey; prompt?: string; height?: number | string;
   radius?: number | string; kicker?: string; style?: CSSProperties;
 }) {
+  const uid = React.useId();
   const p = SCENE[scene] ?? SCENE.generic;
   const framed = radius !== 0 && radius !== "0";
   const showStars = ["lighthouse", "manor", "park", "marina", "town", "home"].includes(scene);
@@ -135,19 +137,19 @@ export function SceneArt({
           ? "0 3px 10px -2px rgba(40,28,12,0.45), inset 0 0 0 1px rgba(0,0,0,0.2)"
           : "inset 0 0 0 1px rgba(0,0,0,0.18)",
       }}>
-        <svg viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" style={{ display: "block" }}>
+        <svg aria-hidden="true" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" style={{ display: "block" }}>
           <defs>
-            <linearGradient id={"sky-" + scene} x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={`sky-${scene}-${uid}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" stopColor={p.sky[0]} /><stop offset="1" stopColor={p.sky[1]} />
             </linearGradient>
-            <radialGradient id={"vig-" + scene} cx="0.5" cy="0.42" r="0.75">
+            <radialGradient id={`vig-${scene}-${uid}`} cx="0.5" cy="0.42" r="0.75">
               <stop offset="0.55" stopColor="#000" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity="0.45" />
             </radialGradient>
           </defs>
-          <rect width="400" height="260" fill={`url(#sky-${scene})`} />
+          <rect width="400" height="260" fill={`url(#sky-${scene}-${uid})`} />
           {showStars && <Stars n={14} />}
           <SceneShapes scene={scene} p={p} />
-          <rect width="400" height="260" fill={`url(#vig-${scene})`} />
+          <rect width="400" height="260" fill={`url(#vig-${scene}-${uid})`} />
         </svg>
         {kicker && (
           <div style={{

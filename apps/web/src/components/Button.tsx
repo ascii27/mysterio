@@ -28,9 +28,9 @@ export function Button({ variant = "primary", size = "md", style, children, ...r
         transition: "transform .12s, filter .12s", opacity: rest.disabled ? 0.45 : 1,
         ...variantStyles[variant], ...sizeStyles[size], ...style,
       }}
-      onMouseDown={(e) => { e.currentTarget.style.transform = "translateY(2px)"; }}
-      onMouseUp={(e) => { e.currentTarget.style.transform = ""; }}
-      onMouseLeave={(e) => { e.currentTarget.style.transform = ""; }}
+      onMouseDown={(e) => { rest.onMouseDown?.(e); e.currentTarget.style.transform = "translateY(2px)"; }}
+      onMouseUp={(e) => { rest.onMouseUp?.(e); e.currentTarget.style.transform = ""; }}
+      onMouseLeave={(e) => { rest.onMouseLeave?.(e); e.currentTarget.style.transform = ""; }}
     >
       {children}
     </button>
