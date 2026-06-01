@@ -24,6 +24,7 @@ export function PlayerPicker() {
           {data.players.map((p) => (
             <button
               key={p.id}
+              aria-label={p.name}
               onClick={() => setActivePlayer(p.id)}
               style={{
                 display: "flex", alignItems: "center", gap: 14, textAlign: "left",
@@ -32,7 +33,7 @@ export function PlayerPicker() {
                 boxShadow: "0 2px 0 rgba(0,0,0,0.2)",
               }}
             >
-              <div style={{
+              <div aria-hidden="true" style={{
                 width: 48, height: 48, borderRadius: 10, flex: "0 0 auto", display: "grid", placeItems: "center",
                 background: "radial-gradient(120% 120% at 30% 25%, var(--accent), #7a3b1a)",
                 color: "#fff", fontFamily: "var(--display)", fontWeight: 700, fontSize: 22,
