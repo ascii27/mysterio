@@ -37,7 +37,7 @@
   font-family: var(--body);
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body, #root { margin: 0; min-height: 100%; color: var(--text); }
+html, body, #root { margin: 0; min-height: 100%; color: var(--text); background: var(--bg); }
 body {
   font-family: var(--body);
   /* aged-paper texture: faint fibres + warm wash */
