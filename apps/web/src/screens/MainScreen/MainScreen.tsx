@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { type CategoryId, type DifficultyId, difficultyConfig } from "@mysterio/shared";
 import { generateMystery } from "../../api/mysteries.js";
 import { listPlayers } from "../../api/players.js";
@@ -34,12 +34,17 @@ export function MainScreen() {
     <div style={{ maxWidth: 720, margin: "0 auto", padding: "var(--pad-lg)" }}>
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 24 }}>
         <h1 style={{ margin: 0, fontSize: 28 }}>Mysterio</h1>
-        <button
-          onClick={clearPlayer}
-          style={{ background: "transparent", color: "var(--text-dim)", fontSize: 14 }}
-        >
-          {player?.name ?? "?"} · Switch player
-        </button>
+        <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
+          <button
+            onClick={clearPlayer}
+            style={{ background: "transparent", color: "var(--text-dim)", fontSize: 14 }}
+          >
+            {player?.name ?? "?"} · Switch player
+          </button>
+          <Link to="/settings" aria-label="Settings" style={{ color: "var(--text-dim)", textDecoration: "none", fontSize: 18 }}>
+            ⚙️
+          </Link>
+        </div>
       </header>
 
       <div

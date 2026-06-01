@@ -79,6 +79,10 @@ function AnnotatedSpan({
         fontWeight: 600,
         cursor: "pointer",
         display: "inline",
+        // Browsers default <button> to text-align:center; without this, a long
+        // multi-line clue highlight renders centered. Keep highlighted clues
+        // left-aligned to match the surrounding prose.
+        textAlign: "left",
       }}
     >
       {inner}

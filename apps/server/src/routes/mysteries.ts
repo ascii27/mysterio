@@ -4,7 +4,10 @@ import { z } from "zod";
 import { getDb } from "../db/client.js";
 import { mysteries, players } from "../db/schema.js";
 import { runGeneration } from "../services/generation/orchestrator.js";
+import { runTtsAgent } from "../services/generation/agents/ttsAgent.js";
 import { mysteryId } from "../utils/ids.js";
+import { buildDebugView } from "./debugView.js";
+import { resolveMysteryAudio } from "./mysteryAudio.js";
 
 const generateBody = z.object({
   player_id: z.string().min(1),
@@ -53,13 +56,20 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       return { error: "not_found" };
     }
     let characters: unknown = undefined;
+    let central_question: string | null = null;
     if (row.logic_structure_json) {
       try {
-        const parsed = JSON.parse(row.logic_structure_json) as { characters?: unknown };
+        const parsed = JSON.parse(row.logic_structure_json) as {
+          characters?: unknown;
+          central_question?: unknown;
+        };
         if (parsed && typeof parsed === "object" && Array.isArray(parsed.characters)) {
           characters = parsed.characters.map((c: Record<string, unknown>) => ({
             id: c.id, name: c.name, role: c.role, description: c.description,
           }));
+        }
+        if (typeof parsed.central_question === "string") {
+          central_question = parsed.central_question;
         }
       } catch { /* swallow — surface as missing */ }
     }
@@ -80,10 +90,47 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       narrative_annotations,
       audio_url: row.audio_path ? `/audio/${row.audio_path}` : null,
       characters,
+      central_question,
       created_at: row.created_at,
       ready_at: row.ready_at,
       failure_reason: row.failure_reason,
     };
+  });
+
+  app.get<{ Params: { id: string } }>("/mysteries/:id/debug", async (req, reply) => {
+    const db = getDb();
+    const row = db.select().from(mysteries).where(eq(mysteries.id, req.params.id)).get();
+    if (!row) {
+      reply.status(404);
+      return { error: "not_found" };
+    }
+    return buildDebugView({
+      id: row.id,
+      status: row.status,
+      difficulty: row.difficulty,
+      failure_reason: row.failure_reason,
+      logic_structure_json: row.logic_structure_json,
+      narrative_text: row.narrative_text,
+      validation_passed: row.validation_passed,
+      validation_attempts: row.validation_attempts,
+      validation_notes: row.validation_notes,
+    });
+  });
+
+  app.post<{ Params: { id: string } }>("/mysteries/:id/audio", async (req, reply) => {
+    const db = getDb();
+    const row = db.select().from(mysteries).where(eq(mysteries.id, req.params.id)).get();
+    const outcome = await resolveMysteryAudio(row, {
+      generateAudio: async (id, narrativeText) => {
+        const r = await runTtsAgent({ mysteryId: id, narrativeText });
+        return r.ok ? { ok: true, audioPath: r.audioPath } : { ok: false, error: r.error };
+      },
+      persistAudioPath: (id, audioPath) => {
+        db.update(mysteries).set({ audio_path: audioPath }).where(eq(mysteries.id, id)).run();
+      },
+    });
+    reply.status(outcome.status);
+    return outcome.body;
   });
 
   app.get<{ Querystring: { player_id?: string; limit?: string } }>("/mysteries", async (req, reply) => {

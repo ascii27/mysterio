@@ -43,6 +43,7 @@ export const logicStructureSchema = z.object({
   how_distractors: z.array(z.string().min(3).max(200)).length(3),
   why_distractors: z.array(z.string().min(3).max(200)).length(3),
   logic_chain: z.array(z.string().min(10).max(400)).min(3).max(8),
+  central_question: z.string().min(10).max(300),
 }).superRefine((val, ctx) => {
   const culprits = val.characters.filter((c) => c.is_culprit);
   if (culprits.length !== 1) {
@@ -69,6 +70,14 @@ export const logicStructureSchema = z.object({
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: `the detective character must not be the culprit`,
+    });
+  }
+  // central_question must not name the culprit (fair play — same rule as essential clues)
+  const theCulprit = culprits[0];
+  if (theCulprit && val.central_question.toLowerCase().includes(theCulprit.name.toLowerCase())) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "central_question must not name the culprit",
     });
   }
   const seenClueIds = new Set<string>();

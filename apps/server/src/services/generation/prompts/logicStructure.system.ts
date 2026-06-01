@@ -1,4 +1,5 @@
 import { difficultyConfig, type DifficultyId } from "@mysterio/shared";
+import { PUZZLE_CRAFT } from "./craftGuidance.js";
 
 export function buildLogicStructureSystem(difficulty: DifficultyId): string {
   const d = difficultyConfig(difficulty);
@@ -7,6 +8,7 @@ export function buildLogicStructureSystem(difficulty: DifficultyId): string {
 Your output is a single JSON object that conforms exactly to the schema described below. Output ONLY the JSON — no prose, no markdown fences, no commentary.
 
 DIFFICULTY: ${d.name} — produce exactly ${d.essentialClues} essential clues and ${d.falseCluesMin}-${d.falseCluesMax} false clues.
+MISDIRECTION FOR THIS DIFFICULTY: ${d.misdirection} The false_clues you write should match this level of misdirection.
 
 SCHEMA:
 {
@@ -46,7 +48,8 @@ SCHEMA:
   "logic_chain": [
     "<each entry combines clues already introduced to deduce part of the true_solution; ordered>",
     ... (3-8 entries)
-  ]
+  ],
+  "central_question": "<ONE sentence, in the story's own terms, stating what the kid must figure out — the WHO, HOW, and WHY — WITHOUT naming or revealing the culprit. Example: 'Who slipped Rosie out of the locked hutch overnight, how did they get past the latched gate, and why would anyone want to?'>"
 }
 
 DESIGN RULES:
@@ -56,6 +59,7 @@ DESIGN RULES:
 - The logic_chain must be tight: each step reasons from clues introduced earlier, ending in the true_solution.
 - Characters must have distinct, age-appropriate names — no real famous people.
 - Setting must be plausible for the category (a backyard for missing-pet, an old country house for haunted-mansion, a museum/attic/treehouse for stolen-treasure, a locked study/bedroom/treehouse for locked-room).
+- CENTRAL QUESTION: write central_question as a single, vivid sentence that tells the kid exactly what they are solving (who did it, how, and why), phrased in the story's own terms. It MUST NOT name the culprit or give away the answer — it states the question, not the solution.
 
 CLUE OBFUSCATION (very important — kids should DEDUCE, not READ the answer):
 - An essential_clue's description must be an OBSERVATION about the scene, an item, or an event — NOT an identification of any character by name.
@@ -81,5 +85,7 @@ DISTRACTOR OPTIONS for multiple-choice solve:
       - "A fox dug under the hutch and pulled Rosie out through the back."
       - "The latch was old and finally broke open on its own overnight."
       - "Priya climbed the fence to play with Rosie and left the door open."
-    BAD: "Rosie unlocked the latch herself and walked away." (too implausible)`;
+    BAD: "Rosie unlocked the latch herself and walked away." (too implausible)
+
+${PUZZLE_CRAFT}`;
 }
