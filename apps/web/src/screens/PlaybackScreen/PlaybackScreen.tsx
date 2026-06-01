@@ -11,6 +11,7 @@ import { AnnotatedNarrative } from "./AnnotatedNarrative/AnnotatedNarrative.js";
 import { BriefingCard } from "./BriefingCard/BriefingCard.js";
 import { ClueTracker } from "./ClueTracker/ClueTracker.js";
 import { DebugPanel } from "./DebugPanel/DebugPanel.js";
+import { SceneFrame, SCENE_FOR_CATEGORY } from "../../components/casebook/index.js";
 import { FailedMystery } from "./FailedMystery.js";
 import { LoadingMystery } from "./LoadingMystery.js";
 
@@ -73,10 +74,17 @@ export function PlaybackScreen() {
     <>
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "var(--pad-lg)", paddingBottom: 80 }}>
         <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <Link to="/" style={{ color: "var(--text-dim)", textDecoration: "none" }}>← Back</Link>
+          <Link to="/" style={{ color: "var(--text-dim)", textDecoration: "none", fontFamily: "var(--mono)" }}>‹ Back</Link>
           <Link to={`/mysteries/${mysteryId}/solve`}><Button>I think I know!</Button></Link>
         </header>
-        <h1 style={{ fontSize: 28, marginBottom: 8 }}>{data.title}</h1>
+        <SceneFrame
+          imageUrl={undefined}
+          scene={SCENE_FOR_CATEGORY[data.category] ?? "generic"}
+          height={190}
+          kicker="The Case Of"
+          style={{ marginBottom: 16 }}
+        />
+        <h1 style={{ fontSize: 30, marginBottom: 8 }}>{data.title}</h1>
         {data.central_question && (
           <p style={{ fontSize: 15, color: "var(--text)", marginBottom: 8 }}>
             <b>Your case:</b> {data.central_question}
@@ -136,7 +144,7 @@ function AudioSection({ mysteryId, audioUrl }: { mysteryId: string; audioUrl: st
   }
   return (
     <div style={{ marginBottom: 16 }}>
-      <Button variant="secondary" disabled={gen.isPending} onClick={() => gen.mutate()}>
+      <Button variant="cream" disabled={gen.isPending} onClick={() => gen.mutate()}>
         {gen.isPending ? "Generating audio…" : "🔊 Generate audio"}
       </Button>
       {gen.isError && (
