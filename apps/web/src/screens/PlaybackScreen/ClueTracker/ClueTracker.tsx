@@ -76,6 +76,7 @@ export function ClueTracker({
           background: "var(--surface)",
           border: "none",
           borderTop: "2px solid var(--accent)",
+          boxShadow: "0 -6px 16px -8px rgba(40,28,12,0.4)",
           color: "var(--text)",
           fontSize: 15,
           fontWeight: 600,
@@ -88,7 +89,7 @@ export function ClueTracker({
         aria-label="Open clue tracker"
       >
         <span>
-          📝 Clue Tracker{" "}
+          🗒️ Clue Notebook{" "}
           <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: 13 }}>
             — {allClues.length} {allClues.length === 1 ? "clue" : "clues"}
           </span>
@@ -112,18 +113,20 @@ export function ClueTracker({
           left: 0,
           right: 0,
           background: "var(--surface)",
+          border: "1px solid var(--line)",
           borderRadius: "16px 16px 0 0",
           padding: 16,
           maxHeight: "60vh",
           display: "flex",
           flexDirection: "column",
           zIndex: 11,
+          boxShadow: "0 -20px 40px -20px rgba(0,0,0,0.5)",
         }}
         role="dialog"
         aria-label="Clue tracker"
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <h3 style={{ margin: 0 }}>Clue Tracker</h3>
+          <h3 style={{ margin: 0 }}>Clue Notebook</h3>
           <button
             onClick={closeDrawer}
             style={{ background: "transparent", border: "none", color: "var(--text-dim)", fontSize: 24, cursor: "pointer", padding: 4 }}
@@ -154,7 +157,7 @@ export function ClueTracker({
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Write a clue..."
-            style={{ flex: 1, padding: 10, borderRadius: 6, border: "1px solid var(--surface-2)", background: "var(--bg)", color: "var(--text)", fontSize: 16 }}
+            style={{ flex: 1, padding: 10, borderRadius: 6, border: "1px solid var(--line)", background: "var(--surface-2)", color: "var(--text)", fontSize: 16, fontFamily: "var(--hand)" }}
             onKeyDown={(e) => { if (e.key === "Enter" && draft.trim() && !createM.isPending) createM.mutate(); }}
           />
           <Button disabled={!draft.trim() || createM.isPending} onClick={() => createM.mutate()}>Add</Button>
