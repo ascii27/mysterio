@@ -1,11 +1,11 @@
 import { type ReactNode } from "react";
 import type { NarrativeAnnotation } from "@mysterio/shared";
 
-const PERSON_COLOR = "var(--teal)";
-const PERSON_BG = "rgba(47,125,107,0.16)";
+const PERSON_COLOR = "var(--ink)";
+const PERSON_BG = "rgba(47,125,107,0.22)";
 
-const CLUE_COLOR = "var(--accent)";
-const CLUE_BG = "rgba(192,137,43,0.18)";
+const CLUE_COLOR = "var(--ink)";
+const CLUE_BG = "rgba(192,137,43,0.30)";
 
 export function AnnotatedNarrative({
   text,

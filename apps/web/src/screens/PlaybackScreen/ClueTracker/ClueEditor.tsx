@@ -30,7 +30,6 @@ export function ClueEditor({
     borderRadius: 8,
     border: focused ? "2px solid var(--accent)" : "2px solid transparent",
     transition: "border-color 120ms ease",
-    fontFamily: "var(--hand)",
     fontSize: 16,
   };
 
@@ -62,7 +61,7 @@ export function ClueEditor({
           style={{ fontSize: 11, color: "var(--accent)", flexShrink: 0 }}
         >✨</span>
       )}
-      <span style={{ flex: 1 }}>{clue.content}</span>
+      <span style={{ flex: 1, fontFamily: "var(--hand)" }}>{clue.content}</span>
       <button
         onClick={() => setEditing(true)}
         style={{ padding: "4px 8px", border: "none", borderRadius: 6, background: "transparent", color: "var(--text-dim)", fontSize: 13, cursor: "pointer" }}

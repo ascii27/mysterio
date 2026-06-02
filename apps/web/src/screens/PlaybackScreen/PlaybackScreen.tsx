@@ -5,13 +5,13 @@ import type { NarrativeAnnotation } from "@mysterio/shared";
 import { createClue } from "../../api/clues.js";
 import { generateAudio } from "../../api/mysteries.js";
 import { Button } from "../../components/Button.js";
+import { SceneFrame, SCENE_FOR_CATEGORY } from "../../components/casebook/index.js";
 import { useGenerationJob } from "../../hooks/useGenerationJob.js";
 import { useSettingsStore } from "../../state/settingsStore.js";
 import { AnnotatedNarrative } from "./AnnotatedNarrative/AnnotatedNarrative.js";
 import { BriefingCard } from "./BriefingCard/BriefingCard.js";
 import { ClueTracker } from "./ClueTracker/ClueTracker.js";
 import { DebugPanel } from "./DebugPanel/DebugPanel.js";
-import { SceneFrame, SCENE_FOR_CATEGORY } from "../../components/casebook/index.js";
 import { FailedMystery } from "./FailedMystery.js";
 import { LoadingMystery } from "./LoadingMystery.js";
 
