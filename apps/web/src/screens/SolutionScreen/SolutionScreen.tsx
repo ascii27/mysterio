@@ -33,8 +33,9 @@ export function SolutionScreen() {
   return (
     <div style={{ maxWidth: 720, margin: "0 auto", padding: "var(--pad-lg)", display: "grid", gap: 16 }}>
       <header>
-        <Link to={`/mysteries/${mysteryId}`} style={{ color: "var(--text-dim)", textDecoration: "none" }}>← Back to story</Link>
-        <h1 style={{ marginBottom: 4 }}>{mysteryQ.data.title}</h1>
+        <Link to={`/mysteries/${mysteryId}`} style={{ color: "var(--text-dim)", textDecoration: "none", fontFamily: "var(--mono)" }}>‹ Back to story</Link>
+        <h1 style={{ marginBottom: 4 }}>Crack the case</h1>
+        <p style={{ color: "var(--text-dim)", fontSize: 14, margin: 0 }}>{mysteryQ.data.title}</p>
       </header>
 
       {!showReveal && <ClueSummary mysteryId={mysteryId} />}
