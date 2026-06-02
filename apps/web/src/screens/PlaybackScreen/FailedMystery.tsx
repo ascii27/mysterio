@@ -14,9 +14,11 @@ export function FailedMystery({ reason }: { reason: string | null }) {
   return (
     <div style={{ minHeight: "100dvh", display: "grid", placeItems: "center", padding: 24 }}>
       <div style={{ textAlign: "center", maxWidth: 420 }}>
-        <div style={{ fontSize: 56 }}>🌀</div>
-        <p style={{ marginTop: 16, marginBottom: 24 }}>{msg}</p>
-        <Link to="/"><Button size="lg">Back to mysteries</Button></Link>
+        <div style={{ fontSize: 56 }}>🗂️</div>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: 20, margin: "16px 0 24px", boxShadow: "0 2px 0 rgba(0,0,0,0.15)" }}>
+          {msg}
+        </div>
+        <Link to="/"><Button size="lg">Back to the casebook</Button></Link>
       </div>
     </div>
   );
