@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getMysteryDebug, type MysteryDebug } from "../../../api/mysteries.js";
 
 const box: CSSProperties = {
-  background: "var(--surface)",
-  border: "1px dashed var(--text-dim)",
+  background: "rgba(178,57,47,0.05)",
+  border: "2px dashed var(--bad)",
   borderRadius: "var(--radius)",
   padding: 12,
   marginTop: 16,
