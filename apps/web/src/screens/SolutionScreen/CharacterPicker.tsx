@@ -22,16 +22,22 @@ export function CharacterPicker({
             onClick={() => onSelect(c.id)}
             style={{
               padding: 12,
-              background: active ? "var(--accent)" : "var(--surface-2)",
-              color: active ? "#1a1530" : "var(--text)",
-              border: active ? "2px solid var(--accent)" : "2px solid transparent",
+              background: active ? "rgba(192,137,43,0.16)" : "var(--surface)",
+              color: "var(--text)",
+              border: active ? "2px solid var(--accent)" : "2px solid var(--line)",
               borderRadius: "var(--radius)",
               textAlign: "center",
               cursor: "pointer",
             }}
           >
-            <div style={{ fontSize: 32 }}>🤔</div>
-            <div style={{ fontWeight: 700 }}>{c.name}</div>
+            <div style={{
+              width: 54, height: 54, margin: "0 auto 6px", borderRadius: 8,
+              background: "radial-gradient(120% 120% at 30% 25%, var(--accent), #7a3b1a)",
+              display: "grid", placeItems: "center", color: "#fff",
+              fontFamily: "var(--display)", fontWeight: 700, fontSize: 22, border: "3px solid #fbf4e3",
+              boxShadow: active ? "0 0 0 3px var(--accent)" : "none",
+            }}>{(c.name[0] ?? "?").toUpperCase()}</div>
+            <div style={{ fontWeight: 700, fontFamily: "var(--display)" }}>{c.name}</div>
           </button>
         );
       })}
