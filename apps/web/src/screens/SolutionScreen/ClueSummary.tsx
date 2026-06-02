@@ -6,7 +6,7 @@ export function ClueSummary({ mysteryId }: { mysteryId: string }) {
   const { data } = useQuery({ queryKey: ["clues", mysteryId], queryFn: () => listClues(mysteryId) });
   const clues = data?.clues ?? [];
   return (
-    <div style={{ background: "var(--surface)", padding: 16, borderRadius: "var(--radius)" }}>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", padding: 16, borderRadius: "var(--radius)" }}>
       <h3 style={{ margin: 0, marginBottom: 8, fontSize: 16 }}>Your clues</h3>
       {clues.length === 0 && (
         <p style={{ color: "var(--text-dim)", margin: 0, fontSize: 13 }}>
