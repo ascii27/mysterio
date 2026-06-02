@@ -23,7 +23,7 @@ export function HintControls({ mysteryId, onGaveUp }: { mysteryId: string; onGav
   const hintList = hintsQ.data?.hints ?? [];
 
   return (
-    <div style={{ background: "var(--surface)", padding: 16, borderRadius: "var(--radius)" }}>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", padding: 16, borderRadius: "var(--radius)" }}>
       <h3 style={{ marginTop: 0, marginBottom: 8, fontSize: 16 }}>Need a hint?</h3>
       {hintList.length > 0 && (
         <ul style={{ margin: "8px 0", paddingLeft: 20 }}>
@@ -32,7 +32,7 @@ export function HintControls({ mysteryId, onGaveUp }: { mysteryId: string; onGav
       )}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
         <Button
-          variant="secondary"
+          variant="cream"
           disabled={remaining === 0 || askHint.isPending}
           onClick={() => askHint.mutate()}
         >
