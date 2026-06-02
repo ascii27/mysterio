@@ -24,7 +24,7 @@ export function RevealPanel({ data }: { data: SolutionResponse }) {
         <h2 style={{ color: b.color, margin: "6px 0 0" }}>{b.label}</h2>
         {solved && (
           <div style={{ marginTop: 12 }}>
-            <Stamp style={{ fontSize: 14, transform: "rotate(-8deg)", animation: "stampin .6s 250ms both" }}>Case Closed</Stamp>
+            <Stamp style={{ fontSize: 14, transform: "none", animation: "stampin .6s 250ms both" }}>Case Closed</Stamp>
           </div>
         )}
       </div>

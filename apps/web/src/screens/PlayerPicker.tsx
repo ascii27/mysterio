@@ -35,9 +35,9 @@ export function PlayerPicker() {
             >
               <div aria-hidden="true" style={{
                 width: 48, height: 48, borderRadius: 10, flex: "0 0 auto", display: "grid", placeItems: "center",
-                background: "radial-gradient(120% 120% at 30% 25%, var(--accent), #7a3b1a)",
+                background: "radial-gradient(120% 120% at 30% 25%, var(--accent), var(--accent-dark))",
                 color: "#fff", fontFamily: "var(--display)", fontWeight: 700, fontSize: 22,
-                border: "3px solid #fbf4e3",
+                border: "3px solid var(--cream)",
               }}>{(p.name[0] ?? "?").toUpperCase()}</div>
               <span style={{ fontFamily: "var(--display)", fontWeight: 700, fontSize: 22 }}>{p.name}</span>
             </button>

@@ -30,11 +30,11 @@ export function CharacterPicker({
               cursor: "pointer",
             }}
           >
-            <div style={{
+            <div aria-hidden="true" style={{
               width: 54, height: 54, margin: "0 auto 6px", borderRadius: 8,
-              background: "radial-gradient(120% 120% at 30% 25%, var(--accent), #7a3b1a)",
+              background: "radial-gradient(120% 120% at 30% 25%, var(--accent), var(--accent-dark))",
               display: "grid", placeItems: "center", color: "#fff",
-              fontFamily: "var(--display)", fontWeight: 700, fontSize: 22, border: "3px solid #fbf4e3",
+              fontFamily: "var(--display)", fontWeight: 700, fontSize: 22, border: "3px solid var(--cream)",
               boxShadow: active ? "0 0 0 3px var(--accent)" : "none",
             }}>{(c.name[0] ?? "?").toUpperCase()}</div>
             <div style={{ fontWeight: 700, fontFamily: "var(--display)" }}>{c.name}</div>
