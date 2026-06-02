@@ -14,9 +14,9 @@ export function LoadingMystery({ status }: { status: MysteryStatus }) {
   return (
     <div style={{ minHeight: "100dvh", display: "grid", placeItems: "center", padding: 24 }}>
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: 64, animation: "spin 2.5s linear infinite", display: "inline-block" }}>🔎</div>
-        <p style={{ fontSize: 20, marginTop: 16 }}>{COPY[status]}</p>
-        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+        <div style={{ fontSize: 64, animation: "floaty 2.5s ease-in-out infinite", display: "inline-block" }}>🔎</div>
+        <h2 style={{ fontSize: 24, marginTop: 16 }}>The detective is on the case</h2>
+        <p style={{ fontSize: 17, marginTop: 8, color: "var(--text-dim)" }}>{COPY[status]}</p>
       </div>
     </div>
   );
