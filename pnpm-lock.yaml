@@ -63,6 +63,15 @@ importers:
 
   apps/web:
     dependencies:
+      '@fontsource/courier-prime':
+        specifier: ^5.2.8
+        version: 5.2.8
+      '@fontsource/patrick-hand':
+        specifier: ^5.2.8
+        version: 5.2.8
+      '@fontsource/zilla-slab':
+        specifier: ^5.2.8
+        version: 5.2.8
       '@mysterio/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -810,6 +819,15 @@ packages:
 
   '@fastify/static@8.3.0':
     resolution: {integrity: sha512-yKxviR5PH1OKNnisIzZKmgZSus0r2OZb8qCSbqmw34aolT4g3UlzYfeBRym+HJ1J471CR8e2ldNub4PubD1coA==}
+
+  '@fontsource/courier-prime@5.2.8':
+    resolution: {integrity: sha512-M3xOCcXnGuFi9TcGCrz4hm5yeWg4Sn35MALRLPnqNoHhawTFvhyi2KSI2+5RyFtDNJrb58bPh8LLipgiI9KA0w==}
+
+  '@fontsource/patrick-hand@5.2.8':
+    resolution: {integrity: sha512-FZx34VLuiF+Pjv/A/m1bTxjR6hAvmL6vdCp62uypVdgFvSrPrBOxX+vCXVy8lfNVFqvKfm/ghun+aaYVYqfBEg==}
+
+  '@fontsource/zilla-slab@5.2.8':
+    resolution: {integrity: sha512-S4wZ1IpJNMFd+FEcS6lwci3Ine/JivSRaMb0SzhE43b/gOmDKnylNfXjIxc7GmAiqAJlz0jOauxiuy085DQdNw==}
 
   '@isaacs/cliui@9.0.0':
     resolution: {integrity: sha512-AokJm4tuBHillT+FpMtxQ60n8ObyXBatq7jD2/JA9dxbDDokKQm8KMht5ibGzLVU9IJDIKK4TPKgMHEYMn3lMg==}
@@ -2339,6 +2357,12 @@ snapshots:
       fastify-plugin: 5.1.0
       fastq: 1.20.1
       glob: 11.1.0
+
+  '@fontsource/courier-prime@5.2.8': {}
+
+  '@fontsource/patrick-hand@5.2.8': {}
+
+  '@fontsource/zilla-slab@5.2.8': {}
 
   '@isaacs/cliui@9.0.0': {}
 

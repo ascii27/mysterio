@@ -1,11 +1,11 @@
 import { type ReactNode } from "react";
 import type { NarrativeAnnotation } from "@mysterio/shared";
 
-const PERSON_COLOR = "var(--bad)";
-const PERSON_BG = "rgba(231,115,115,0.18)";
+const PERSON_COLOR = "var(--ink)";
+const PERSON_BG = "rgba(47,125,107,0.22)";
 
-const CLUE_COLOR = "#f5c84c";
-const CLUE_BG = "rgba(245,200,76,0.20)";
+const CLUE_COLOR = "var(--ink)";
+const CLUE_BG = "rgba(192,137,43,0.30)";
 
 export function AnnotatedNarrative({
   text,
@@ -42,7 +42,11 @@ export function AnnotatedNarrative({
   }
 
   return (
-    <div style={{ background: "var(--surface)", padding: 16, borderRadius: "var(--radius)", whiteSpace: "pre-wrap", lineHeight: 1.7, fontSize: 16 }}>
+    <div style={{
+      background: "var(--surface)", border: "1px solid var(--line)", padding: "16px 18px",
+      borderRadius: "var(--radius)", whiteSpace: "pre-wrap", lineHeight: 1.7, fontSize: 16.5,
+      color: "var(--ink)", boxShadow: "0 2px 0 rgba(0,0,0,0.12)",
+    }}>
       {pieces}
     </div>
   );

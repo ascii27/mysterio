@@ -38,6 +38,7 @@ export function GuessForm({
       </section>
       <Button
         size="lg"
+        variant="rose"
         disabled={!canSubmit}
         onClick={() => canSubmit && onSubmit({ guess_who: who!, guess_how: how!, guess_why: why! })}
       >
@@ -69,13 +70,13 @@ function OptionPicker({
             onClick={() => onChange(opt)}
             aria-pressed={active}
             style={{
-              padding: 12,
-              background: active ? "var(--accent)" : "var(--surface-2)",
-              color: active ? "#1a1530" : "var(--text)",
-              border: active ? "2px solid var(--accent)" : "2px solid transparent",
+              padding: 14,
+              background: active ? "rgba(192,137,43,0.16)" : "var(--surface)",
+              color: "var(--text)",
+              border: active ? "2px solid var(--accent)" : "2px solid var(--line)",
               borderRadius: "var(--radius)",
               textAlign: "left",
-              fontSize: 14,
+              fontSize: 15,
               lineHeight: 1.5,
               cursor: "pointer",
             }}

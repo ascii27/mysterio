@@ -1,4 +1,5 @@
 import { CATEGORIES, type CategoryId } from "@mysterio/shared";
+import { SceneArt, SCENE_FOR_CATEGORY } from "../../components/casebook/index.js";
 
 const ICONS: Record<CategoryId, string> = {
   "missing-pet": "🐾",
@@ -23,19 +24,18 @@ export function CategoryGrid({
             key={c.id}
             onClick={() => onSelect(c.id)}
             style={{
-              background: active ? "var(--accent)" : "var(--surface)",
-              color: active ? "#1a1530" : "var(--text)",
+              textAlign: "left", padding: 0, overflow: "hidden", cursor: "pointer",
+              background: "var(--surface)", borderRadius: "var(--radius)",
               border: active ? "2px solid var(--accent)" : "2px solid transparent",
-              borderRadius: "var(--radius)",
-              padding: 16,
-              textAlign: "left",
-              cursor: "pointer",
-              minHeight: 120,
+              transform: active ? "translateY(-2px)" : "none", transition: "transform .12s",
+              boxShadow: active ? "0 12px 24px -12px rgba(192,137,43,0.6)" : "0 2px 0 rgba(0,0,0,0.2)",
             }}
           >
-            <div style={{ fontSize: 36, marginBottom: 4 }}>{ICONS[c.id]}</div>
-            <div style={{ fontSize: 18, fontWeight: 700 }}>{c.name}</div>
-            <div style={{ fontSize: 13, opacity: 0.85, marginTop: 4 }}>{c.blurb}</div>
+            <SceneArt scene={SCENE_FOR_CATEGORY[c.id] ?? "generic"} height={84} radius={0} />
+            <div style={{ padding: 12 }}>
+              <div style={{ fontSize: 17, fontWeight: 800, fontFamily: "var(--display)" }}>{ICONS[c.id]} {c.name}</div>
+              <div style={{ fontSize: 12.5, color: "var(--text-dim)", marginTop: 3, lineHeight: 1.35 }}>{c.blurb}</div>
+            </div>
           </button>
         );
       })}

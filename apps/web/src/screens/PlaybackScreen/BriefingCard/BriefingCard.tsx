@@ -1,12 +1,6 @@
 import type { PublicCharacter, MysteryDetail } from "../../../api/mysteries.js";
 import { Button } from "../../../components/Button.js";
-
-const CATEGORY_EMOJI: Record<string, string> = {
-  "missing-pet": "🐾",
-  "haunted-mansion": "👻",
-  "stolen-treasure": "💎",
-  "locked-room": "🔒",
-};
+import { SceneFrame, SCENE_FOR_CATEGORY } from "../../../components/casebook/index.js";
 
 const DETECTIVE_BADGE = { emoji: "🕵️", label: "You", color: "var(--accent)" };
 const PERSON_BADGE = { emoji: "🤔", color: "var(--bad)" };
@@ -24,32 +18,26 @@ export function BriefingCard({
     .filter((c) => c.role !== "detective")
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name));
-  const icon = CATEGORY_EMOJI[mystery.category] ?? "🔎";
-
   return (
     <div style={{ maxWidth: 480, margin: "0 auto", padding: "var(--pad-lg)" }}>
       <div
         style={{
           background: "var(--surface)",
-          borderRadius: 16,
-          padding: 24,
-          border: "2px solid var(--accent)",
+          borderRadius: "var(--radius-lg)",
+          padding: 20,
+          border: "1px solid var(--line)",
+          boxShadow: "0 2px 0 rgba(0,0,0,0.2)",
           textAlign: "center",
         }}
       >
-        <div style={{ fontSize: 48 }}>{icon}</div>
-        <div
-          style={{
-            fontSize: 12,
-            color: "var(--text-dim)",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            marginTop: 8,
-          }}
-        >
-          Today's case
-        </div>
-        <div style={{ fontSize: 20, fontWeight: 700, marginTop: 4 }}>
+        <SceneFrame
+          imageUrl={undefined}
+          scene={SCENE_FOR_CATEGORY[mystery.category] ?? "generic"}
+          height={150}
+          kicker="Today's Case"
+          style={{ marginBottom: 14 }}
+        />
+        <div style={{ fontSize: 22, fontWeight: 800, marginTop: 4, fontFamily: "var(--display)" }}>
           {mystery.title ?? "Untitled Mystery"}
         </div>
         <div style={{ fontSize: 14, color: "var(--text)", margin: "16px 0", lineHeight: 1.5 }}>
@@ -106,9 +94,9 @@ function CastRow({
   return (
     <div
       style={{
-        background: "var(--bg)",
+        background: "var(--surface-2)",
         padding: "8px 10px",
-        borderRadius: 6,
+        borderRadius: 8,
         fontSize: 13,
         color: "var(--text)",
         display: "flex",

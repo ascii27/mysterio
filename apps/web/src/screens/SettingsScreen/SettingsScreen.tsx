@@ -10,8 +10,11 @@ export function SettingsScreen() {
   return (
     <div style={{ maxWidth: 720, margin: "0 auto", padding: "var(--pad-lg)" }}>
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-        <h1 style={{ margin: 0, fontSize: 28 }}>Settings</h1>
-        <Link to="/" style={{ color: "var(--text-dim)", textDecoration: "none" }}>← Back</Link>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 26 }}>🔧 Grown-up Settings</h1>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-dim)" }}>ADMIN PANEL</div>
+        </div>
+        <Link to="/" style={{ color: "var(--text-dim)", textDecoration: "none", fontFamily: "var(--mono)" }}>‹ Back</Link>
       </header>
 
       <div style={{ display: "grid", gap: 16 }}>
@@ -24,6 +27,8 @@ export function SettingsScreen() {
             justifyContent: "space-between",
             alignItems: "center",
             gap: 16,
+            border: "1px solid var(--line)",
+            boxShadow: "0 1px 4px -2px rgba(40,28,12,0.3)",
           }}
         >
           <div>
@@ -52,6 +57,8 @@ export function SettingsScreen() {
             justifyContent: "space-between",
             alignItems: "center",
             gap: 16,
+            border: "1px solid var(--line)",
+            boxShadow: "0 1px 4px -2px rgba(40,28,12,0.3)",
           }}
         >
           <div>

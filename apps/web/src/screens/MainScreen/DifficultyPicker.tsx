@@ -17,13 +17,14 @@ export function DifficultyPicker({
             onClick={() => onSelect(d.id)}
             style={{
               background: active ? "var(--accent-2)" : "var(--surface)",
-              color: "var(--text)",
-              border: active ? "2px solid var(--accent-2)" : "2px solid transparent",
+              color: active ? "#fff5f0" : "var(--text)",
+              border: active ? "2px solid var(--accent-2)" : "2px solid var(--line)",
               borderRadius: "var(--radius)",
-              padding: 12,
+              padding: "14px 8px",
               cursor: "pointer",
               fontWeight: 700,
-              fontSize: 16,
+              fontSize: 17,
+              fontFamily: "var(--display)",
             }}
           >
             {d.name}

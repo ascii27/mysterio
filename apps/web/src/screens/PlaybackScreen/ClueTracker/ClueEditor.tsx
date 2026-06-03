@@ -30,6 +30,7 @@ export function ClueEditor({
     borderRadius: 8,
     border: focused ? "2px solid var(--accent)" : "2px solid transparent",
     transition: "border-color 120ms ease",
+    fontSize: 16,
   };
 
   if (editing) {
@@ -39,11 +40,11 @@ export function ClueEditor({
           autoFocus
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          style={{ flex: 1, padding: 6, borderRadius: 6, border: "1px solid var(--surface)", background: "var(--bg)", color: "var(--text)", fontSize: 16 }}
+          style={{ flex: 1, padding: 6, borderRadius: 6, border: "1px solid var(--line)", background: "var(--surface)", color: "var(--text)", fontSize: 16, fontFamily: "var(--hand)" }}
         />
         <button
           onClick={() => { onSave(draft); setEditing(false); }}
-          style={{ padding: "4px 8px", border: "none", borderRadius: 6, background: "var(--accent)", color: "#1a1530", fontWeight: 600, cursor: "pointer" }}
+          style={{ padding: "4px 8px", border: "none", borderRadius: 6, background: "var(--accent)", color: "#33240c", fontWeight: 600, cursor: "pointer" }}
         >Save</button>
         <button
           onClick={() => { setDraft(clue.content); setEditing(false); }}
@@ -60,7 +61,7 @@ export function ClueEditor({
           style={{ fontSize: 11, color: "var(--accent)", flexShrink: 0 }}
         >✨</span>
       )}
-      <span style={{ flex: 1 }}>{clue.content}</span>
+      <span style={{ flex: 1, fontFamily: "var(--hand)" }}>{clue.content}</span>
       <button
         onClick={() => setEditing(true)}
         style={{ padding: "4px 8px", border: "none", borderRadius: 6, background: "transparent", color: "var(--text-dim)", fontSize: 13, cursor: "pointer" }}
