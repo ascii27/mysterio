@@ -6,6 +6,7 @@ import { mysteries } from "../../db/schema.js";
 import { logger } from "../../utils/logger.js";
 import { runLogicStructureAgent } from "./agents/logicStructureAgent.js";
 import { runValidationAgent } from "./agents/validationAgent.js";
+import { runCoverImageAgent } from "./agents/coverImageAgent.js";
 import { compareSolutions } from "./compareSolutions.js";
 import { redact } from "./redact.js";
 import { writeAndVerifyProse } from "./readthrough.js";
@@ -15,6 +16,8 @@ interface RunInput {
   category: CategoryId;
   difficulty: DifficultyId;
   playerName: string;
+  /** When false, skips cover-image generation. Defaults to true (image generated). Spec-4 parent-toggle hook. */
+  generateImage?: boolean;
 }
 
 export async function runGeneration(input: RunInput): Promise<void> {
@@ -77,14 +80,33 @@ export async function runGeneration(input: RunInput): Promise<void> {
         maxReadthroughAttempts: env.MAX_READTHROUGH_ATTEMPTS,
       });
       if (prose.ok) {
+        // Best-effort cover image — never blocks `ready`. A failure (rate limit,
+        // moderation refusal, disk) leaves cover_image_path null and the frontend
+        // falls back to SceneArt.
+        let coverImagePath: string | null = null;
+        if (input.generateImage !== false) {
+          const cover = await runCoverImageAgent({
+            mysteryId: input.mysteryId,
+            category: input.category,
+            title: prose.value.title,
+            centralQuestion: logic.central_question,
+            setting: logic.setting,
+          });
+          if (cover.ok) {
+            coverImagePath = cover.coverImagePath;
+          } else {
+            log("cover_image_skipped", { reason: cover.error });
+          }
+        }
         db.update(mysteries).set({
           status: "ready",
           title: prose.value.title,
           narrative_text: prose.value.narrative_text,
           narrative_annotations: JSON.stringify(prose.value.annotations),
+          cover_image_path: coverImagePath,
           ready_at: Math.floor(Date.now() / 1000),
         }).where(eq(mysteries.id, input.mysteryId)).run();
-        log("generation_complete", { attempt });
+        log("generation_complete", { attempt, cover: coverImagePath !== null });
         return;
       }
 
