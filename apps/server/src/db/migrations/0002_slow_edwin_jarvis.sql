@@ -1,0 +1,1 @@
+ALTER TABLE `mysteries` ADD `cover_image_path` text;

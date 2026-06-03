@@ -31,7 +31,7 @@ export function BriefingCard({
         }}
       >
         <SceneFrame
-          imageUrl={undefined}
+          imageUrl={mystery.cover_image_url}
           scene={SCENE_FOR_CATEGORY[mystery.category] ?? "generic"}
           height={150}
           kicker="Today's Case"
