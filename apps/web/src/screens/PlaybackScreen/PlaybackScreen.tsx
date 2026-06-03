@@ -78,7 +78,7 @@ export function PlaybackScreen() {
           <Link to={`/mysteries/${mysteryId}/solve`}><Button>I think I know!</Button></Link>
         </header>
         <SceneFrame
-          imageUrl={undefined}
+          imageUrl={data.cover_image_url}
           scene={SCENE_FOR_CATEGORY[data.category] ?? "generic"}
           height={190}
           kicker="The Case Of"

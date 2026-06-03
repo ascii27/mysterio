@@ -11,6 +11,7 @@ export interface MysteryDetail {
   narrative_text: string | null;
   narrative_annotations: NarrativeAnnotation[] | null;
   audio_url: string | null;
+  cover_image_url: string | null;
   central_question: string | null;
   characters?: PublicCharacter[];
   created_at: number;
