@@ -1,0 +1,519 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "b8f147ce-ac58-4ff8-8442-055584a37841",
+  "prevId": "157cf485-08dd-46d7-80e8-f61e51e81a05",
+  "tables": {
+    "clues": {
+      "name": "clues",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mystery_id": {
+          "name": "mystery_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "category_type": {
+          "name": "category_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "audio_timestamp_ms": {
+          "name": "audio_timestamp_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'manual'"
+        },
+        "annotation_id": {
+          "name": "annotation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {
+        "idx_clues_mystery": {
+          "name": "idx_clues_mystery",
+          "columns": [
+            "mystery_id"
+          ],
+          "isUnique": false
+        },
+        "clues_mystery_annotation_uniq": {
+          "name": "clues_mystery_annotation_uniq",
+          "columns": [
+            "mystery_id",
+            "annotation_id"
+          ],
+          "isUnique": true,
+          "where": "\"clues\".\"annotation_id\" IS NOT NULL"
+        }
+      },
+      "foreignKeys": {
+        "clues_mystery_id_mysteries_id_fk": {
+          "name": "clues_mystery_id_mysteries_id_fk",
+          "tableFrom": "clues",
+          "tableTo": "mysteries",
+          "columnsFrom": [
+            "mystery_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "clues_category_chk": {
+          "name": "clues_category_chk",
+          "value": "\"clues\".\"category_type\" IN ('character','item','location','event','note')"
+        },
+        "clues_source_chk": {
+          "name": "clues_source_chk",
+          "value": "\"clues\".\"source\" IN ('manual','annotation')"
+        }
+      }
+    },
+    "hints": {
+      "name": "hints",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mystery_id": {
+          "name": "mystery_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "hints_mystery_id_mysteries_id_fk": {
+          "name": "hints_mystery_id_mysteries_id_fk",
+          "tableFrom": "hints",
+          "tableTo": "mysteries",
+          "columnsFrom": [
+            "mystery_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "mysteries": {
+      "name": "mysteries",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "difficulty": {
+          "name": "difficulty",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "logic_structure_json": {
+          "name": "logic_structure_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "narrative_text": {
+          "name": "narrative_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "narrative_annotations": {
+          "name": "narrative_annotations",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "audio_path": {
+          "name": "audio_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cover_image_path": {
+          "name": "cover_image_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "validation_passed": {
+          "name": "validation_passed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "validation_attempts": {
+          "name": "validation_attempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "validation_notes": {
+          "name": "validation_notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "failure_reason": {
+          "name": "failure_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        },
+        "ready_at": {
+          "name": "ready_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_mysteries_player": {
+          "name": "idx_mysteries_player",
+          "columns": [
+            "player_id",
+            "created_at"
+          ],
+          "isUnique": false
+        },
+        "idx_mysteries_active": {
+          "name": "idx_mysteries_active",
+          "columns": [
+            "status"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "mysteries_player_id_players_id_fk": {
+          "name": "mysteries_player_id_players_id_fk",
+          "tableFrom": "mysteries",
+          "tableTo": "players",
+          "columnsFrom": [
+            "player_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "mysteries_difficulty_chk": {
+          "name": "mysteries_difficulty_chk",
+          "value": "\"mysteries\".\"difficulty\" IN ('easy','medium','hard')"
+        },
+        "mysteries_status_chk": {
+          "name": "mysteries_status_chk",
+          "value": "\"mysteries\".\"status\" IN ('pending','generating_logic','validating','writing','synthesizing','ready','failed')"
+        }
+      }
+    },
+    "players": {
+      "name": "players",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "default_difficulty": {
+          "name": "default_difficulty",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "players_difficulty_chk": {
+          "name": "players_difficulty_chk",
+          "value": "\"players\".\"default_difficulty\" IN ('easy','medium','hard')"
+        }
+      }
+    },
+    "solutions": {
+      "name": "solutions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mystery_id": {
+          "name": "mystery_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "guess_who": {
+          "name": "guess_who",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "guess_how": {
+          "name": "guess_how",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "guess_why": {
+          "name": "guess_why",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_correct": {
+          "name": "is_correct",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "who_match": {
+          "name": "who_match",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "how_match": {
+          "name": "how_match",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "why_match": {
+          "name": "why_match",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "hints_used": {
+          "name": "hints_used",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "gave_up": {
+          "name": "gave_up",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "explanation": {
+          "name": "explanation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {
+        "solutions_mystery_uniq": {
+          "name": "solutions_mystery_uniq",
+          "columns": [
+            "mystery_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "solutions_mystery_id_mysteries_id_fk": {
+          "name": "solutions_mystery_id_mysteries_id_fk",
+          "tableFrom": "solutions",
+          "tableTo": "mysteries",
+          "columnsFrom": [
+            "mystery_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

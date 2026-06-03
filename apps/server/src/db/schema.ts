@@ -21,6 +21,7 @@ export const mysteries = sqliteTable("mysteries", {
   narrative_text: text("narrative_text"),
   narrative_annotations: text("narrative_annotations"),
   audio_path: text("audio_path"),
+  cover_image_path: text("cover_image_path"),
   validation_passed: integer("validation_passed"),
   validation_attempts: integer("validation_attempts").notNull().default(0),
   validation_notes: text("validation_notes"),

@@ -89,6 +89,7 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       narrative_text: row.status === "ready" ? row.narrative_text : null,
       narrative_annotations,
       audio_url: row.audio_path ? `/audio/${row.audio_path}` : null,
+      cover_image_url: row.cover_image_path ? `/images/${row.cover_image_path}` : null,
       characters,
       central_question,
       created_at: row.created_at,

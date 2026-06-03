@@ -7,13 +7,24 @@ import { loadEnv } from "../config/env.js";
 export async function staticRoutes(app: FastifyInstance): Promise<void> {
   const env = loadEnv();
   const audioDir = resolve(env.AUDIO_DIR);
+  const imageDir = resolve(env.IMAGE_DIR);
   const webDir = resolve("../web/dist");
   mkdirSync(audioDir, { recursive: true });
+  mkdirSync(imageDir, { recursive: true });
   mkdirSync(webDir, { recursive: true });
 
   await app.register(fastifyStatic, {
     root: audioDir,
     prefix: "/audio/",
+    cacheControl: true,
+    maxAge: "365d",
+    immutable: true,
+  });
+
+  await app.register(fastifyStatic, {
+    root: imageDir,
+    prefix: "/images/",
+    decorateReply: false,
     cacheControl: true,
     maxAge: "365d",
     immutable: true,
@@ -27,7 +38,7 @@ export async function staticRoutes(app: FastifyInstance): Promise<void> {
   });
 
   app.setNotFoundHandler(async (req, reply) => {
-    if (req.url.startsWith("/api/") || req.url.startsWith("/audio/")) {
+    if (req.url.startsWith("/api/") || req.url.startsWith("/audio/") || req.url.startsWith("/images/")) {
       reply.status(404);
       return { error: "not_found" };
     }
