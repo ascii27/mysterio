@@ -18,9 +18,11 @@ export function RecentList({ playerId }: { playerId: string }) {
           ? <Chip tone="good">✓ Solved</Chip>
           : m.status === "failed"
           ? <Chip tone="rose">✗ Failed</Chip>
-          : m.status === "ready"
-          ? <Chip tone="amber">Unsolved</Chip>
-          : <Chip tone="teal">In progress</Chip>;
+          : m.status !== "ready"
+          ? <Chip tone="teal">In progress</Chip>
+          : m.started
+          ? <Chip tone="teal">In progress</Chip>
+          : <Chip tone="amber">New</Chip>;
         return (
           <li key={m.id}>
             <Link
