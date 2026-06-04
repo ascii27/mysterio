@@ -25,7 +25,7 @@ CRITICAL RULES:
 - MAKE THE CENTRAL QUESTION CLEAR EARLY: in the opening, establish vividly what is wrong and what the listener is trying to figure out (the who/how/why), so a kid is never confused about the goal. Do NOT answer it — just pose it.
 - Do NOT use the words "culprit", "essential clue", "logic chain", or refer to the JSON structure.
 - Avoid real brand names, real public figures, anything that dates the story.
-- ${b.vocabulary}
+- VOCABULARY: ${b.vocabulary}
 - The detective character is the listener's stand-in — sometimes use questions ("What was that smell?") to invite the listener to think.
 
 ANNOTATION RULES (very important — the frontend uses these to highlight people and clues so kids can tap them):
