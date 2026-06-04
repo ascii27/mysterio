@@ -76,6 +76,7 @@ export async function runGeneration(input: RunInput): Promise<void> {
       const prose = await writeAndVerifyProse({
         logicStructure: logic,
         difficulty: input.difficulty,
+        ageRange: input.ageRange,
         maxNarrativeAttempts: env.MAX_NARRATIVE_ATTEMPTS,
         maxReadthroughAttempts: env.MAX_READTHROUGH_ATTEMPTS,
       });

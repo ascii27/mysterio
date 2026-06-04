@@ -118,7 +118,7 @@ describe("writeAndVerifyProse", () => {
   it("returns ok on the first draft when the gate passes", async () => {
     let calls = 0;
     const r = await writeAndVerifyProse(
-      { logicStructure: logic, difficulty: "easy", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
+      { logicStructure: logic, difficulty: "easy", ageRange: "10-11", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
       {
         narrative: async () => { calls++; return narrativeOk; },
         gate: async () => ({ passed: true, notes: "ok" }),
@@ -132,7 +132,7 @@ describe("writeAndVerifyProse", () => {
     let calls = 0;
     let secondCallNotes: string | undefined;
     const r = await writeAndVerifyProse(
-      { logicStructure: logic, difficulty: "easy", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
+      { logicStructure: logic, difficulty: "easy", ageRange: "10-11", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
       {
         narrative: async (extraNotes) => { calls++; if (calls === 2) secondCallNotes = extraNotes; return narrativeOk; },
         gate: async () => (calls < 2 ? { passed: false, notes: "the latch is missing" } : { passed: true, notes: "ok" }),
@@ -145,7 +145,7 @@ describe("writeAndVerifyProse", () => {
 
   it("escalates after readthrough attempts are exhausted", async () => {
     const r = await writeAndVerifyProse(
-      { logicStructure: logic, difficulty: "easy", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
+      { logicStructure: logic, difficulty: "easy", ageRange: "10-11", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
       {
         narrative: async () => narrativeOk,
         gate: async () => ({ passed: false, notes: "still unsolvable" }),

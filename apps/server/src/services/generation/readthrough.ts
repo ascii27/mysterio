@@ -1,4 +1,4 @@
-import type { DifficultyId, LogicStructure, TrueSolution } from "@mysterio/shared";
+import type { AgeRange, DifficultyId, LogicStructure, TrueSolution } from "@mysterio/shared";
 import { logger } from "../../utils/logger.js";
 import { runContinuityAuditAgent } from "./agents/continuityAuditAgent.js";
 import type { ContinuityAuditInput, ContinuityAuditResult } from "./agents/continuityAuditAgent.js";
@@ -79,6 +79,7 @@ export async function runReadthroughGate(
 export interface WriteAndVerifyInput {
   logicStructure: LogicStructure;
   difficulty: DifficultyId;
+  ageRange: AgeRange;
   maxNarrativeAttempts: number;
   maxReadthroughAttempts: number;
 }
@@ -102,6 +103,7 @@ export async function writeAndVerifyProse(
       runNarrativeAgent({
         logicStructure: input.logicStructure,
         difficulty: input.difficulty,
+        ageRange: input.ageRange,
         maxAttempts: input.maxNarrativeAttempts,
         extraNotes,
       }));

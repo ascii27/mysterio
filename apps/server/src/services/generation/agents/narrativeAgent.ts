@@ -1,4 +1,5 @@
 import {
+  type AgeRange,
   type DifficultyId,
   type LogicStructure,
   type NarrativeAnnotation,
@@ -28,6 +29,7 @@ export type NarrativeAgentResult =
 export interface NarrativeAgentInput {
   logicStructure: LogicStructure;
   difficulty: DifficultyId;
+  ageRange: AgeRange;
   maxAttempts: number;
   extraNotes?: string;
 }
@@ -51,7 +53,7 @@ export async function runNarrativeAgent(input: NarrativeAgentInput): Promise<Nar
         label: `narrativeAgent:attempt${attempt}`,
         system: [
           { type: "text", text: SAFETY_PREAMBLE, cache: true },
-          { type: "text", text: buildNarrativeSystem(input.difficulty) },
+          { type: "text", text: buildNarrativeSystem(input.difficulty, input.ageRange) },
         ],
         user: userMsg,
         maxTokens: 4096,
