@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { ageBandConfig } from "@mysterio/shared";
 import { listMysteries } from "../../api/mysteries.js";
 import { Chip } from "../../components/casebook/index.js";
 
@@ -35,7 +36,10 @@ export function RecentList({ playerId }: { playerId: string }) {
               }}
             >
               <span style={{ fontFamily: "var(--display)", fontWeight: 700 }}>{m.title ?? "Untitled"}</span>
-              {chip}
+              <span style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+                {m.target_age_range && <Chip tone="ink">Ages {ageBandConfig(m.target_age_range).label}</Chip>}
+                {chip}
+              </span>
             </Link>
           </li>
         );
