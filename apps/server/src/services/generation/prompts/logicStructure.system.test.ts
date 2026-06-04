@@ -30,7 +30,7 @@ describe("buildLogicStructureSystem", () => {
   });
 
   it("injects the age-band subtlety nudge", () => {
-    expect(buildLogicStructureSystem("easy", "8-9").toLowerCase()).toContain("obvious");
-    expect(buildLogicStructureSystem("easy", "12-13").toLowerCase()).toContain("subtle");
+    expect(buildLogicStructureSystem("easy", "8-9")).toContain("AGE BAND: 8-9 — Lean toward the OBVIOUS end");
+    expect(buildLogicStructureSystem("easy", "12-13")).toContain("AGE BAND: 12-13 — Lean toward SUBTLE");
   });
 });
