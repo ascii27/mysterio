@@ -12,12 +12,7 @@ const createBody = z.object({
   avatar_description: z.string().max(300).optional(),
 });
 
-const patchBody = z.object({
-  name: z.string().trim().min(1).max(24).optional(),
-  age_range: z.enum(["8-9", "10-11", "12-13"]).optional(),
-  default_difficulty: z.enum(["easy", "medium", "hard"]).optional(),
-  avatar_description: z.string().max(300).optional(),
-});
+const patchBody = createBody.partial();
 
 export async function playersRoutes(app: FastifyInstance): Promise<void> {
   app.get("/players", async () => {

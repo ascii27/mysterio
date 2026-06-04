@@ -32,6 +32,17 @@ describe("PATCH /players/:id", () => {
     expect(res.json().player.avatar_description).toBeNull();
   });
 
+  it("no-op empty patch returns the player unchanged", async () => {
+    const res = await app.inject({ method: "PATCH", url: "/players/p1", payload: {} });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().player.name).toBe("Lily");
+  });
+
+  it("updates avatar_description to a new non-empty value", async () => {
+    const res = await app.inject({ method: "PATCH", url: "/players/p1", payload: { avatar_description: "a kid in a blue cape" } });
+    expect(res.json().player.avatar_description).toBe("a kid in a blue cape");
+  });
+
   it("404s on unknown id and 400s on a bad field", async () => {
     expect((await app.inject({ method: "PATCH", url: "/players/nope", payload: { name: "X" } })).statusCode).toBe(404);
     expect((await app.inject({ method: "PATCH", url: "/players/p1", payload: { age_range: "99-100" } })).statusCode).toBe(400);
