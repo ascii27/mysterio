@@ -24,3 +24,12 @@ export function getSqlite(): Database.Database {
   if (!_sqlite) throw new Error("sqlite not initialised");
   return _sqlite;
 }
+
+/** Test-only: inject an already-migrated DB (see src/test/db.ts). */
+export function __setTestDb(
+  db: ReturnType<typeof drizzle<typeof schema>>,
+  sqlite: Database.Database,
+): void {
+  _db = db;
+  _sqlite = sqlite;
+}

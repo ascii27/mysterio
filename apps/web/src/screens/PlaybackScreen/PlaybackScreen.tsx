@@ -7,6 +7,7 @@ import { generateAudio } from "../../api/mysteries.js";
 import { Button } from "../../components/Button.js";
 import { SceneFrame, SCENE_FOR_CATEGORY } from "../../components/casebook/index.js";
 import { useGenerationJob } from "../../hooks/useGenerationJob.js";
+import { usePlayerStore } from "../../state/playerStore.js";
 import { useSettingsStore } from "../../state/settingsStore.js";
 import { AnnotatedNarrative } from "./AnnotatedNarrative/AnnotatedNarrative.js";
 import { BriefingCard } from "./BriefingCard/BriefingCard.js";
@@ -22,6 +23,7 @@ export function PlaybackScreen() {
   const [started, setStarted] = useState(false);
   const [focusedClueId, setFocusedClueId] = useState<string | null>(null);
   const qc = useQueryClient();
+  const playerId = usePlayerStore((s) => s.activePlayerId)!;
   const debugEnabled = useSettingsStore((s) => s.debugEnabled);
   const audioEnabled = useSettingsStore((s) => s.audioEnabled);
 
@@ -41,7 +43,7 @@ export function PlaybackScreen() {
       // Server dedupes by (mystery_id, annotation_id) per the partial unique index
       // from M5b.1 — a re-tap returns 200 with the existing row, not 409. onSuccess
       // fires for both 200 and 201 with the same clue id, focusing the existing row.
-      return createClue(mysteryId, {
+      return createClue(mysteryId, playerId, {
         category_type,
         content,
         source: "annotation",
@@ -50,7 +52,7 @@ export function PlaybackScreen() {
     },
     onSuccess: (res) => {
       setFocusedClueId(res.clue.id);
-      qc.invalidateQueries({ queryKey: ["clues", mysteryId] });
+      qc.invalidateQueries({ queryKey: ["clues", mysteryId, playerId] });
     },
     onError: (err) => {
       // Silent-failure posture matches the rest of the MVP, but log for M5b.9 debugging.

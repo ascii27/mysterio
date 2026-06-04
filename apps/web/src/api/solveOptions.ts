@@ -6,6 +6,6 @@ export interface SolveOptions {
   why_options: string[];
 }
 
-export function getSolveOptions(mysteryId: string): Promise<SolveOptions> {
-  return api(`/api/mysteries/${mysteryId}/solve-options`);
+export function getSolveOptions(mysteryId: string, playerId: string): Promise<SolveOptions> {
+  return api(`/api/mysteries/${mysteryId}/solve-options?player_id=${encodeURIComponent(playerId)}`);
 }

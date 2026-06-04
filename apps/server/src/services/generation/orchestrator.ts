@@ -15,7 +15,6 @@ interface RunInput {
   mysteryId: string;
   category: CategoryId;
   difficulty: DifficultyId;
-  playerName: string;
   /** When false, skips cover-image generation. Defaults to true (image generated). Spec-4 parent-toggle hook. */
   generateImage?: boolean;
 }
@@ -37,7 +36,6 @@ export async function runGeneration(input: RunInput): Promise<void> {
       const logicRes = await runLogicStructureAgent({
         category: input.category,
         difficulty: input.difficulty,
-        playerName: input.playerName,
         previousFailureNotes,
       });
       if (!logicRes.ok) {

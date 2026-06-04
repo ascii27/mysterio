@@ -5,14 +5,17 @@ export const players = sqliteTable("players", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   default_difficulty: text("default_difficulty").notNull(),
+  age_range: text("age_range").notNull().default("10-11"),
+  avatar_description: text("avatar_description"),
   created_at: integer("created_at").notNull().default(sql`(unixepoch())`),
 }, (t) => ({
   difficultyCheck: check("players_difficulty_chk", sql`${t.default_difficulty} IN ('easy','medium','hard')`),
+  ageRangeCheck: check("players_age_range_chk", sql`${t.age_range} IN ('8-9','10-11','12-13')`),
 }));
 
 export const mysteries = sqliteTable("mysteries", {
   id: text("id").primaryKey(),
-  player_id: text("player_id").notNull().references(() => players.id),
+  player_id: text("player_id").references(() => players.id, { onDelete: "set null" }),
   category: text("category").notNull(),
   difficulty: text("difficulty").notNull(),
   status: text("status").notNull(),
@@ -41,6 +44,7 @@ export const mysteries = sqliteTable("mysteries", {
 export const clues = sqliteTable("clues", {
   id: text("id").primaryKey(),
   mystery_id: text("mystery_id").notNull().references(() => mysteries.id, { onDelete: "cascade" }),
+  player_id: text("player_id").notNull().references(() => players.id, { onDelete: "cascade" }),
   category_type: text("category_type").notNull(),
   content: text("content").notNull(),
   audio_timestamp_ms: integer("audio_timestamp_ms"),
@@ -58,13 +62,15 @@ export const clues = sqliteTable("clues", {
   ),
   mysteryIdx: index("idx_clues_mystery").on(t.mystery_id),
   annotationUniq: uniqueIndex("clues_mystery_annotation_uniq")
-    .on(t.mystery_id, t.annotation_id)
+    .on(t.mystery_id, t.player_id, t.annotation_id)
     .where(sql`${t.annotation_id} IS NOT NULL`),
+  mysteryPlayerIdx: index("idx_clues_mystery_player").on(t.mystery_id, t.player_id),
 }));
 
 export const solutions = sqliteTable("solutions", {
   id: text("id").primaryKey(),
   mystery_id: text("mystery_id").notNull().references(() => mysteries.id, { onDelete: "cascade" }),
+  player_id: text("player_id").notNull().references(() => players.id, { onDelete: "cascade" }),
   guess_who: text("guess_who"),
   guess_how: text("guess_how"),
   guess_why: text("guess_why"),
@@ -77,12 +83,15 @@ export const solutions = sqliteTable("solutions", {
   explanation: text("explanation"),
   created_at: integer("created_at").notNull().default(sql`(unixepoch())`),
 }, (t) => ({
-  mysteryUniq: uniqueIndex("solutions_mystery_uniq").on(t.mystery_id),
+  mysteryUniq: uniqueIndex("solutions_mystery_uniq").on(t.mystery_id, t.player_id),
 }));
 
 export const hints = sqliteTable("hints", {
   id: text("id").primaryKey(),
   mystery_id: text("mystery_id").notNull().references(() => mysteries.id, { onDelete: "cascade" }),
+  player_id: text("player_id").notNull().references(() => players.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
   created_at: integer("created_at").notNull().default(sql`(unixepoch())`),
-});
+}, (t) => ({
+  mysteryPlayerIdx: index("idx_hints_mystery_player").on(t.mystery_id, t.player_id),
+}));

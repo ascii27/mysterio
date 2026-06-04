@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ClueCategoryType } from "@mysterio/shared";
 import { createClue, deleteClue, listClues, updateClue } from "../../../api/clues.js";
 import { Button } from "../../../components/Button.js";
+import { usePlayerStore } from "../../../state/playerStore.js";
 import { ClueCategoryTabs } from "./ClueCategoryTabs.js";
 import { ClueEditor } from "./ClueEditor.js";
 
@@ -16,12 +17,13 @@ export function ClueTracker({
   onClearFocus?: () => void;
 }) {
   const qc = useQueryClient();
+  const playerId = usePlayerStore((s) => s.activePlayerId)!;
   const [expanded, setExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<ClueCategoryType>("character");
   const [draft, setDraft] = useState("");
   const focusedRowRef = useRef<HTMLDivElement | null>(null);
 
-  const cluesQ = useQuery({ queryKey: ["clues", mysteryId], queryFn: () => listClues(mysteryId) });
+  const cluesQ = useQuery({ queryKey: ["clues", mysteryId, playerId], queryFn: () => listClues(mysteryId, playerId) });
 
   const allClues = cluesQ.data?.clues ?? [];
 
@@ -44,16 +46,16 @@ export function ClueTracker({
   }, [focusedClueId, expanded, activeTab]);
 
   const createM = useMutation({
-    mutationFn: () => createClue(mysteryId, { category_type: activeTab, content: draft.trim() }),
-    onSuccess: () => { setDraft(""); qc.invalidateQueries({ queryKey: ["clues", mysteryId] }); },
+    mutationFn: () => createClue(mysteryId, playerId, { category_type: activeTab, content: draft.trim() }),
+    onSuccess: () => { setDraft(""); qc.invalidateQueries({ queryKey: ["clues", mysteryId, playerId] }); },
   });
   const updateM = useMutation({
-    mutationFn: ({ clueId, content }: { clueId: string; content: string }) => updateClue(mysteryId, clueId, content),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["clues", mysteryId] }),
+    mutationFn: ({ clueId, content }: { clueId: string; content: string }) => updateClue(mysteryId, playerId, clueId, content),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["clues", mysteryId, playerId] }),
   });
   const deleteM = useMutation({
-    mutationFn: (clueId: string) => deleteClue(mysteryId, clueId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["clues", mysteryId] }),
+    mutationFn: (clueId: string) => deleteClue(mysteryId, playerId, clueId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["clues", mysteryId, playerId] }),
   });
 
   const visible = allClues.filter((c) => c.category_type === activeTab);

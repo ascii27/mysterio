@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { getMystery } from "../../api/mysteries.js";
 import { getSolveOptions } from "../../api/solveOptions.js";
 import { getSolution, submitSolution } from "../../api/solutions.js";
+import { usePlayerStore } from "../../state/playerStore.js";
 import { ClueSummary } from "./ClueSummary.js";
 import { GuessForm } from "./GuessForm.js";
 import { HintControls } from "./HintControls.js";
@@ -12,18 +13,19 @@ export function SolutionScreen() {
   const { id } = useParams<{ id: string }>();
   const mysteryId = id!;
   const qc = useQueryClient();
+  const playerId = usePlayerStore((s) => s.activePlayerId)!;
 
   const mysteryQ = useQuery({ queryKey: ["mystery", mysteryId], queryFn: () => getMystery(mysteryId) });
-  const solutionQ = useQuery({ queryKey: ["solution", mysteryId], queryFn: () => getSolution(mysteryId), retry: false });
+  const solutionQ = useQuery({ queryKey: ["solution", mysteryId, playerId], queryFn: () => getSolution(mysteryId, playerId), retry: false });
   const solveOptionsQ = useQuery({
-    queryKey: ["solve-options", mysteryId],
-    queryFn: () => getSolveOptions(mysteryId),
+    queryKey: ["solve-options", mysteryId, playerId],
+    queryFn: () => getSolveOptions(mysteryId, playerId),
     retry: false,
   });
 
   const submitM = useMutation({
-    mutationFn: (g: { guess_who: string; guess_how: string; guess_why: string }) => submitSolution(mysteryId, g),
-    onSuccess: (data) => { qc.setQueryData(["solution", mysteryId], data); },
+    mutationFn: (g: { guess_who: string; guess_how: string; guess_why: string }) => submitSolution(mysteryId, playerId, g),
+    onSuccess: (data) => { qc.setQueryData(["solution", mysteryId, playerId], data); },
   });
 
   if (!mysteryQ.data) return <div style={{ padding: 24 }}>Loading...</div>;

@@ -41,7 +41,6 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       mysteryId: id,
       category: parsed.data.category,
       difficulty: parsed.data.difficulty,
-      playerName: player.name,
     });
 
     reply.status(202);
@@ -151,14 +150,15 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       title: mysteries.title,
       created_at: mysteries.created_at,
       ready_at: mysteries.ready_at,
-      solved: sql<number>`EXISTS (SELECT 1 FROM solutions WHERE solutions.mystery_id = ${mysteries.id} AND solutions.is_correct = 1)`,
+      solved: sql<number>`EXISTS (SELECT 1 FROM solutions s WHERE s.mystery_id = mysteries.id AND s.player_id = ${playerId} AND s.is_correct = 1)`,
+      started: sql<number>`(EXISTS (SELECT 1 FROM solutions s WHERE s.mystery_id = mysteries.id AND s.player_id = ${playerId}) OR EXISTS (SELECT 1 FROM clues c WHERE c.mystery_id = mysteries.id AND c.player_id = ${playerId}))`,
     }).from(mysteries)
-      .where(eq(mysteries.player_id, playerId))
+      .where(sql`${mysteries.status} = 'ready' OR ${mysteries.player_id} = ${playerId}`)
       .orderBy(desc(mysteries.created_at))
       .limit(limit)
       .all();
     return {
-      mysteries: rows.map((r) => ({ ...r, solved: r.solved === 1 })),
+      mysteries: rows.map((r) => ({ ...r, solved: r.solved === 1, started: r.started === 1 })),
     };
   });
 }

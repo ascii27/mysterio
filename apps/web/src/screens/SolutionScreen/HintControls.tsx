@@ -3,19 +3,21 @@ import { useState } from "react";
 import { listHints, requestHint } from "../../api/hints.js";
 import { giveUp } from "../../api/solutions.js";
 import { Button } from "../../components/Button.js";
+import { usePlayerStore } from "../../state/playerStore.js";
 
 export function HintControls({ mysteryId, onGaveUp }: { mysteryId: string; onGaveUp: () => void }) {
   const qc = useQueryClient();
-  const hintsQ = useQuery({ queryKey: ["hints", mysteryId], queryFn: () => listHints(mysteryId) });
+  const playerId = usePlayerStore((s) => s.activePlayerId)!;
+  const hintsQ = useQuery({ queryKey: ["hints", mysteryId, playerId], queryFn: () => listHints(mysteryId, playerId) });
   const [confirmGiveUp, setConfirmGiveUp] = useState(false);
 
   const askHint = useMutation({
-    mutationFn: () => requestHint(mysteryId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["hints", mysteryId] }),
+    mutationFn: () => requestHint(mysteryId, playerId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["hints", mysteryId, playerId] }),
   });
 
   const giveUpM = useMutation({
-    mutationFn: () => giveUp(mysteryId),
+    mutationFn: () => giveUp(mysteryId, playerId),
     onSuccess: () => onGaveUp(),
   });
 

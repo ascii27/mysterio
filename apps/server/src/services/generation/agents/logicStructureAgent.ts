@@ -13,7 +13,6 @@ import { formatZodIssues } from "../zodFormat.js";
 export interface LogicStructureAgentInput {
   category: CategoryId;
   difficulty: DifficultyId;
-  playerName: string;
   previousFailureNotes?: string;
 }
 
@@ -67,8 +66,7 @@ export async function runLogicStructureAgent(
 }
 
 function buildUserMessage(input: LogicStructureAgentInput, lastError?: string): string {
-  // NOTE: player.name is interpolated raw. When player rename lands, cap length and sanitize for prompt-injection.
-  const base = `Generate a ${input.difficulty} ${input.category} mystery. The detective character's name MUST be exactly: ${input.playerName}.`;
+  const base = `Generate a ${input.difficulty} ${input.category} mystery.`;
   if (input.previousFailureNotes) {
     const parseNote = lastError ? `\n\nNote: your most recent JSON output also had a structural problem: ${lastError}` : "";
     return `${base}\n\nYour previous attempt failed validation. Fix these issues:\n${input.previousFailureNotes}${parseNote}`;
