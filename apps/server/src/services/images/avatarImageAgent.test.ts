@@ -30,6 +30,7 @@ describe("runAvatarImageAgent", () => {
     generate.mockRejectedValue(new Error("rate_limited"));
     const res = await runAvatarImageAgent(input);
     expect(res.ok).toBe(false);
+    expect((res as { ok: false; error: string }).error).toBe("rate_limited");
     expect(writeAvatarImage).not.toHaveBeenCalled();
   });
 
@@ -38,5 +39,6 @@ describe("runAvatarImageAgent", () => {
     writeAvatarImage.mockRejectedValue(new Error("disk_full"));
     const res = await runAvatarImageAgent(input);
     expect(res.ok).toBe(false);
+    expect((res as { ok: false; error: string }).error).toBe("disk_full");
   });
 });
