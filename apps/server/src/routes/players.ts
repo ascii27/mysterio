@@ -3,6 +3,8 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { getDb } from "../db/client.js";
 import { players } from "../db/schema.js";
+import { runAvatarImageAgent } from "../services/images/avatarImageAgent.js";
+import { deleteImageByKey } from "../services/images/storage.js";
 import { shortId } from "../utils/ids.js";
 
 const createBody = z.object({
@@ -64,5 +66,24 @@ export async function playersRoutes(app: FastifyInstance): Promise<void> {
     const db = getDb();
     db.delete(players).where(eq(players.id, req.params.id)).run();
     reply.status(204);
+  });
+
+  app.post<{ Params: { id: string } }>("/players/:id/avatar", async (req, reply) => {
+    const db = getDb();
+    const player = db.select().from(players).where(eq(players.id, req.params.id)).get();
+    if (!player) { reply.status(404); return { error: "player_not_found" }; }
+    const description = player.avatar_description?.trim();
+    if (!description) { reply.status(400); return { error: "no_description" }; }
+
+    const result = await runAvatarImageAgent({ playerId: player.id, description });
+    if (!result.ok) { reply.status(502); return { error: "avatar_generation_failed", detail: result.error }; }
+
+    const previousKey = player.avatar_image_path;
+    db.update(players).set({ avatar_image_path: result.avatarImagePath }).where(eq(players.id, player.id)).run();
+    if (previousKey && previousKey !== result.avatarImagePath) {
+      await deleteImageByKey(previousKey); // best-effort cleanup of the prior version
+    }
+    const row = db.select().from(players).where(eq(players.id, player.id)).get();
+    return { player: row };
   });
 }
