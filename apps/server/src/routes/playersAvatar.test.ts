@@ -56,4 +56,14 @@ describe("POST /players/:id/avatar", () => {
     runAvatarImageAgent.mockResolvedValue({ ok: false, error: "rate_limited" });
     expect((await app.inject({ method: "POST", url: "/players/p1/avatar" })).statusCode).toBe(502);
   });
+
+  it("a failed regenerate keeps the existing avatar (no delete, row unchanged)", async () => {
+    getDb().update(players).set({ avatar_image_path: "avatars/p1-keep.png" }).where(eq(players.id, "p1")).run();
+    runAvatarImageAgent.mockResolvedValue({ ok: false, error: "rate_limited" });
+    const res = await app.inject({ method: "POST", url: "/players/p1/avatar" });
+    expect(res.statusCode).toBe(502);
+    expect(deleteImageByKey).not.toHaveBeenCalled();
+    const row = getDb().select().from(players).where(eq(players.id, "p1")).get();
+    expect(row?.avatar_image_path).toBe("avatars/p1-keep.png");
+  });
 });
