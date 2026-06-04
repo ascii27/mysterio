@@ -6,6 +6,7 @@ describe("buildAvatarPrompt", () => {
     const p = buildAvatarPrompt("a kid with curly red hair and a green coat");
     expect(p).toContain("a kid with curly red hair and a green coat");
     expect(p.toLowerCase()).toContain("portrait");
+    expect(p).toContain("storybook character portrait"); // style preamble survived
   });
 
   it("includes the child-safety clause (no text in image)", () => {
