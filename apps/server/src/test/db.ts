@@ -5,7 +5,7 @@ import { __setTestDb } from "../db/client.js";
 import * as schema from "../db/schema.js";
 
 /** Fresh in-memory SQLite with all migrations applied, injected into getDb(). Call in beforeEach. */
-export function setupTestDb() {
+export function setupTestDb(): void {
   const sqlite = new Database(":memory:");
   // FK OFF during migrate (table rebuilds would otherwise cascade-delete) — mirrors migrate.ts.
   sqlite.pragma("foreign_keys = OFF");
@@ -13,5 +13,4 @@ export function setupTestDb() {
   migrate(db, { migrationsFolder: "./src/db/migrations" });
   sqlite.pragma("foreign_keys = ON"); // enforce cascades at runtime in tests
   __setTestDb(db, sqlite);
-  return { db, sqlite };
 }
