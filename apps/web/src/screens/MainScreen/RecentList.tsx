@@ -35,7 +35,7 @@ export function RecentList({ playerId }: { playerId: string }) {
                 boxShadow: "0 2px 0 rgba(0,0,0,0.15)",
               }}
             >
-              <span style={{ fontFamily: "var(--display)", fontWeight: 700 }}>{m.title ?? "Untitled"}</span>
+              <span style={{ fontFamily: "var(--display)", fontWeight: 700, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.title ?? "Untitled"}</span>
               <span style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
                 {m.target_age_range && <Chip tone="ink">Ages {ageBandConfig(m.target_age_range).label}</Chip>}
                 {chip}
