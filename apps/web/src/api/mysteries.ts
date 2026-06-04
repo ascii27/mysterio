@@ -1,4 +1,4 @@
-import type { CategoryId, DifficultyId, LogicStructure, MysterySummary, MysteryStatus, NarrativeAnnotation } from "@mysterio/shared";
+import type { AgeRange, CategoryId, DifficultyId, LogicStructure, MysterySummary, MysteryStatus, NarrativeAnnotation } from "@mysterio/shared";
 import { api } from "./client.js";
 
 export interface MysteryDetail {
@@ -6,6 +6,7 @@ export interface MysteryDetail {
   player_id: string;
   category: CategoryId;
   difficulty: DifficultyId;
+  target_age_range: AgeRange | null;
   status: MysteryStatus;
   title: string | null;
   narrative_text: string | null;

@@ -35,6 +35,7 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       player_id: parsed.data.player_id,
       category: parsed.data.category,
       difficulty: parsed.data.difficulty,
+      target_age_range: player.age_range,
       status: "pending",
     }).run();
 
@@ -85,6 +86,7 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       player_id: row.player_id,
       category: row.category,
       difficulty: row.difficulty,
+      target_age_range: row.target_age_range,
       status: row.status,
       title: row.title,
       narrative_text: row.status === "ready" ? row.narrative_text : null,
