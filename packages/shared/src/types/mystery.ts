@@ -29,6 +29,7 @@ export interface MysterySummary {
   player_id: string | null; // creator (provenance only; null if the creator was deleted)
   category: CategoryId;
   difficulty: DifficultyId;
+  target_age_range: AgeRange | null;
   status: MysteryStatus;
   title: string | null;
   created_at: number;

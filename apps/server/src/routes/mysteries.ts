@@ -150,6 +150,7 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       player_id: mysteries.player_id,
       category: mysteries.category,
       difficulty: mysteries.difficulty,
+      target_age_range: mysteries.target_age_range,
       status: mysteries.status,
       title: mysteries.title,
       created_at: mysteries.created_at,
