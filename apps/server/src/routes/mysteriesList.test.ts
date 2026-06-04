@@ -49,5 +49,6 @@ describe("GET /mysteries — shared pool + per-detective status", () => {
     expect(a.solved).toBe(true);
     expect(a.started).toBe(true);
     expect(b.solved).toBe(false);
+    expect(b.started).toBe(false);
   });
 });
