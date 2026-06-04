@@ -61,46 +61,56 @@ export function PlayerPicker() {
 
         <div style={{ display: "grid", gap: 14 }}>
           {data.players.map((p) => (
-            <button
+            // Row is a non-interactive container so the "select" and "delete" actions can be
+            // SIBLING buttons. A <button> nested in a <button> is invalid HTML and iOS Safari
+            // drops taps on the inner one — which broke delete on iPad.
+            <div
               key={p.id}
-              aria-label={p.name}
-              onClick={() => {
-                if (!editing) setActivePlayer(p.id);
-              }}
               style={{
-                display: "flex", alignItems: "center", gap: 14, textAlign: "left",
+                display: "flex", alignItems: "center",
                 background: "var(--surface)", border: "1px solid var(--line)",
-                borderRadius: "var(--radius)", padding: 16, cursor: editing ? "default" : "pointer",
-                boxShadow: "0 2px 0 rgba(0,0,0,0.2)",
+                borderRadius: "var(--radius)", boxShadow: "0 2px 0 rgba(0,0,0,0.2)", overflow: "hidden",
               }}
             >
-              <div aria-hidden="true" style={{
-                width: 48, height: 48, borderRadius: 10, flex: "0 0 auto", display: "grid", placeItems: "center",
-                background: "radial-gradient(120% 120% at 30% 25%, var(--accent), var(--accent-dark))",
-                color: "#fff", fontFamily: "var(--display)", fontWeight: 700, fontSize: 22,
-                border: "3px solid var(--cream)",
-              }}>{(p.name[0] ?? "?").toUpperCase()}</div>
-              <span style={{ flex: 1, fontFamily: "var(--display)", fontWeight: 700, fontSize: 22 }}>{p.name}</span>
+              <button
+                type="button"
+                aria-label={p.name}
+                onClick={() => {
+                  if (!editing) setActivePlayer(p.id);
+                }}
+                style={{
+                  flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 14, textAlign: "left",
+                  background: "none", border: "none", padding: 16, cursor: editing ? "default" : "pointer",
+                  color: "inherit", font: "inherit",
+                }}
+              >
+                <div aria-hidden="true" style={{
+                  width: 48, height: 48, borderRadius: 10, flex: "0 0 auto", display: "grid", placeItems: "center",
+                  background: "radial-gradient(120% 120% at 30% 25%, var(--accent), var(--accent-dark))",
+                  color: "#fff", fontFamily: "var(--display)", fontWeight: 700, fontSize: 22,
+                  border: "3px solid var(--cream)",
+                }}>{(p.name[0] ?? "?").toUpperCase()}</div>
+                <span style={{ flex: 1, fontFamily: "var(--display)", fontWeight: 700, fontSize: 22 }}>{p.name}</span>
+              </button>
               {editing && (
                 <button
                   type="button"
                   aria-label={`Delete ${p.name}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  onClick={() => {
                     if (window.confirm(`Delete detective ${p.name}? Their notes and solved mysteries are removed.`)) {
                       delM.mutate(p.id);
                     }
                   }}
                   style={{
                     background: "none", border: "1px solid var(--line)", borderRadius: "var(--radius)",
-                    padding: "4px 10px", cursor: "pointer", color: "var(--bad)", fontSize: 16,
+                    padding: "8px 12px", margin: "0 12px", cursor: "pointer", color: "var(--bad)", fontSize: 18,
                     lineHeight: 1, flexShrink: 0,
                   }}
                 >
                   🗑
                 </button>
               )}
-            </button>
+            </div>
           ))}
         </div>
 
