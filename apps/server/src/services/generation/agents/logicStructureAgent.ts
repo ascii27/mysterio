@@ -1,4 +1,5 @@
 import {
+  type AgeRange,
   type CategoryId,
   type DifficultyId,
   type LogicStructure,
@@ -13,6 +14,7 @@ import { formatZodIssues } from "../zodFormat.js";
 export interface LogicStructureAgentInput {
   category: CategoryId;
   difficulty: DifficultyId;
+  ageRange: AgeRange;
   previousFailureNotes?: string;
 }
 
@@ -32,7 +34,7 @@ export async function runLogicStructureAgent(
       label: `logicStructureAgent:attempt${attempt}`,
       system: [
         { type: "text", text: SAFETY_PREAMBLE, cache: true },
-        { type: "text", text: buildLogicStructureSystem(input.difficulty) },
+        { type: "text", text: buildLogicStructureSystem(input.difficulty, input.ageRange) },
       ],
       user: userMsg,
       maxTokens: 4096,

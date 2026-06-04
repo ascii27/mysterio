@@ -1,6 +1,7 @@
 import { desc, eq, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import type { AgeRange } from "@mysterio/shared";
 import { getDb } from "../db/client.js";
 import { mysteries, players } from "../db/schema.js";
 import { runGeneration } from "../services/generation/orchestrator.js";
@@ -41,6 +42,7 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       mysteryId: id,
       category: parsed.data.category,
       difficulty: parsed.data.difficulty,
+      ageRange: player.age_range as AgeRange,
     });
 
     reply.status(202);

@@ -1,14 +1,16 @@
-import { difficultyConfig, type DifficultyId } from "@mysterio/shared";
+import { ageBandConfig, difficultyConfig, type AgeRange, type DifficultyId } from "@mysterio/shared";
 import { PUZZLE_CRAFT } from "./craftGuidance.js";
 
-export function buildLogicStructureSystem(difficulty: DifficultyId): string {
+export function buildLogicStructureSystem(difficulty: DifficultyId, ageRange: AgeRange): string {
   const d = difficultyConfig(difficulty);
+  const b = ageBandConfig(ageRange);
   return `You are a mystery designer for a kids' game.
 
 Your output is a single JSON object that conforms exactly to the schema described below. Output ONLY the JSON — no prose, no markdown fences, no commentary.
 
 DIFFICULTY: ${d.name} — produce exactly ${d.essentialClues} essential clues and ${d.falseCluesMin}-${d.falseCluesMax} false clues.
 MISDIRECTION FOR THIS DIFFICULTY: ${d.misdirection} The false_clues you write should match this level of misdirection.
+AGE BAND: ${ageRange} — ${b.subtletyNudge}
 
 SCHEMA:
 {
@@ -54,7 +56,7 @@ SCHEMA:
 
 DESIGN RULES:
 - DETECTIVE CHARACTER: exactly one character has role "detective" and their "name" MUST be exactly "You". Write their description in the second person ("You are the detective on this case — curious, observant, you carry a notebook everywhere"). The detective is the listener's stand-in and is NEVER the culprit. Do not give the detective a personal first name; any detective should be able to solve this story.
-- The mystery MUST be solvable from the essential_clues alone, by a careful eight-year-old, without ever needing the false_clues or off-screen knowledge.
+- The mystery MUST be solvable from the essential_clues alone, by a careful ${b.benchmarkAge}-year-old, without ever needing the false_clues or off-screen knowledge.
 - Spread coverage across clues: collectively they must support deducing who, how, AND why. Individual clues should cover different aspects.
 - The logic_chain must be tight: each step reasons from clues introduced earlier, ending in the true_solution.
 - Characters must have distinct, age-appropriate names — no real famous people.
@@ -76,7 +78,7 @@ CLUE OBFUSCATION (very important — kids should DEDUCE, not READ the answer):
 
 DISTRACTOR OPTIONS for multiple-choice solve:
 - Generate exactly 3 distinct distractors for how_distractors[] and 3 for why_distractors[].
-- Each distractor must be a PLAUSIBLE-sounding but WRONG explanation. A careful eight-year-old reading the clues should be able to rule them out, but a kid skimming should find them tempting.
+- Each distractor must be a PLAUSIBLE-sounding but WRONG explanation. A careful ${b.benchmarkAge}-year-old reading the clues should be able to rule them out, but a kid skimming should find them tempting.
 - Distractors should match the style and length of the true how/why (one sentence each).
 - Do NOT make distractors that are obviously wrong (e.g., "the rabbit teleported"). Subtle plausibility = better puzzle.
 - Distractors must be DISTINCT from the true solution and from each other.

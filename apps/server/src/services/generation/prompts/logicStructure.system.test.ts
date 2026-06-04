@@ -3,23 +3,34 @@ import { buildLogicStructureSystem } from "./logicStructure.system.js";
 
 describe("buildLogicStructureSystem", () => {
   it("includes the central_question schema field and rule", () => {
-    const s = buildLogicStructureSystem("easy");
+    const s = buildLogicStructureSystem("easy", "10-11");
     expect(s).toContain("central_question");
   });
 
   it("interpolates the difficulty misdirection guidance", () => {
-    expect(buildLogicStructureSystem("hard").toLowerCase()).toContain("obvious suspect");
-    expect(buildLogicStructureSystem("easy").toLowerCase()).toContain("simple red herrings");
+    expect(buildLogicStructureSystem("hard", "10-11").toLowerCase()).toContain("obvious suspect");
+    expect(buildLogicStructureSystem("easy", "10-11").toLowerCase()).toContain("simple red herrings");
   });
 
   it("includes the PUZZLE_CRAFT guidance", () => {
-    expect(buildLogicStructureSystem("medium")).toContain("MYSTERY CRAFT — PUZZLE DESIGN");
+    expect(buildLogicStructureSystem("medium", "10-11")).toContain("MYSTERY CRAFT — PUZZLE DESIGN");
   });
 
   it("describes a detective-agnostic second-person detective", () => {
-    const s = buildLogicStructureSystem("easy");
+    const s = buildLogicStructureSystem("easy", "10-11");
     expect(s).toContain('"You"');
     expect(s.toLowerCase()).toContain("second person");
     expect(s).not.toContain("name provided in the user message");
+  });
+
+  it("scales the solvability benchmark to the age band's lower bound", () => {
+    expect(buildLogicStructureSystem("easy", "8-9")).toContain("careful 8-year-old");
+    expect(buildLogicStructureSystem("easy", "12-13")).toContain("careful 12-year-old");
+    expect(buildLogicStructureSystem("easy", "8-9")).not.toContain("eight-year-old");
+  });
+
+  it("injects the age-band subtlety nudge", () => {
+    expect(buildLogicStructureSystem("easy", "8-9").toLowerCase()).toContain("obvious");
+    expect(buildLogicStructureSystem("easy", "12-13").toLowerCase()).toContain("subtle");
   });
 });

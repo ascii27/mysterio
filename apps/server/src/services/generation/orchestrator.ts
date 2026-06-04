@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { CategoryId, DifficultyId, LogicStructure } from "@mysterio/shared";
+import type { AgeRange, CategoryId, DifficultyId, LogicStructure } from "@mysterio/shared";
 import { loadEnv } from "../../config/env.js";
 import { getDb } from "../../db/client.js";
 import { mysteries } from "../../db/schema.js";
@@ -15,6 +15,7 @@ interface RunInput {
   mysteryId: string;
   category: CategoryId;
   difficulty: DifficultyId;
+  ageRange: AgeRange;
   /** When false, skips cover-image generation. Defaults to true (image generated). Spec-4 parent-toggle hook. */
   generateImage?: boolean;
 }
@@ -36,6 +37,7 @@ export async function runGeneration(input: RunInput): Promise<void> {
       const logicRes = await runLogicStructureAgent({
         category: input.category,
         difficulty: input.difficulty,
+        ageRange: input.ageRange,
         previousFailureNotes,
       });
       if (!logicRes.ok) {
