@@ -13,5 +13,6 @@ describe("target_age_range migration", () => {
     expect(sql, "no migration adds target_age_range").toBeTruthy();
     expect(sql!).toContain("ALTER TABLE");
     expect(sql!).not.toContain("__new_mysteries");
+    expect(sql!).not.toContain("DROP TABLE `mysteries`");
   });
 });
