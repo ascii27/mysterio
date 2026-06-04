@@ -1,0 +1,1 @@
+ALTER TABLE `mysteries` ADD `target_age_range` text;

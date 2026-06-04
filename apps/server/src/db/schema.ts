@@ -18,6 +18,7 @@ export const mysteries = sqliteTable("mysteries", {
   player_id: text("player_id").references(() => players.id, { onDelete: "set null" }),
   category: text("category").notNull(),
   difficulty: text("difficulty").notNull(),
+  target_age_range: text("target_age_range"),
   status: text("status").notNull(),
   title: text("title"),
   logic_structure_json: text("logic_structure_json"),
