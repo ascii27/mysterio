@@ -21,6 +21,7 @@ export interface Player {
   age_range: AgeRange;
   default_difficulty: DifficultyId;
   avatar_description: string | null;
+  avatar_image_path: string | null;
   created_at: number;
 }
 
