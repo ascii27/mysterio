@@ -17,7 +17,7 @@ beforeEach(async () => {
   for (const id of ["p-a", "p-b"]) {
     db.insert(players).values({ id, name: id, age_range: "10-11", default_difficulty: "easy" }).run();
   }
-  db.insert(mysteries).values({ id: "m-ready", player_id: "p-a", category: "missing-pet", difficulty: "easy", status: "ready" }).run();
+  db.insert(mysteries).values({ id: "m-ready", player_id: "p-a", category: "missing-pet", difficulty: "easy", status: "ready", target_age_range: "12-13" }).run();
   db.insert(mysteries).values({ id: "m-pending", player_id: "p-a", category: "missing-pet", difficulty: "easy", status: "pending" }).run();
   app = Fastify();
   await app.register(mysteriesRoutes);
@@ -50,5 +50,11 @@ describe("GET /mysteries — shared pool + per-detective status", () => {
     expect(a.started).toBe(true);
     expect(b.solved).toBe(false);
     expect(b.started).toBe(false);
+  });
+
+  it("returns target_age_range for the badge", async () => {
+    const a = await list("p-a");
+    const ready = a.find((m) => m.id === "m-ready") as unknown as { target_age_range: string | null };
+    expect(ready.target_age_range).toBe("12-13");
   });
 });

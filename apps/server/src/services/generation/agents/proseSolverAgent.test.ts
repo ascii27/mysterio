@@ -11,6 +11,7 @@ const baseInput = {
   centralQuestion: "Who took the rabbit and why?",
   narrativeText: "Once upon a time...",
   characters,
+  ageRange: "10-11" as const,
 };
 
 function fakeCall(json: string) {

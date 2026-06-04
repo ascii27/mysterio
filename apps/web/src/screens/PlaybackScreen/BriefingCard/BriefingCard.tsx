@@ -1,4 +1,5 @@
 import type { PublicCharacter, MysteryDetail } from "../../../api/mysteries.js";
+import { ageBandConfig } from "@mysterio/shared";
 import { Button } from "../../../components/Button.js";
 import { SceneFrame, SCENE_FOR_CATEGORY } from "../../../components/casebook/index.js";
 
@@ -40,6 +41,11 @@ export function BriefingCard({
         <div style={{ fontSize: 22, fontWeight: 800, marginTop: 4, fontFamily: "var(--display)" }}>
           {mystery.title ?? "Untitled Mystery"}
         </div>
+        {mystery.target_age_range && (
+          <div style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "var(--mono)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 6 }}>
+            Written for ages {ageBandConfig(mystery.target_age_range).label}
+          </div>
+        )}
         <div style={{ fontSize: 14, color: "var(--text)", margin: "16px 0", lineHeight: 1.5 }}>
           {mystery.central_question ? (
             <><b>Your case:</b> {mystery.central_question}</>

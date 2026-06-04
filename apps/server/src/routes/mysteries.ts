@@ -1,6 +1,7 @@
 import { desc, eq, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import type { AgeRange } from "@mysterio/shared";
 import { getDb } from "../db/client.js";
 import { mysteries, players } from "../db/schema.js";
 import { runGeneration } from "../services/generation/orchestrator.js";
@@ -34,6 +35,7 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       player_id: parsed.data.player_id,
       category: parsed.data.category,
       difficulty: parsed.data.difficulty,
+      target_age_range: player.age_range,
       status: "pending",
     }).run();
 
@@ -41,6 +43,7 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       mysteryId: id,
       category: parsed.data.category,
       difficulty: parsed.data.difficulty,
+      ageRange: player.age_range as AgeRange,
     });
 
     reply.status(202);
@@ -83,6 +86,7 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       player_id: row.player_id,
       category: row.category,
       difficulty: row.difficulty,
+      target_age_range: row.target_age_range,
       status: row.status,
       title: row.title,
       narrative_text: row.status === "ready" ? row.narrative_text : null,
@@ -146,6 +150,7 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       player_id: mysteries.player_id,
       category: mysteries.category,
       difficulty: mysteries.difficulty,
+      target_age_range: mysteries.target_age_range,
       status: mysteries.status,
       title: mysteries.title,
       created_at: mysteries.created_at,

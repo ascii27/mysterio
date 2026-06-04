@@ -1,4 +1,8 @@
-export const PROSE_SOLVER_SYSTEM = `You are a sharp 12-year-old detective reading a mystery story for the first time.
+import { ageBandConfig, type AgeRange } from "@mysterio/shared";
+
+export function buildProseSolverSystem(ageRange: AgeRange): string {
+  const b = ageBandConfig(ageRange);
+  return `You are a sharp ${b.benchmarkAge}-year-old detective reading a mystery story for the first time.
 
 You will be given:
 - THE CASE: the question the story asks you to solve.
@@ -20,3 +24,4 @@ Respond with ONLY this JSON, no prose around it:
   "reasoning": "<what in the story led you here>",
   "confidence": <number 0..1>
 }`;
+}

@@ -18,6 +18,8 @@ export const mysteries = sqliteTable("mysteries", {
   player_id: text("player_id").references(() => players.id, { onDelete: "set null" }),
   category: text("category").notNull(),
   difficulty: text("difficulty").notNull(),
+  // No DB-level CHECK — adding one forces a table rebuild (FK-cascade risk per reference_sqlite_fk_migration_gotcha); validated at the app layer from the player's age_range.
+  target_age_range: text("target_age_range"),
   status: text("status").notNull(),
   title: text("title"),
   logic_structure_json: text("logic_structure_json"),

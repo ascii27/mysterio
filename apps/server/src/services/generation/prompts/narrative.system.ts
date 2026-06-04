@@ -1,11 +1,12 @@
-import { difficultyConfig, type DifficultyId } from "@mysterio/shared";
+import { ageBandConfig, difficultyConfig, type AgeRange, type DifficultyId } from "@mysterio/shared";
 import { PROSE_CRAFT } from "./craftGuidance.js";
 
-export function buildNarrativeSystem(difficulty: DifficultyId): string {
+export function buildNarrativeSystem(difficulty: DifficultyId, ageRange: AgeRange): string {
   const d = difficultyConfig(difficulty);
+  const b = ageBandConfig(ageRange);
   const minWords = Math.round(d.targetWords * (1 - d.wordToleranceFraction));
   const maxWords = Math.round(d.targetWords * (1 + d.wordToleranceFraction));
-  return `You are a children's audiobook author writing a mystery story for ages 8-13.
+  return `You are a children's audiobook author writing a mystery story for ages ${ageRange}.
 
 You will receive a JSON LogicStructure for a mystery. Your job: write an engaging narration that a kid will listen to.
 
@@ -24,7 +25,7 @@ CRITICAL RULES:
 - MAKE THE CENTRAL QUESTION CLEAR EARLY: in the opening, establish vividly what is wrong and what the listener is trying to figure out (the who/how/why), so a kid is never confused about the goal. Do NOT answer it — just pose it.
 - Do NOT use the words "culprit", "essential clue", "logic chain", or refer to the JSON structure.
 - Avoid real brand names, real public figures, anything that dates the story.
-- Use age-appropriate vocabulary with occasional richer words for flavor.
+- VOCABULARY: ${b.vocabulary}
 - The detective character is the listener's stand-in — sometimes use questions ("What was that smell?") to invite the listener to think.
 
 ANNOTATION RULES (very important — the frontend uses these to highlight people and clues so kids can tap them):

@@ -1,5 +1,6 @@
+import type { AgeRange } from "@mysterio/shared";
 import { claudeText, extractJson } from "../../anthropic/client.js";
-import { PROSE_SOLVER_SYSTEM } from "../prompts/proseSolver.system.js";
+import { buildProseSolverSystem } from "../prompts/proseSolver.system.js";
 import { SAFETY_PREAMBLE } from "../prompts/shared.js";
 import { formatZodIssues } from "../zodFormat.js";
 import { validationGuessSchema } from "./validationAgent.js";
@@ -11,6 +12,7 @@ export interface ProseSolverInput {
   centralQuestion: string;
   narrativeText: string;
   characters: Array<{ id: string; name: string; role: string; description: string }>;
+  ageRange: AgeRange;
 }
 
 const MAX_INTERNAL_ATTEMPTS = 2;
@@ -39,7 +41,7 @@ export async function runProseSolverAgent(
       label: `proseSolverAgent:attempt${attempt}`,
       system: [
         { type: "text", text: SAFETY_PREAMBLE, cache: true },
-        { type: "text", text: PROSE_SOLVER_SYSTEM, cache: true },
+        { type: "text", text: buildProseSolverSystem(input.ageRange), cache: true },
       ],
       user: lastError ? `${user}\n\nYour previous attempt was malformed: ${lastError}` : user,
       maxTokens: 1024,

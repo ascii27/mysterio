@@ -1,4 +1,4 @@
-import type { DifficultyId, LogicStructure, TrueSolution } from "@mysterio/shared";
+import type { AgeRange, DifficultyId, LogicStructure, TrueSolution } from "@mysterio/shared";
 import { logger } from "../../utils/logger.js";
 import { runContinuityAuditAgent } from "./agents/continuityAuditAgent.js";
 import type { ContinuityAuditInput, ContinuityAuditResult } from "./agents/continuityAuditAgent.js";
@@ -13,6 +13,7 @@ import type { CompareResult } from "./compareSolutions.js";
 export interface ReadthroughInput {
   logicStructure: LogicStructure;
   narrativeText: string;
+  ageRange: AgeRange;
 }
 
 export interface ReadthroughVerdict {
@@ -44,6 +45,7 @@ export async function runReadthroughGate(
     centralQuestion: ls.central_question,
     narrativeText: input.narrativeText,
     characters,
+    ageRange: input.ageRange,
   });
   if (!solved.ok) {
     return { passed: false, notes: `A fresh reader could not produce a usable answer from the story (solver error: ${solved.error}).` };
@@ -79,6 +81,7 @@ export async function runReadthroughGate(
 export interface WriteAndVerifyInput {
   logicStructure: LogicStructure;
   difficulty: DifficultyId;
+  ageRange: AgeRange;
   maxNarrativeAttempts: number;
   maxReadthroughAttempts: number;
 }
@@ -102,13 +105,14 @@ export async function writeAndVerifyProse(
       runNarrativeAgent({
         logicStructure: input.logicStructure,
         difficulty: input.difficulty,
+        ageRange: input.ageRange,
         maxAttempts: input.maxNarrativeAttempts,
         extraNotes,
       }));
   const gate =
     deps.gate ??
     ((narrativeText: string) =>
-      runReadthroughGate({ logicStructure: input.logicStructure, narrativeText }));
+      runReadthroughGate({ logicStructure: input.logicStructure, narrativeText, ageRange: input.ageRange }));
 
   let notes: string | undefined;
   for (let attempt = 1; attempt <= input.maxReadthroughAttempts; attempt++) {

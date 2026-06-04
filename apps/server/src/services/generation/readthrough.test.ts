@@ -33,7 +33,7 @@ const okGuess = {
 describe("runReadthroughGate", () => {
   it("passes when the prose-solver solves it and the auditor finds no dangling refs", async () => {
     const r = await runReadthroughGate(
-      { logicStructure: logic, narrativeText: "..." },
+      { logicStructure: logic, narrativeText: "...", ageRange: "10-11" as const },
       {
         solver: async () => ({ ok: true, value: okGuess }),
         auditor: async () => ({ ok: true, dangling: [] }),
@@ -45,7 +45,7 @@ describe("runReadthroughGate", () => {
 
   it("fails with notes when the auditor finds a dangling element", async () => {
     const r = await runReadthroughGate(
-      { logicStructure: logic, narrativeText: "..." },
+      { logicStructure: logic, narrativeText: "...", ageRange: "10-11" as const },
       {
         solver: async () => ({ ok: true, value: okGuess }),
         auditor: async () => ({ ok: true, dangling: [{ element: "the latch", where: "solution", note: "never mentioned" }] }),
@@ -58,7 +58,7 @@ describe("runReadthroughGate", () => {
 
   it("fails when the prose-solver cannot solve it from the story", async () => {
     const r = await runReadthroughGate(
-      { logicStructure: logic, narrativeText: "..." },
+      { logicStructure: logic, narrativeText: "...", ageRange: "10-11" as const },
       {
         solver: async () => ({ ok: true, value: okGuess }),
         auditor: async () => ({ ok: true, dangling: [] }),
@@ -71,7 +71,7 @@ describe("runReadthroughGate", () => {
 
   it("combines solvability and dangling failures in the notes", async () => {
     const r = await runReadthroughGate(
-      { logicStructure: logic, narrativeText: "..." },
+      { logicStructure: logic, narrativeText: "...", ageRange: "10-11" as const },
       {
         solver: async () => ({ ok: true, value: okGuess }),
         auditor: async () => ({ ok: true, dangling: [{ element: "the latch", where: "solution", note: "never mentioned" }] }),
@@ -85,7 +85,7 @@ describe("runReadthroughGate", () => {
 
   it("fail-closed when the solver malfunctions, but ignores an auditor malfunction", async () => {
     const solverDown = await runReadthroughGate(
-      { logicStructure: logic, narrativeText: "..." },
+      { logicStructure: logic, narrativeText: "...", ageRange: "10-11" as const },
       {
         solver: async () => ({ ok: false, error: "model down" }),
         auditor: async () => ({ ok: true, dangling: [] }),
@@ -96,7 +96,7 @@ describe("runReadthroughGate", () => {
     expect(solverDown.notes).toContain("solver error");
 
     const auditorDown = await runReadthroughGate(
-      { logicStructure: logic, narrativeText: "..." },
+      { logicStructure: logic, narrativeText: "...", ageRange: "10-11" as const },
       {
         solver: async () => ({ ok: true, value: okGuess }),
         auditor: async () => ({ ok: false, error: "model down" }),
@@ -118,7 +118,7 @@ describe("writeAndVerifyProse", () => {
   it("returns ok on the first draft when the gate passes", async () => {
     let calls = 0;
     const r = await writeAndVerifyProse(
-      { logicStructure: logic, difficulty: "easy", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
+      { logicStructure: logic, difficulty: "easy", ageRange: "10-11", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
       {
         narrative: async () => { calls++; return narrativeOk; },
         gate: async () => ({ passed: true, notes: "ok" }),
@@ -132,7 +132,7 @@ describe("writeAndVerifyProse", () => {
     let calls = 0;
     let secondCallNotes: string | undefined;
     const r = await writeAndVerifyProse(
-      { logicStructure: logic, difficulty: "easy", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
+      { logicStructure: logic, difficulty: "easy", ageRange: "10-11", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
       {
         narrative: async (extraNotes) => { calls++; if (calls === 2) secondCallNotes = extraNotes; return narrativeOk; },
         gate: async () => (calls < 2 ? { passed: false, notes: "the latch is missing" } : { passed: true, notes: "ok" }),
@@ -145,7 +145,7 @@ describe("writeAndVerifyProse", () => {
 
   it("escalates after readthrough attempts are exhausted", async () => {
     const r = await writeAndVerifyProse(
-      { logicStructure: logic, difficulty: "easy", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
+      { logicStructure: logic, difficulty: "easy", ageRange: "10-11", maxNarrativeAttempts: 2, maxReadthroughAttempts: 2 },
       {
         narrative: async () => narrativeOk,
         gate: async () => ({ passed: false, notes: "still unsolvable" }),

@@ -10,4 +10,4 @@ ABSOLUTE RULES (no exceptions, ever):
 - Mild peril is allowed (sneaking, hiding, mysterious noises, locked doors).
 - Spookiness is allowed in atmospheric contexts (haunted mansion, foggy night) but never gory.
 - Antagonists have understandable, non-malicious motives (jealousy, mischief, misunderstanding, secret-keeping).
-- Vocabulary should be readable by an eight-year-old, with occasional richer words for context.`;
+- Vocabulary must be age-appropriate for children ages 8-13; when the task specifies a target age band, match that band's reading level.`;
