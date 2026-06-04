@@ -7,6 +7,9 @@ export const players = sqliteTable("players", {
   default_difficulty: text("default_difficulty").notNull(),
   age_range: text("age_range").notNull().default("10-11"),
   avatar_description: text("avatar_description"),
+  // No DB-level CHECK — players is the parent of FK-cascade children (clues/solutions/hints);
+  // a CHECK would force a table rebuild (DROP TABLE players → cascade-wipe). Nullable ADD COLUMN only.
+  avatar_image_path: text("avatar_image_path"),
   created_at: integer("created_at").notNull().default(sql`(unixepoch())`),
 }, (t) => ({
   difficultyCheck: check("players_difficulty_chk", sql`${t.default_difficulty} IN ('easy','medium','hard')`),

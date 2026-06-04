@@ -17,3 +17,16 @@ export function createPlayer(body: {
 export function deletePlayer(id: string): Promise<void> {
   return api(`/api/players/${id}`, { method: "DELETE" });
 }
+
+export function updatePlayer(id: string, patch: {
+  name?: string;
+  age_range?: AgeRange;
+  default_difficulty?: DifficultyId;
+  avatar_description?: string;
+}): Promise<{ player: Player }> {
+  return api(`/api/players/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
+}
+
+export function generateAvatar(id: string): Promise<{ player: Player }> {
+  return api(`/api/players/${id}/avatar`, { method: "POST" });
+}
