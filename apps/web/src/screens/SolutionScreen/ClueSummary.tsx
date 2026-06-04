@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { listClues } from "../../api/clues.js";
+import { usePlayerStore } from "../../state/playerStore.js";
 import { CLUE_TABS } from "../PlaybackScreen/ClueTracker/ClueCategoryTabs.js";
 
 export function ClueSummary({ mysteryId }: { mysteryId: string }) {
-  const { data } = useQuery({ queryKey: ["clues", mysteryId], queryFn: () => listClues(mysteryId) });
+  const playerId = usePlayerStore((s) => s.activePlayerId)!;
+  const { data } = useQuery({ queryKey: ["clues", mysteryId, playerId], queryFn: () => listClues(mysteryId, playerId) });
   const clues = data?.clues ?? [];
   return (
     <div style={{ background: "var(--surface)", border: "1px solid var(--line)", padding: 16, borderRadius: "var(--radius)" }}>
