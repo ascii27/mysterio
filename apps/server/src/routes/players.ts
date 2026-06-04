@@ -12,6 +12,13 @@ const createBody = z.object({
   avatar_description: z.string().max(300).optional(),
 });
 
+const patchBody = z.object({
+  name: z.string().trim().min(1).max(24).optional(),
+  age_range: z.enum(["8-9", "10-11", "12-13"]).optional(),
+  default_difficulty: z.enum(["easy", "medium", "hard"]).optional(),
+  avatar_description: z.string().max(300).optional(),
+});
+
 export async function playersRoutes(app: FastifyInstance): Promise<void> {
   app.get("/players", async () => {
     const db = getDb();
@@ -34,6 +41,27 @@ export async function playersRoutes(app: FastifyInstance): Promise<void> {
     }).run();
     const row = db.select().from(players).where(eq(players.id, id)).get();
     reply.status(201);
+    return { player: row };
+  });
+
+  app.patch<{ Params: { id: string } }>("/players/:id", async (req, reply) => {
+    const parsed = patchBody.safeParse(req.body);
+    if (!parsed.success) { reply.status(400); return { error: "invalid_body", issues: parsed.error.issues }; }
+    const db = getDb();
+    const existing = db.select().from(players).where(eq(players.id, req.params.id)).get();
+    if (!existing) { reply.status(404); return { error: "player_not_found" }; }
+
+    const patch: Partial<typeof players.$inferInsert> = {};
+    if (parsed.data.name !== undefined) patch.name = parsed.data.name;
+    if (parsed.data.age_range !== undefined) patch.age_range = parsed.data.age_range;
+    if (parsed.data.default_difficulty !== undefined) patch.default_difficulty = parsed.data.default_difficulty;
+    if (parsed.data.avatar_description !== undefined) {
+      patch.avatar_description = parsed.data.avatar_description.trim() ? parsed.data.avatar_description.trim() : null;
+    }
+    if (Object.keys(patch).length > 0) {
+      db.update(players).set(patch).where(eq(players.id, req.params.id)).run();
+    }
+    const row = db.select().from(players).where(eq(players.id, req.params.id)).get();
     return { player: row };
   });
 
