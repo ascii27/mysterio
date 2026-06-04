@@ -85,7 +85,7 @@ export function PlayerPicker() {
                 }}
                 style={{
                   flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 14, textAlign: "left",
-                  background: "none", border: "none", padding: 16, cursor: editing ? "default" : "pointer",
+                  background: "none", border: "none", padding: 16, cursor: "pointer",
                   color: "inherit", font: "inherit",
                 }}
               >
