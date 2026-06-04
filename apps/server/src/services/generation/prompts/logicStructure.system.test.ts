@@ -15,4 +15,11 @@ describe("buildLogicStructureSystem", () => {
   it("includes the PUZZLE_CRAFT guidance", () => {
     expect(buildLogicStructureSystem("medium")).toContain("MYSTERY CRAFT — PUZZLE DESIGN");
   });
+
+  it("describes a detective-agnostic second-person detective", () => {
+    const s = buildLogicStructureSystem("easy");
+    expect(s).toContain('"You"');
+    expect(s.toLowerCase()).toContain("second person");
+    expect(s).not.toContain("name provided in the user message");
+  });
 });

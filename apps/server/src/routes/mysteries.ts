@@ -41,7 +41,6 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       mysteryId: id,
       category: parsed.data.category,
       difficulty: parsed.data.difficulty,
-      playerName: player.name,
     });
 
     reply.status(202);
