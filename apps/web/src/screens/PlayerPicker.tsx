@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Player } from "@mysterio/shared";
 import { deletePlayer, listPlayers } from "../api/players.js";
 import { usePlayerStore } from "../state/playerStore.js";
 import { Kicker } from "../components/casebook/index.js";
 import { CreateDetective } from "./CreateDetective.js";
+import { EditDetective } from "./EditDetective.js";
 
 export function PlayerPicker() {
   const setActivePlayer = usePlayerStore((s) => s.setActivePlayer);
@@ -12,6 +14,7 @@ export function PlayerPicker() {
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
 
   const { data, isLoading, isError } = useQuery({ queryKey: ["players"], queryFn: listPlayers });
 
@@ -32,6 +35,7 @@ export function PlayerPicker() {
   if (isError || !data) return <div style={{ padding: 24, color: "var(--bad)" }}>Couldn't load players.</div>;
 
   if (creating) return <CreateDetective onCancel={() => setCreating(false)} />;
+  if (editingPlayer) return <EditDetective player={editingPlayer} onDone={() => setEditingPlayer(null)} />;
 
   return (
     <div style={{ minHeight: "100dvh", display: "grid", placeItems: "center", padding: 24 }}>
@@ -76,7 +80,8 @@ export function PlayerPicker() {
                 type="button"
                 aria-label={p.name}
                 onClick={() => {
-                  if (!editing) setActivePlayer(p.id);
+                  if (editing) setEditingPlayer(p);
+                  else setActivePlayer(p.id);
                 }}
                 style={{
                   flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 14, textAlign: "left",
@@ -86,10 +91,15 @@ export function PlayerPicker() {
               >
                 <div aria-hidden="true" style={{
                   width: 48, height: 48, borderRadius: 10, flex: "0 0 auto", display: "grid", placeItems: "center",
+                  overflow: "hidden",
                   background: "radial-gradient(120% 120% at 30% 25%, var(--accent), var(--accent-dark))",
                   color: "#fff", fontFamily: "var(--display)", fontWeight: 700, fontSize: 22,
                   border: "3px solid var(--cream)",
-                }}>{(p.name[0] ?? "?").toUpperCase()}</div>
+                }}>
+                  {p.avatar_image_path
+                    ? <img src={`/images/${p.avatar_image_path}`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    : (p.name[0] ?? "?").toUpperCase()}
+                </div>
                 <span style={{ flex: 1, fontFamily: "var(--display)", fontWeight: 700, fontSize: 22 }}>{p.name}</span>
               </button>
               {editing && (
