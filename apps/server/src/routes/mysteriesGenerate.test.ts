@@ -42,4 +42,13 @@ describe("POST /mysteries/generate — age band", () => {
     const res = await app.inject({ method: "GET", url: "/mysteries/m1" });
     expect(res.json().target_age_range).toBe("12-13");
   });
+
+  it("GET /mysteries/:id returns null target_age_range when not set", async () => {
+    getDb().insert(mysteries).values({
+      id: "m2", player_id: "p-young", category: "missing-pet",
+      difficulty: "easy", status: "pending",
+    }).run();
+    const res = await app.inject({ method: "GET", url: "/mysteries/m2" });
+    expect(res.json().target_age_range).toBeNull();
+  });
 });
