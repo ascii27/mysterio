@@ -14,8 +14,19 @@ export function EditDetective({ player, onDone }: { player: Player; onDone: () =
   const [avatar, setAvatar] = useState(player.avatar_description ?? "");
   const [imagePath, setImagePath] = useState<string | null>(player.avatar_image_path);
 
+  // Generate = save current edits, then draw. Persisting first means the image always
+  // reflects the description currently in the textarea (the server reads the saved row),
+  // not a stale one. Generation happens ONLY here — never as a side effect of Save.
   const genM = useMutation({
-    mutationFn: () => generateAvatar(player.id),
+    mutationFn: async () => {
+      await updatePlayer(player.id, {
+        name: name.trim(),
+        age_range: ageRange,
+        default_difficulty: difficulty,
+        avatar_description: avatar.trim(),
+      });
+      return generateAvatar(player.id);
+    },
     onSuccess: (res) => {
       setImagePath(res.player.avatar_image_path);
       void qc.invalidateQueries({ queryKey: ["players"] });
@@ -23,18 +34,12 @@ export function EditDetective({ player, onDone }: { player: Player; onDone: () =
   });
 
   const saveM = useMutation({
-    mutationFn: async () => {
-      const descChanged = (avatar.trim() || "") !== (player.avatar_description ?? "");
-      await updatePlayer(player.id, {
-        name: name.trim(),
-        age_range: ageRange,
-        default_difficulty: difficulty,
-        avatar_description: avatar.trim(),
-      });
-      if (descChanged && avatar.trim()) {
-        await generateAvatar(player.id); // a changed description produces a fresh image
-      }
-    },
+    mutationFn: () => updatePlayer(player.id, {
+      name: name.trim(),
+      age_range: ageRange,
+      default_difficulty: difficulty,
+      avatar_description: avatar.trim(),
+    }),
     onSuccess: () => { void qc.invalidateQueries({ queryKey: ["players"] }); onDone(); },
   });
 
