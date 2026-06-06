@@ -4,6 +4,7 @@ import { PlayerPicker } from "./screens/PlayerPicker.js";
 import { PlaybackScreen } from "./screens/PlaybackScreen/PlaybackScreen.js";
 import { SettingsScreen } from "./screens/SettingsScreen/SettingsScreen.js";
 import { SolutionScreen } from "./screens/SolutionScreen/SolutionScreen.js";
+import { TrophyRoom } from "./screens/TrophyRoom/TrophyRoom.js";
 import { usePlayerStore } from "./state/playerStore.js";
 
 function Home() {
@@ -19,6 +20,7 @@ export function Routes() {
       <Route path="/mysteries/:id" element={<PlaybackScreen />} />
       <Route path="/mysteries/:id/solve" element={<SolutionScreen />} />
       <Route path="/settings" element={<SettingsScreen />} />
+      <Route path="/trophies" element={<TrophyRoom />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </RRRoutes>
   );

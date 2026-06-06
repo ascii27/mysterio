@@ -1,6 +1,7 @@
 import type { AgeRange } from "../constants/ageRanges.js";
 import type { CategoryId } from "../constants/categories.js";
 import type { DifficultyId } from "../constants/difficulties.js";
+import type { PlayerReputation } from "../constants/reputation.js";
 
 export const MYSTERY_STATUSES = [
   "pending",
@@ -23,6 +24,8 @@ export interface Player {
   avatar_description: string | null;
   avatar_image_path: string | null;
   created_at: number;
+  /** Server-computed; present on the GET /players DTO, absent on raw rows. */
+  reputation?: PlayerReputation;
 }
 
 export interface MysterySummary {

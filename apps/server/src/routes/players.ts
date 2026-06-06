@@ -1,11 +1,37 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { getDb } from "../db/client.js";
-import { players } from "../db/schema.js";
+import { mysteries, players, solutions } from "../db/schema.js";
+import { DIFFICULTY_POINTS, reputationFor, type DifficultyId, type PlayerReputation } from "@mysterio/shared";
 import { runAvatarImageAgent } from "../services/images/avatarImageAgent.js";
 import { deleteImageByKey } from "../services/images/storage.js";
 import { shortId } from "../utils/ids.js";
+
+/** Points + solved-count per detective, derived from their correct solutions. */
+function reputationByPlayer(): Map<string, PlayerReputation> {
+  const db = getDb();
+  const solved = db
+    .select({ player_id: solutions.player_id, difficulty: mysteries.difficulty })
+    .from(solutions)
+    .innerJoin(mysteries, eq(solutions.mystery_id, mysteries.id))
+    .where(eq(solutions.is_correct, 1))
+    .all();
+  const points = new Map<string, number>();
+  const counts = new Map<string, number>();
+  for (const r of solved) {
+    // difficulty is a string column in SQLite but is constrained to DifficultyId values on the insert path
+    points.set(r.player_id, (points.get(r.player_id) ?? 0) + (DIFFICULTY_POINTS[r.difficulty as DifficultyId] ?? 0));
+    counts.set(r.player_id, (counts.get(r.player_id) ?? 0) + 1);
+  }
+  const out = new Map<string, PlayerReputation>();
+  for (const [pid, pts] of points) {
+    out.set(pid, { ...reputationFor(pts), solved_count: counts.get(pid) ?? 0 });
+  }
+  return out;
+}
+
+const ROOKIE: PlayerReputation = { ...reputationFor(0), solved_count: 0 };
 
 const createBody = z.object({
   name: z.string().trim().min(1).max(24),
@@ -20,7 +46,8 @@ export async function playersRoutes(app: FastifyInstance): Promise<void> {
   app.get("/players", async () => {
     const db = getDb();
     const rows = db.select().from(players).all();
-    return { players: rows };
+    const reps = reputationByPlayer();
+    return { players: rows.map((p) => ({ ...p, reputation: reps.get(p.id) ?? ROOKIE })) };
   });
 
   app.post("/players", async (req, reply) => {
@@ -85,5 +112,55 @@ export async function playersRoutes(app: FastifyInstance): Promise<void> {
     }
     const row = db.select().from(players).where(eq(players.id, player.id)).get();
     return { player: row };
+  });
+
+  app.get<{ Params: { id: string } }>("/players/:id/trophies", async (req) => {
+    const db = getDb();
+    const rows = db
+      .select({
+        mystery_id: mysteries.id,
+        title: mysteries.title,
+        cover_image_path: mysteries.cover_image_path,
+        difficulty: mysteries.difficulty,
+        logic: mysteries.logic_structure_json,
+        solved_at: solutions.created_at,
+      })
+      .from(solutions)
+      .innerJoin(mysteries, eq(solutions.mystery_id, mysteries.id))
+      .where(and(
+        eq(solutions.player_id, req.params.id),
+        eq(solutions.is_correct, 1),
+        eq(mysteries.status, "ready"),
+      ))
+      .all();
+
+    const trophies = rows
+      .map((r) => {
+        let culprit_name: string | null = null;
+        let how: string | null = null;
+        try {
+          const ls = JSON.parse(r.logic ?? "") as {
+            characters?: Array<{ id: string; name: string }>;
+            true_solution?: { who_did_it?: string; how?: string };
+          };
+          how = typeof ls.true_solution?.how === "string" ? ls.true_solution.how : null;
+          const who = ls.true_solution?.who_did_it;
+          culprit_name = ls.characters?.find((c) => c.id === who)?.name ?? null;
+        } catch {
+          // malformed/absent logic structure — leave culprit/how null
+        }
+        return {
+          mystery_id: r.mystery_id,
+          title: r.title,
+          cover_image_path: r.cover_image_path,
+          difficulty: r.difficulty,
+          solved_at: r.solved_at,
+          culprit_name,
+          how,
+        };
+      })
+      .sort((a, b) => b.solved_at - a.solved_at);
+
+    return { trophies };
   });
 }
