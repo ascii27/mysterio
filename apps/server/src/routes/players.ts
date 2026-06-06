@@ -2,10 +2,35 @@ import { eq } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { getDb } from "../db/client.js";
-import { players } from "../db/schema.js";
+import { mysteries, players, solutions } from "../db/schema.js";
+import { DIFFICULTY_POINTS, reputationFor, type DifficultyId, type PlayerReputation } from "@mysterio/shared";
 import { runAvatarImageAgent } from "../services/images/avatarImageAgent.js";
 import { deleteImageByKey } from "../services/images/storage.js";
 import { shortId } from "../utils/ids.js";
+
+/** Points + solved-count per detective, derived from their correct solutions. */
+function reputationByPlayer(): Map<string, PlayerReputation> {
+  const db = getDb();
+  const solved = db
+    .select({ player_id: solutions.player_id, difficulty: mysteries.difficulty })
+    .from(solutions)
+    .innerJoin(mysteries, eq(solutions.mystery_id, mysteries.id))
+    .where(eq(solutions.is_correct, 1))
+    .all();
+  const points = new Map<string, number>();
+  const counts = new Map<string, number>();
+  for (const r of solved) {
+    points.set(r.player_id, (points.get(r.player_id) ?? 0) + (DIFFICULTY_POINTS[r.difficulty as DifficultyId] ?? 0));
+    counts.set(r.player_id, (counts.get(r.player_id) ?? 0) + 1);
+  }
+  const out = new Map<string, PlayerReputation>();
+  for (const [pid, pts] of points) {
+    out.set(pid, { ...reputationFor(pts), solved_count: counts.get(pid) ?? 0 });
+  }
+  return out;
+}
+
+const ROOKIE: PlayerReputation = { ...reputationFor(0), solved_count: 0 };
 
 const createBody = z.object({
   name: z.string().trim().min(1).max(24),
@@ -20,7 +45,8 @@ export async function playersRoutes(app: FastifyInstance): Promise<void> {
   app.get("/players", async () => {
     const db = getDb();
     const rows = db.select().from(players).all();
-    return { players: rows };
+    const reps = reputationByPlayer();
+    return { players: rows.map((p) => ({ ...p, reputation: reps.get(p.id) ?? ROOKIE })) };
   });
 
   app.post("/players", async (req, reply) => {
