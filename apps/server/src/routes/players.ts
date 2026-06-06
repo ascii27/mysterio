@@ -20,6 +20,7 @@ function reputationByPlayer(): Map<string, PlayerReputation> {
   const points = new Map<string, number>();
   const counts = new Map<string, number>();
   for (const r of solved) {
+    // difficulty is a string column in SQLite but is constrained to DifficultyId values on the insert path
     points.set(r.player_id, (points.get(r.player_id) ?? 0) + (DIFFICULTY_POINTS[r.difficulty as DifficultyId] ?? 0));
     counts.set(r.player_id, (counts.get(r.player_id) ?? 0) + 1);
   }

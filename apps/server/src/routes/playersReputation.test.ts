@@ -51,8 +51,12 @@ describe("GET /players reputation", () => {
     seedSolvedCase("p1", "ma", "hard", { is_correct: 1 });
     seedSolvedCase("p2", "mb", "easy", { is_correct: 1 });
     const list = await app.inject({ method: "GET", url: "/players" });
-    const map = Object.fromEntries(list.json().players.map((x: { id: string; reputation: { points: number } }) => [x.id, x.reputation.points]));
-    expect(map.p1).toBe(3);
-    expect(map.p2).toBe(1);
+    const byId = Object.fromEntries(
+      list.json().players.map((x: { id: string; reputation: { points: number; solved_count: number } }) => [x.id, x.reputation]),
+    );
+    expect(byId.p1.points).toBe(3);
+    expect(byId.p2.points).toBe(1);
+    expect(byId.p1.solved_count).toBe(1);
+    expect(byId.p2.solved_count).toBe(1);
   });
 });
