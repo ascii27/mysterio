@@ -100,7 +100,12 @@ export function PlayerPicker() {
                     ? <img src={`/images/${p.avatar_image_path}`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     : (p.name[0] ?? "?").toUpperCase()}
                 </div>
-                <span style={{ flex: 1, fontFamily: "var(--display)", fontWeight: 700, fontSize: 22 }}>{p.name}</span>
+                <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
+                  <span style={{ fontFamily: "var(--display)", fontWeight: 700, fontSize: 22, lineHeight: 1.05 }}>{p.name}</span>
+                  <span style={{ fontFamily: "var(--mono)", fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--accent)" }}>
+                    {p.reputation?.rank_name ?? "Rookie"}
+                  </span>
+                </span>
               </button>
               {editing && (
                 <button
