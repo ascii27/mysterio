@@ -5,3 +5,4 @@ export { Kicker } from "./Kicker.js";
 export { Folder } from "./Folder.js";
 export { SceneArt, SCENE_FOR_CATEGORY, type SceneKey } from "./SceneArt.js";
 export { SceneFrame } from "./SceneFrame.js";
+export { RankBadge } from "./RankBadge.js";

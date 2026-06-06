@@ -30,3 +30,17 @@ export function updatePlayer(id: string, patch: {
 export function generateAvatar(id: string): Promise<{ player: Player }> {
   return api(`/api/players/${id}/avatar`, { method: "POST" });
 }
+
+export interface Trophy {
+  mystery_id: string;
+  title: string | null;
+  cover_image_path: string | null;
+  difficulty: DifficultyId;
+  solved_at: number;
+  culprit_name: string | null;
+  how: string | null;
+}
+
+export function listTrophies(playerId: string): Promise<{ trophies: Trophy[] }> {
+  return api(`/api/players/${playerId}/trophies`);
+}
