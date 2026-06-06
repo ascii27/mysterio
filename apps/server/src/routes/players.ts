@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { getDb } from "../db/client.js";
@@ -112,5 +112,55 @@ export async function playersRoutes(app: FastifyInstance): Promise<void> {
     }
     const row = db.select().from(players).where(eq(players.id, player.id)).get();
     return { player: row };
+  });
+
+  app.get<{ Params: { id: string } }>("/players/:id/trophies", async (req) => {
+    const db = getDb();
+    const rows = db
+      .select({
+        mystery_id: mysteries.id,
+        title: mysteries.title,
+        cover_image_path: mysteries.cover_image_path,
+        difficulty: mysteries.difficulty,
+        logic: mysteries.logic_structure_json,
+        solved_at: solutions.created_at,
+      })
+      .from(solutions)
+      .innerJoin(mysteries, eq(solutions.mystery_id, mysteries.id))
+      .where(and(
+        eq(solutions.player_id, req.params.id),
+        eq(solutions.is_correct, 1),
+        eq(mysteries.status, "ready"),
+      ))
+      .all();
+
+    const trophies = rows
+      .map((r) => {
+        let culprit_name: string | null = null;
+        let how: string | null = null;
+        try {
+          const ls = JSON.parse(r.logic ?? "") as {
+            characters?: Array<{ id: string; name: string }>;
+            true_solution?: { who_did_it?: string; how?: string };
+          };
+          how = typeof ls.true_solution?.how === "string" ? ls.true_solution.how : null;
+          const who = ls.true_solution?.who_did_it;
+          culprit_name = ls.characters?.find((c) => c.id === who)?.name ?? null;
+        } catch {
+          // malformed/absent logic structure — leave culprit/how null
+        }
+        return {
+          mystery_id: r.mystery_id,
+          title: r.title,
+          cover_image_path: r.cover_image_path,
+          difficulty: r.difficulty,
+          solved_at: r.solved_at,
+          culprit_name,
+          how,
+        };
+      })
+      .sort((a, b) => b.solved_at - a.solved_at);
+
+    return { trophies };
   });
 }
