@@ -66,13 +66,24 @@ export function MainScreen() {
               marginBottom: 24, display: "flex", gap: 14, alignItems: "center",
             }}
           >
-            <RankBadge rankIndex={rankIndex} size={56} />
+            <div style={{
+              width: 56, height: 56, borderRadius: "50%", flex: "0 0 auto", overflow: "hidden",
+              display: "grid", placeItems: "center",
+              background: "radial-gradient(120% 120% at 30% 25%, var(--accent), var(--accent-dark))",
+              color: "#fff", fontFamily: "var(--display)", fontWeight: 800, fontSize: 26,
+              border: "3px solid var(--cream)", boxShadow: "0 2px 6px -1px rgba(0,0,0,0.45)",
+            }}>
+              {player?.avatar_image_path
+                ? <img src={`/images/${player.avatar_image_path}`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : (player?.name?.[0] ?? "?").toUpperCase()}
+            </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 12, color: "var(--gold)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--display)", fontWeight: 700 }}>
                 {rankName}
               </div>
-              <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2, fontFamily: "var(--display)" }}>
-                Detective {player?.name ?? ""} 🕵️
+              <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2, fontFamily: "var(--display)", display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Detective {player?.name ?? ""}</span>
+                <RankBadge rankIndex={rankIndex} size={26} />
               </div>
               <div style={{ marginTop: 8, height: 8, borderRadius: 999, background: "rgba(74,52,24,0.18)", overflow: "hidden" }}>
                 <div style={{ width: `${pct}%`, height: "100%", background: "var(--gold)", transition: "width .3s" }} />
