@@ -19,6 +19,7 @@ describe("reputation model", () => {
     expect(reputationFor(3).rank_name).toBe("Junior Sleuth");
     expect(reputationFor(8).rank_name).toBe("Junior Sleuth");
     expect(reputationFor(9).rank_name).toBe("Detective");
+    expect(reputationFor(9).rank_index).toBe(2);
     expect(reputationFor(21).rank_name).toBe("Master Detective");
   });
 
@@ -42,6 +43,7 @@ describe("reputation model", () => {
 
   it("floors negative/fractional points", () => {
     expect(reputationFor(-5).points).toBe(0);
+    expect(reputationFor(2.9).points).toBe(2);
     expect(reputationFor(2.9).rank_name).toBe("Rookie");
   });
 

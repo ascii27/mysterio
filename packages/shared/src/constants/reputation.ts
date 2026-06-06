@@ -17,12 +17,12 @@ export interface Rank {
 }
 
 /** Named ranks with geometrically growing gaps (3, 6, 12 — each doubles). */
-export const RANKS: readonly Rank[] = [
+export const RANKS = [
   { id: "rookie", name: "Rookie", threshold: 0, medal: "#c98a5b" },
   { id: "sleuth", name: "Junior Sleuth", threshold: 3, medal: "#c9cdd6" },
   { id: "detective", name: "Detective", threshold: 9, medal: "#e8b04b" },
   { id: "master", name: "Master Detective", threshold: 21, medal: "#7fd1ff" },
-] as const;
+] as const satisfies readonly Rank[];
 
 export interface ReputationSummary {
   points: number;
@@ -65,6 +65,7 @@ export function reputationFor(points: number): ReputationSummary {
   };
 }
 
+/** Pure: sum the reputation points for a list of difficulty ids. */
 export function pointsForDifficulties(difficulties: DifficultyId[]): number {
   return difficulties.reduce((sum, d) => sum + (DIFFICULTY_POINTS[d] ?? 0), 0);
 }
