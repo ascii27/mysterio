@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { type CategoryId, type DifficultyId, difficultyConfig } from "@mysterio/shared";
+import { type CategoryId, type DifficultyId, difficultyConfig, RANKS } from "@mysterio/shared";
 import { generateMystery } from "../../api/mysteries.js";
 import { listPlayers } from "../../api/players.js";
 import { Button } from "../../components/Button.js";
@@ -9,7 +9,11 @@ import { usePlayerStore } from "../../state/playerStore.js";
 import { CategoryGrid } from "./CategoryGrid.js";
 import { DifficultyPicker } from "./DifficultyPicker.js";
 import { RecentList } from "./RecentList.js";
-import { Kicker } from "../../components/casebook/index.js";
+import { Kicker, RankBadge } from "../../components/casebook/index.js";
+
+function RANKS_NEXT_NAME(rankIndex: number): string {
+  return RANKS[rankIndex + 1]?.name ?? "Master Detective";
+}
 
 export function MainScreen() {
   const navigate = useNavigate();
@@ -48,23 +52,47 @@ export function MainScreen() {
         </div>
       </header>
 
-      <div
-        style={{
-          background: "linear-gradient(135deg, #f3ead0, #e7d6ac)",
-          padding: 18,
-          borderRadius: "var(--radius-lg)",
-          border: "1px solid var(--line)",
-          boxShadow: "0 2px 8px -3px rgba(40,28,12,0.3), inset 4px 0 0 var(--accent)",
-          marginBottom: 24,
-        }}
-      >
-        <div style={{ fontSize: 12, color: "var(--gold)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--display)", fontWeight: 700 }}>
-          Welcome back
-        </div>
-        <div style={{ fontSize: 24, fontWeight: 800, marginTop: 4, fontFamily: "var(--display)" }}>
-          Detective {player?.name ?? ""} 🕵️
-        </div>
-      </div>
+      {(() => {
+        const rep = player?.reputation;
+        const rankIndex = rep?.rank_index ?? 0;
+        const rankName = rep?.rank_name ?? "Rookie";
+        const pct = Math.round((rep?.progress_fraction ?? 0) * 100);
+        return (
+          <div
+            style={{
+              background: "linear-gradient(135deg, #f3ead0, #e7d6ac)",
+              padding: 18, borderRadius: "var(--radius-lg)", border: "1px solid var(--line)",
+              boxShadow: "0 2px 8px -3px rgba(40,28,12,0.3), inset 4px 0 0 var(--accent)",
+              marginBottom: 24, display: "flex", gap: 14, alignItems: "center",
+            }}
+          >
+            <RankBadge rankIndex={rankIndex} size={56} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, color: "var(--gold)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--display)", fontWeight: 700 }}>
+                {rankName}
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2, fontFamily: "var(--display)" }}>
+                Detective {player?.name ?? ""} 🕵️
+              </div>
+              <div style={{ marginTop: 8, height: 8, borderRadius: 999, background: "rgba(74,52,24,0.18)", overflow: "hidden" }}>
+                <div style={{ width: `${pct}%`, height: "100%", background: "var(--gold)", transition: "width .3s" }} />
+              </div>
+              <div style={{ fontSize: 12, color: "var(--ink-dim)", marginTop: 5 }}>
+                {rep?.points_to_next != null
+                  ? `${rep.points_to_next} more to ${RANKS_NEXT_NAME(rankIndex)} · ${rep.solved_count ?? 0} solved`
+                  : `Top rank! · ${rep?.solved_count ?? 0} solved`}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate("/trophies")}
+              style={{ flex: "0 0 auto", padding: "10px 12px", borderRadius: "var(--radius)", background: "var(--surface)", border: "1px solid var(--line)", cursor: "pointer", fontFamily: "var(--display)", fontWeight: 700, fontSize: 13 }}
+            >
+              🏆<br />Trophies
+            </button>
+          </div>
+        );
+      })()}
 
       <section style={{ marginBottom: 24 }}>
         <Kicker>Pick a kind of mystery</Kicker>
