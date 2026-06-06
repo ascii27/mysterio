@@ -29,7 +29,7 @@ function seedSolved(playerId: string, mysteryId: string, opts: { is_correct: num
     id: mysteryId, player_id: playerId, category: "missing-pet", difficulty: "medium",
     status: opts.status ?? "ready", title: opts.title ?? "The Case", cover_image_path: "covers/x.png",
     logic_structure_json: LOGIC,
-  }).run();
+  }).onConflictDoNothing().run();
   db.insert(solutions).values({ id: `s-${mysteryId}`, mystery_id: mysteryId, player_id: playerId, is_correct: opts.is_correct }).run();
 }
 
@@ -62,5 +62,22 @@ describe("GET /players/:id/trophies", () => {
     const res = await app.inject({ method: "GET", url: "/players/p2/trophies" });
     expect(res.statusCode).toBe(200);
     expect(res.json().trophies).toEqual([]);
+  });
+
+  it("returns a trophy with null culprit/how when logic_structure_json is malformed", async () => {
+    const db = getDb();
+    db.insert(players).values({ id: "p3", name: "p3", age_range: "10-11", default_difficulty: "easy" }).onConflictDoNothing().run();
+    db.insert(mysteries).values({
+      id: "m-bad", player_id: "p3", category: "missing-pet", difficulty: "easy",
+      status: "ready", title: "Bad Logic", cover_image_path: "covers/x.png",
+      logic_structure_json: null,
+    }).run();
+    db.insert(solutions).values({ id: "s-m-bad", mystery_id: "m-bad", player_id: "p3", is_correct: 1 }).run();
+    const res = await app.inject({ method: "GET", url: "/players/p3/trophies" });
+    expect(res.statusCode).toBe(200);
+    const trophies = res.json().trophies;
+    expect(trophies).toHaveLength(1);
+    expect(trophies[0].culprit_name).toBeNull();
+    expect(trophies[0].how).toBeNull();
   });
 });
