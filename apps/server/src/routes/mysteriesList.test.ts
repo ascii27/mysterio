@@ -15,10 +15,10 @@ beforeEach(async () => {
   setupTestDb();
   const db = getDb();
   for (const id of ["p-a", "p-b"]) {
-    db.insert(players).values({ id, name: id, age_range: "10-11", default_difficulty: "easy" }).run();
+    await db.insert(players).values({ id, name: id, age_range: "10-11", default_difficulty: "easy" });
   }
-  db.insert(mysteries).values({ id: "m-ready", player_id: "p-a", category: "missing-pet", difficulty: "easy", status: "ready", target_age_range: "12-13" }).run();
-  db.insert(mysteries).values({ id: "m-pending", player_id: "p-a", category: "missing-pet", difficulty: "easy", status: "pending" }).run();
+  await db.insert(mysteries).values({ id: "m-ready", player_id: "p-a", category: "missing-pet", difficulty: "easy", status: "ready", target_age_range: "12-13" });
+  await db.insert(mysteries).values({ id: "m-pending", player_id: "p-a", category: "missing-pet", difficulty: "easy", status: "pending" });
   app = Fastify();
   await app.register(mysteriesRoutes);
   await app.ready();
@@ -40,10 +40,10 @@ describe("GET /mysteries — shared pool + per-detective status", () => {
 
   it("solved status is per-detective", async () => {
     const db = getDb();
-    db.insert(solutions).values({
+    await db.insert(solutions).values({
       id: "sol-a", mystery_id: "m-ready", player_id: "p-a",
-      is_correct: 1, hints_used: 0, gave_up: 0,
-    }).run();
+      is_correct: true, hints_used: 0, gave_up: false,
+    });
     const a = (await list("p-a")).find((m) => m.id === "m-ready")!;
     const b = (await list("p-b")).find((m) => m.id === "m-ready")!;
     expect(a.solved).toBe(true);
