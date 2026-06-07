@@ -14,18 +14,18 @@ beforeEach(async () => {
 });
 afterEach(async () => { await app.close(); });
 
-function seedPlayer(id: string) {
-  getDb().insert(players).values({ id, name: id, age_range: "10-11", default_difficulty: "easy" }).run();
+async function seedPlayer(id: string) {
+  await getDb().insert(players).values({ id, name: id, age_range: "10-11", default_difficulty: "easy" });
 }
-function seedSolvedCase(playerId: string, mysteryId: string, difficulty: "easy" | "medium" | "hard", outcome: { is_correct: number; gave_up?: number }) {
+async function seedSolvedCase(playerId: string, mysteryId: string, difficulty: "easy" | "medium" | "hard", outcome: { is_correct: boolean; gave_up?: boolean }) {
   const db = getDb();
-  db.insert(mysteries).values({ id: mysteryId, player_id: playerId, category: "missing-pet", difficulty, status: "ready" }).run();
-  db.insert(solutions).values({ id: `s-${mysteryId}-${playerId}`, mystery_id: mysteryId, player_id: playerId, is_correct: outcome.is_correct, gave_up: outcome.gave_up ?? 0 }).run();
+  await db.insert(mysteries).values({ id: mysteryId, player_id: playerId, category: "missing-pet", difficulty, status: "ready" });
+  await db.insert(solutions).values({ id: `s-${mysteryId}-${playerId}`, mystery_id: mysteryId, player_id: playerId, is_correct: outcome.is_correct, gave_up: outcome.gave_up ?? false });
 }
 
 describe("GET /players reputation", () => {
   it("a detective with no solves is Rookie with 0 points", async () => {
-    seedPlayer("p1");
+    await seedPlayer("p1");
     const list = await app.inject({ method: "GET", url: "/players" });
     const p = list.json().players.find((x: { id: string }) => x.id === "p1");
     expect(p.reputation.points).toBe(0);
@@ -34,11 +34,11 @@ describe("GET /players reputation", () => {
   });
 
   it("sums difficulty-weighted points over correct solves only", async () => {
-    seedPlayer("p1");
-    seedSolvedCase("p1", "m-easy", "easy", { is_correct: 1 });   // +1
-    seedSolvedCase("p1", "m-hard", "hard", { is_correct: 1 });   // +3
-    seedSolvedCase("p1", "m-wrong", "hard", { is_correct: 0 });  // wrong → 0
-    seedSolvedCase("p1", "m-gaveup", "medium", { is_correct: 0, gave_up: 1 }); // give-up → 0
+    await seedPlayer("p1");
+    await seedSolvedCase("p1", "m-easy", "easy", { is_correct: true });   // +1
+    await seedSolvedCase("p1", "m-hard", "hard", { is_correct: true });   // +3
+    await seedSolvedCase("p1", "m-wrong", "hard", { is_correct: false });  // wrong → 0
+    await seedSolvedCase("p1", "m-gaveup", "medium", { is_correct: false, gave_up: true }); // give-up → 0
     const list = await app.inject({ method: "GET", url: "/players" });
     const p = list.json().players.find((x: { id: string }) => x.id === "p1");
     expect(p.reputation.points).toBe(4); // 1 + 3
@@ -47,9 +47,9 @@ describe("GET /players reputation", () => {
   });
 
   it("scopes reputation per detective", async () => {
-    seedPlayer("p1"); seedPlayer("p2");
-    seedSolvedCase("p1", "ma", "hard", { is_correct: 1 });
-    seedSolvedCase("p2", "mb", "easy", { is_correct: 1 });
+    await seedPlayer("p1"); await seedPlayer("p2");
+    await seedSolvedCase("p1", "ma", "hard", { is_correct: true });
+    await seedSolvedCase("p2", "mb", "easy", { is_correct: true });
     const list = await app.inject({ method: "GET", url: "/players" });
     const byId = Object.fromEntries(
       list.json().players.map((x: { id: string; reputation: { points: number; solved_count: number } }) => [x.id, x.reputation]),

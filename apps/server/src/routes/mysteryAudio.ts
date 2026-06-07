@@ -7,7 +7,7 @@ export interface AudioRow {
 
 export interface AudioDeps {
   generateAudio: (id: string, narrativeText: string) => Promise<{ ok: true; audioPath: string } | { ok: false; error: string }>;
-  persistAudioPath: (id: string, audioPath: string) => void;
+  persistAudioPath: (id: string, audioPath: string) => void | Promise<void>;
 }
 
 export interface AudioOutcome {
@@ -33,6 +33,6 @@ export async function resolveMysteryAudio(
   if (!res.ok) {
     return { status: 502, body: { error: "tts_failed", detail: res.error } };
   }
-  deps.persistAudioPath(row.id, res.audioPath);
+  await deps.persistAudioPath(row.id, res.audioPath);
   return { status: 200, body: { audio_url: `/audio/${res.audioPath}` } };
 }

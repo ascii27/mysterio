@@ -8,7 +8,7 @@ import { playersRoutes } from "./players.js";
 let app: FastifyInstance;
 beforeEach(async () => {
   setupTestDb();
-  getDb().insert(players).values({ id: "p1", name: "Lily", age_range: "10-11", default_difficulty: "easy", avatar_description: "red hair" }).run();
+  await getDb().insert(players).values({ id: "p1", name: "Lily", age_range: "10-11", default_difficulty: "easy", avatar_description: "red hair" });
   app = Fastify();
   await app.register(playersRoutes);
   await app.ready();

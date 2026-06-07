@@ -36,7 +36,7 @@ export interface Trophy {
   title: string | null;
   cover_image_path: string | null;
   difficulty: DifficultyId;
-  solved_at: number;
+  solved_at: string;
   culprit_name: string | null;
   how: string | null;
 }

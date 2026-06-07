@@ -7,6 +7,7 @@ vi.mock("../services/generation/agents/hintAgent.js", () => ({
 
 import { setupTestDb } from "../test/db.js";
 import { getDb } from "../db/client.js";
+import type { LogicStructure } from "@mysterio/shared";
 import { players, mysteries } from "../db/schema.js";
 import { hintsRoutes } from "./hints.js";
 
@@ -25,19 +26,19 @@ const LS_FIXTURE = {
   how_distractors: ["A fox.", "It broke.", "Left open."],
   why_distractors: ["Prank.", "To sell.", "Anger."],
   logic_chain: ["Clover to gap.", "Latch lifted.", "Theo did it."],
-};
+} as LogicStructure;
 
 let app: FastifyInstance;
 beforeEach(async () => {
   setupTestDb();
   const db = getDb();
   for (const id of ["p-a", "p-b"]) {
-    db.insert(players).values({ id, name: id, age_range: "10-11", default_difficulty: "easy" }).run();
+    await db.insert(players).values({ id, name: id, age_range: "10-11", default_difficulty: "easy" });
   }
-  db.insert(mysteries).values({
+  await db.insert(mysteries).values({
     id: "m-1", player_id: "p-a", category: "missing-pet", difficulty: "easy",
-    status: "ready", logic_structure_json: JSON.stringify(LS_FIXTURE),
-  }).run();
+    status: "ready", logic_structure_json: LS_FIXTURE,
+  });
   app = Fastify();
   await app.register(hintsRoutes);
   await app.ready();

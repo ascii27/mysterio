@@ -6,8 +6,8 @@ import { listPlayers, listTrophies, type Trophy } from "../../api/players.js";
 import { usePlayerStore } from "../../state/playerStore.js";
 import { RankBadge, Chip } from "../../components/casebook/index.js";
 
-function solvedDate(ms: number): string {
-  return new Date(ms * 1000).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+function solvedDate(iso: string): string {
+  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
 export function TrophyRoom() {

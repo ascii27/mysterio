@@ -32,8 +32,8 @@ export async function runGeneration(input: RunInput): Promise<void> {
 
     for (let attempt = 1; attempt <= env.MAX_VALIDATION_ATTEMPTS; attempt++) {
       // Phase 1: logic structure
-      db.update(mysteries).set({ status: "generating_logic", validation_attempts: attempt - 1 })
-        .where(eq(mysteries.id, input.mysteryId)).run();
+      await db.update(mysteries).set({ status: "generating_logic", validation_attempts: attempt - 1 })
+        .where(eq(mysteries.id, input.mysteryId));
       const logicRes = await runLogicStructureAgent({
         category: input.category,
         difficulty: input.difficulty,
@@ -48,8 +48,8 @@ export async function runGeneration(input: RunInput): Promise<void> {
       const logic: LogicStructure = logicRes.value;
 
       // Phase 2: structure validation
-      db.update(mysteries).set({ status: "validating", validation_attempts: attempt })
-        .where(eq(mysteries.id, input.mysteryId)).run();
+      await db.update(mysteries).set({ status: "validating", validation_attempts: attempt })
+        .where(eq(mysteries.id, input.mysteryId));
       const valRes = await runValidationAgent(redact(logic));
       if (!valRes.ok) {
         previousFailureNotes = `validation agent malfunctioned: ${valRes.error}`;
@@ -57,7 +57,7 @@ export async function runGeneration(input: RunInput): Promise<void> {
         continue;
       }
       const cmp = await compareSolutions(valRes.value, logic.true_solution);
-      db.update(mysteries).set({ validation_notes: cmp.notes }).where(eq(mysteries.id, input.mysteryId)).run();
+      await db.update(mysteries).set({ validation_notes: cmp.notes }).where(eq(mysteries.id, input.mysteryId));
       log("validation_attempt", { attempt, passed: cmp.passed, who_match: cmp.who_match, how_match: cmp.how_match, why_match: cmp.why_match });
       if (!cmp.passed) {
         previousFailureNotes = cmp.notes;
@@ -65,11 +65,11 @@ export async function runGeneration(input: RunInput): Promise<void> {
       }
 
       // Structure is solvable — lock it in and write the prose.
-      db.update(mysteries).set({
+      await db.update(mysteries).set({
         status: "writing",
-        logic_structure_json: JSON.stringify(logic),
-        validation_passed: 1,
-      }).where(eq(mysteries.id, input.mysteryId)).run();
+        logic_structure_json: logic,
+        validation_passed: true,
+      }).where(eq(mysteries.id, input.mysteryId));
 
       // Phase 3 + 4: narrative + readthrough gate (regen prose, then escalate).
       proseAttempted = true;
@@ -99,38 +99,38 @@ export async function runGeneration(input: RunInput): Promise<void> {
             log("cover_image_skipped", { reason: cover.error });
           }
         }
-        db.update(mysteries).set({
+        await db.update(mysteries).set({
           status: "ready",
           title: prose.value.title,
           narrative_text: prose.value.narrative_text,
-          narrative_annotations: JSON.stringify(prose.value.annotations),
+          narrative_annotations: prose.value.annotations,
           cover_image_path: coverImagePath,
-          ready_at: Math.floor(Date.now() / 1000),
-        }).where(eq(mysteries.id, input.mysteryId)).run();
+          ready_at: new Date(),
+        }).where(eq(mysteries.id, input.mysteryId));
         log("generation_complete", { attempt, cover: coverImagePath !== null });
         return;
       }
 
       // Prose couldn't be made solvable — escalate to a fresh logic structure.
       previousFailureNotes = prose.escalationNotes;
-      db.update(mysteries).set({ validation_notes: prose.escalationNotes }).where(eq(mysteries.id, input.mysteryId)).run();
+      await db.update(mysteries).set({ validation_notes: prose.escalationNotes }).where(eq(mysteries.id, input.mysteryId));
       log("readthrough_escalate", { attempt, notes: prose.escalationNotes });
     }
 
     // Outer loop exhausted.
-    db.update(mysteries).set({
+    await db.update(mysteries).set({
       status: "failed",
       failure_reason: proseAttempted ? "readthrough_exhausted" : "validation_exhausted",
-      validation_passed: 0,
+      validation_passed: false,
       validation_attempts: env.MAX_VALIDATION_ATTEMPTS,
-    }).where(eq(mysteries.id, input.mysteryId)).run();
+    }).where(eq(mysteries.id, input.mysteryId));
     log("generation_failed", { reason: proseAttempted ? "readthrough_exhausted" : "validation_exhausted" });
   } catch (err) {
     log("orchestrator_unhandled_error", { err: err instanceof Error ? err.message : String(err) });
     try {
       const db = getDb();
-      db.update(mysteries).set({ status: "failed", failure_reason: "orchestrator_error" })
-        .where(eq(mysteries.id, input.mysteryId)).run();
+      await db.update(mysteries).set({ status: "failed", failure_reason: "orchestrator_error" })
+        .where(eq(mysteries.id, input.mysteryId));
     } catch (dbErr) {
       log("orchestrator_catch_db_failed", { err: dbErr instanceof Error ? dbErr.message : String(dbErr) });
       // mystery stays in non-terminal status; M1.9's startup cleanup will recover it

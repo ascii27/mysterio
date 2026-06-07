@@ -1,41 +1,41 @@
 import { sql } from "drizzle-orm";
-import { check, index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { boolean, check, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import type { LogicStructure, NarrativeAnnotation } from "@mysterio/shared";
 
-export const players = sqliteTable("players", {
+const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
+
+export const players = pgTable("players", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   default_difficulty: text("default_difficulty").notNull(),
   age_range: text("age_range").notNull().default("10-11"),
   avatar_description: text("avatar_description"),
-  // No DB-level CHECK — players is the parent of FK-cascade children (clues/solutions/hints);
-  // a CHECK would force a table rebuild (DROP TABLE players → cascade-wipe). Nullable ADD COLUMN only.
   avatar_image_path: text("avatar_image_path"),
-  created_at: integer("created_at").notNull().default(sql`(unixepoch())`),
+  created_at: createdAt(),
 }, (t) => ({
   difficultyCheck: check("players_difficulty_chk", sql`${t.default_difficulty} IN ('easy','medium','hard')`),
   ageRangeCheck: check("players_age_range_chk", sql`${t.age_range} IN ('8-9','10-11','12-13')`),
 }));
 
-export const mysteries = sqliteTable("mysteries", {
+export const mysteries = pgTable("mysteries", {
   id: text("id").primaryKey(),
   player_id: text("player_id").references(() => players.id, { onDelete: "set null" }),
   category: text("category").notNull(),
   difficulty: text("difficulty").notNull(),
-  // No DB-level CHECK — adding one forces a table rebuild (FK-cascade risk per reference_sqlite_fk_migration_gotcha); validated at the app layer from the player's age_range.
   target_age_range: text("target_age_range"),
   status: text("status").notNull(),
   title: text("title"),
-  logic_structure_json: text("logic_structure_json"),
+  logic_structure_json: jsonb("logic_structure_json").$type<LogicStructure>(),
   narrative_text: text("narrative_text"),
-  narrative_annotations: text("narrative_annotations"),
+  narrative_annotations: jsonb("narrative_annotations").$type<NarrativeAnnotation[]>(),
   audio_path: text("audio_path"),
   cover_image_path: text("cover_image_path"),
-  validation_passed: integer("validation_passed"),
+  validation_passed: boolean("validation_passed"),
   validation_attempts: integer("validation_attempts").notNull().default(0),
   validation_notes: text("validation_notes"),
   failure_reason: text("failure_reason"),
-  created_at: integer("created_at").notNull().default(sql`(unixepoch())`),
-  ready_at: integer("ready_at"),
+  created_at: createdAt(),
+  ready_at: timestamp("ready_at", { withTimezone: true }),
 }, (t) => ({
   difficultyCheck: check("mysteries_difficulty_chk", sql`${t.difficulty} IN ('easy','medium','hard')`),
   statusCheck: check(
@@ -46,7 +46,7 @@ export const mysteries = sqliteTable("mysteries", {
   activeIdx: index("idx_mysteries_active").on(t.status),
 }));
 
-export const clues = sqliteTable("clues", {
+export const clues = pgTable("clues", {
   id: text("id").primaryKey(),
   mystery_id: text("mystery_id").notNull().references(() => mysteries.id, { onDelete: "cascade" }),
   player_id: text("player_id").notNull().references(() => players.id, { onDelete: "cascade" }),
@@ -55,16 +55,10 @@ export const clues = sqliteTable("clues", {
   audio_timestamp_ms: integer("audio_timestamp_ms"),
   source: text("source").notNull().default("manual"),
   annotation_id: text("annotation_id"),
-  created_at: integer("created_at").notNull().default(sql`(unixepoch())`),
+  created_at: createdAt(),
 }, (t) => ({
-  categoryCheck: check(
-    "clues_category_chk",
-    sql`${t.category_type} IN ('character','item','location','event','note')`,
-  ),
-  sourceCheck: check(
-    "clues_source_chk",
-    sql`${t.source} IN ('manual','annotation')`,
-  ),
+  categoryCheck: check("clues_category_chk", sql`${t.category_type} IN ('character','item','location','event','note')`),
+  sourceCheck: check("clues_source_chk", sql`${t.source} IN ('manual','annotation')`),
   mysteryIdx: index("idx_clues_mystery").on(t.mystery_id),
   annotationUniq: uniqueIndex("clues_mystery_annotation_uniq")
     .on(t.mystery_id, t.player_id, t.annotation_id)
@@ -72,31 +66,31 @@ export const clues = sqliteTable("clues", {
   mysteryPlayerIdx: index("idx_clues_mystery_player").on(t.mystery_id, t.player_id),
 }));
 
-export const solutions = sqliteTable("solutions", {
+export const solutions = pgTable("solutions", {
   id: text("id").primaryKey(),
   mystery_id: text("mystery_id").notNull().references(() => mysteries.id, { onDelete: "cascade" }),
   player_id: text("player_id").notNull().references(() => players.id, { onDelete: "cascade" }),
   guess_who: text("guess_who"),
   guess_how: text("guess_how"),
   guess_why: text("guess_why"),
-  is_correct: integer("is_correct").notNull(),
-  who_match: integer("who_match"),
-  how_match: integer("how_match"),
-  why_match: integer("why_match"),
+  is_correct: boolean("is_correct").notNull(),
+  who_match: boolean("who_match"),
+  how_match: boolean("how_match"),
+  why_match: boolean("why_match"),
   hints_used: integer("hints_used").notNull().default(0),
-  gave_up: integer("gave_up").notNull().default(0),
+  gave_up: boolean("gave_up").notNull().default(false),
   explanation: text("explanation"),
-  created_at: integer("created_at").notNull().default(sql`(unixepoch())`),
+  created_at: createdAt(),
 }, (t) => ({
   mysteryUniq: uniqueIndex("solutions_mystery_uniq").on(t.mystery_id, t.player_id),
 }));
 
-export const hints = sqliteTable("hints", {
+export const hints = pgTable("hints", {
   id: text("id").primaryKey(),
   mystery_id: text("mystery_id").notNull().references(() => mysteries.id, { onDelete: "cascade" }),
   player_id: text("player_id").notNull().references(() => players.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
-  created_at: integer("created_at").notNull().default(sql`(unixepoch())`),
+  created_at: createdAt(),
 }, (t) => ({
   mysteryPlayerIdx: index("idx_hints_mystery_player").on(t.mystery_id, t.player_id),
 }));

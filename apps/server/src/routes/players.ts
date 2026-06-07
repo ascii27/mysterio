@@ -9,18 +9,17 @@ import { deleteImageByKey } from "../services/images/storage.js";
 import { shortId } from "../utils/ids.js";
 
 /** Points + solved-count per detective, derived from their correct solutions. */
-function reputationByPlayer(): Map<string, PlayerReputation> {
+async function reputationByPlayer(): Promise<Map<string, PlayerReputation>> {
   const db = getDb();
-  const solved = db
+  const solved = await db
     .select({ player_id: solutions.player_id, difficulty: mysteries.difficulty })
     .from(solutions)
     .innerJoin(mysteries, eq(solutions.mystery_id, mysteries.id))
-    .where(eq(solutions.is_correct, 1))
-    .all();
+    .where(eq(solutions.is_correct, true));
   const points = new Map<string, number>();
   const counts = new Map<string, number>();
   for (const r of solved) {
-    // difficulty is a string column in SQLite but is constrained to DifficultyId values on the insert path
+    // difficulty is a string column constrained to DifficultyId values on the insert path
     points.set(r.player_id, (points.get(r.player_id) ?? 0) + (DIFFICULTY_POINTS[r.difficulty as DifficultyId] ?? 0));
     counts.set(r.player_id, (counts.get(r.player_id) ?? 0) + 1);
   }
@@ -45,8 +44,8 @@ const patchBody = createBody.partial();
 export async function playersRoutes(app: FastifyInstance): Promise<void> {
   app.get("/players", async () => {
     const db = getDb();
-    const rows = db.select().from(players).all();
-    const reps = reputationByPlayer();
+    const rows = await db.select().from(players);
+    const reps = await reputationByPlayer();
     return { players: rows.map((p) => ({ ...p, reputation: reps.get(p.id) ?? ROOKIE })) };
   });
 
@@ -56,14 +55,14 @@ export async function playersRoutes(app: FastifyInstance): Promise<void> {
     const db = getDb();
     const id = shortId();
     const avatar_description = parsed.data.avatar_description?.trim() ? parsed.data.avatar_description.trim() : null;
-    db.insert(players).values({
+    await db.insert(players).values({
       id,
       name: parsed.data.name,
       age_range: parsed.data.age_range,
       default_difficulty: parsed.data.default_difficulty,
       avatar_description,
-    }).run();
-    const row = db.select().from(players).where(eq(players.id, id)).get();
+    });
+    const [row] = await db.select().from(players).where(eq(players.id, id)).limit(1);
     reply.status(201);
     return { player: row };
   });
@@ -72,7 +71,7 @@ export async function playersRoutes(app: FastifyInstance): Promise<void> {
     const parsed = patchBody.safeParse(req.body);
     if (!parsed.success) { reply.status(400); return { error: "invalid_body", issues: parsed.error.issues }; }
     const db = getDb();
-    const existing = db.select().from(players).where(eq(players.id, req.params.id)).get();
+    const [existing] = await db.select().from(players).where(eq(players.id, req.params.id)).limit(1);
     if (!existing) { reply.status(404); return { error: "player_not_found" }; }
 
     const patch: Partial<typeof players.$inferInsert> = {};
@@ -83,21 +82,21 @@ export async function playersRoutes(app: FastifyInstance): Promise<void> {
       patch.avatar_description = parsed.data.avatar_description.trim() ? parsed.data.avatar_description.trim() : null;
     }
     if (Object.keys(patch).length > 0) {
-      db.update(players).set(patch).where(eq(players.id, req.params.id)).run();
+      await db.update(players).set(patch).where(eq(players.id, req.params.id));
     }
-    const row = db.select().from(players).where(eq(players.id, req.params.id)).get();
+    const [row] = await db.select().from(players).where(eq(players.id, req.params.id)).limit(1);
     return { player: row };
   });
 
   app.delete<{ Params: { id: string } }>("/players/:id", async (req, reply) => {
     const db = getDb();
-    db.delete(players).where(eq(players.id, req.params.id)).run();
+    await db.delete(players).where(eq(players.id, req.params.id));
     reply.status(204);
   });
 
   app.post<{ Params: { id: string } }>("/players/:id/avatar", async (req, reply) => {
     const db = getDb();
-    const player = db.select().from(players).where(eq(players.id, req.params.id)).get();
+    const [player] = await db.select().from(players).where(eq(players.id, req.params.id)).limit(1);
     if (!player) { reply.status(404); return { error: "player_not_found" }; }
     const description = player.avatar_description?.trim();
     if (!description) { reply.status(400); return { error: "no_description" }; }
@@ -106,17 +105,17 @@ export async function playersRoutes(app: FastifyInstance): Promise<void> {
     if (!result.ok) { reply.status(502); return { error: "avatar_generation_failed", detail: result.error }; }
 
     const previousKey = player.avatar_image_path;
-    db.update(players).set({ avatar_image_path: result.avatarImagePath }).where(eq(players.id, player.id)).run();
+    await db.update(players).set({ avatar_image_path: result.avatarImagePath }).where(eq(players.id, player.id));
     if (previousKey && previousKey !== result.avatarImagePath) {
       await deleteImageByKey(previousKey); // best-effort cleanup of the prior version
     }
-    const row = db.select().from(players).where(eq(players.id, player.id)).get();
+    const [row] = await db.select().from(players).where(eq(players.id, player.id)).limit(1);
     return { player: row };
   });
 
   app.get<{ Params: { id: string } }>("/players/:id/trophies", async (req) => {
     const db = getDb();
-    const rows = db
+    const rows = await db
       .select({
         mystery_id: mysteries.id,
         title: mysteries.title,
@@ -129,25 +128,19 @@ export async function playersRoutes(app: FastifyInstance): Promise<void> {
       .innerJoin(mysteries, eq(solutions.mystery_id, mysteries.id))
       .where(and(
         eq(solutions.player_id, req.params.id),
-        eq(solutions.is_correct, 1),
+        eq(solutions.is_correct, true),
         eq(mysteries.status, "ready"),
-      ))
-      .all();
+      ));
 
     const trophies = rows
       .map((r) => {
         let culprit_name: string | null = null;
         let how: string | null = null;
-        try {
-          const ls = JSON.parse(r.logic ?? "") as {
-            characters?: Array<{ id: string; name: string }>;
-            true_solution?: { who_did_it?: string; how?: string };
-          };
+        const ls = r.logic;
+        if (ls) {
           how = typeof ls.true_solution?.how === "string" ? ls.true_solution.how : null;
           const who = ls.true_solution?.who_did_it;
           culprit_name = ls.characters?.find((c) => c.id === who)?.name ?? null;
-        } catch {
-          // malformed/absent logic structure — leave culprit/how null
         }
         return {
           mystery_id: r.mystery_id,
@@ -159,7 +152,7 @@ export async function playersRoutes(app: FastifyInstance): Promise<void> {
           how,
         };
       })
-      .sort((a, b) => b.solved_at - a.solved_at);
+      .sort((a, b) => b.solved_at.getTime() - a.solved_at.getTime());
 
     return { trophies };
   });

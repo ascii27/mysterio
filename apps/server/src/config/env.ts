@@ -11,7 +11,7 @@ const envSchema = z.object({
   IMAGE_DIR: z.string().default("./data/images"),
   PORT: z.coerce.number().int().positive().default(3000),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  DATABASE_PATH: z.string().default("./data/mysterio.db"),
+  DATABASE_URL: z.string().min(1).default("postgresql://mysterio:mysterio@localhost:5432/mysterio"),
   AUDIO_DIR: z.string().default("./data/audio"),
   MAX_VALIDATION_ATTEMPTS: z.coerce.number().int().positive().default(3),
   MAX_NARRATIVE_ATTEMPTS: z.coerce.number().int().positive().default(2),

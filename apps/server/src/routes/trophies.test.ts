@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
 import { setupTestDb } from "../test/db.js";
 import { getDb } from "../db/client.js";
+import type { LogicStructure } from "@mysterio/shared";
 import { mysteries, players, solutions } from "../db/schema.js";
 import { playersRoutes } from "./players.js";
 
@@ -14,28 +15,28 @@ beforeEach(async () => {
 });
 afterEach(async () => { await app.close(); });
 
-const LOGIC = JSON.stringify({
+const LOGIC = {
   characters: [
     { id: "ms-green", name: "Ms. Green" },
     { id: "mr-blue", name: "Mr. Blue" },
   ],
   true_solution: { who_did_it: "ms-green", how: "She used the spare key.", why: "To borrow it." },
-});
+} as unknown as LogicStructure;
 
-function seedSolved(playerId: string, mysteryId: string, opts: { is_correct: number; status?: string; title?: string }) {
+async function seedSolved(playerId: string, mysteryId: string, opts: { is_correct: boolean; status?: string; title?: string }) {
   const db = getDb();
-  db.insert(players).values({ id: playerId, name: playerId, age_range: "10-11", default_difficulty: "easy" }).onConflictDoNothing().run();
-  db.insert(mysteries).values({
+  await db.insert(players).values({ id: playerId, name: playerId, age_range: "10-11", default_difficulty: "easy" }).onConflictDoNothing();
+  await db.insert(mysteries).values({
     id: mysteryId, player_id: playerId, category: "missing-pet", difficulty: "medium",
     status: opts.status ?? "ready", title: opts.title ?? "The Case", cover_image_path: "covers/x.png",
     logic_structure_json: LOGIC,
-  }).onConflictDoNothing().run();
-  db.insert(solutions).values({ id: `s-${mysteryId}`, mystery_id: mysteryId, player_id: playerId, is_correct: opts.is_correct }).run();
+  }).onConflictDoNothing();
+  await db.insert(solutions).values({ id: `s-${mysteryId}`, mystery_id: mysteryId, player_id: playerId, is_correct: opts.is_correct });
 }
 
 describe("GET /players/:id/trophies", () => {
   it("lists solved cases with resolved culprit name + how", async () => {
-    seedSolved("p1", "m1", { is_correct: 1, title: "The Borrowed Tortoise" });
+    await seedSolved("p1", "m1", { is_correct: true, title: "The Borrowed Tortoise" });
     const res = await app.inject({ method: "GET", url: "/players/p1/trophies" });
     expect(res.statusCode).toBe(200);
     const trophies = res.json().trophies;
@@ -51,28 +52,28 @@ describe("GET /players/:id/trophies", () => {
   });
 
   it("excludes wrong guesses and non-ready mysteries", async () => {
-    seedSolved("p1", "m-wrong", { is_correct: 0 });
-    seedSolved("p1", "m-pending", { is_correct: 1, status: "pending" });
+    await seedSolved("p1", "m-wrong", { is_correct: false });
+    await seedSolved("p1", "m-pending", { is_correct: true, status: "pending" });
     const res = await app.inject({ method: "GET", url: "/players/p1/trophies" });
     expect(res.json().trophies).toHaveLength(0);
   });
 
   it("returns an empty list for a detective with no solves", async () => {
-    getDb().insert(players).values({ id: "p2", name: "p2", age_range: "8-9", default_difficulty: "easy" }).run();
+    await getDb().insert(players).values({ id: "p2", name: "p2", age_range: "8-9", default_difficulty: "easy" });
     const res = await app.inject({ method: "GET", url: "/players/p2/trophies" });
     expect(res.statusCode).toBe(200);
     expect(res.json().trophies).toEqual([]);
   });
 
-  it("returns a trophy with null culprit/how when logic_structure_json is malformed", async () => {
+  it("returns a trophy with null culprit/how when logic_structure_json is null", async () => {
     const db = getDb();
-    db.insert(players).values({ id: "p3", name: "p3", age_range: "10-11", default_difficulty: "easy" }).onConflictDoNothing().run();
-    db.insert(mysteries).values({
+    await db.insert(players).values({ id: "p3", name: "p3", age_range: "10-11", default_difficulty: "easy" }).onConflictDoNothing();
+    await db.insert(mysteries).values({
       id: "m-bad", player_id: "p3", category: "missing-pet", difficulty: "easy",
       status: "ready", title: "Bad Logic", cover_image_path: "covers/x.png",
       logic_structure_json: null,
-    }).run();
-    db.insert(solutions).values({ id: "s-m-bad", mystery_id: "m-bad", player_id: "p3", is_correct: 1 }).run();
+    });
+    await db.insert(solutions).values({ id: "s-m-bad", mystery_id: "m-bad", player_id: "p3", is_correct: true });
     const res = await app.inject({ method: "GET", url: "/players/p3/trophies" });
     expect(res.statusCode).toBe(200);
     const trophies = res.json().trophies;

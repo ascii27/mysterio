@@ -1,1 +1,0 @@
-ALTER TABLE `players` ADD `avatar_image_path` text;
