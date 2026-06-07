@@ -79,6 +79,9 @@ function unwrapForPgMem(raw: string): string {
  *    `mapResultRow` then receives the positional arrays it expects.
  */
 function patchPgMemPool(pool: any): any {
+  // Each createPg() call produces a new MemPg class with a new prototype, so this
+  // patch is NOT shared across setupTestDb() calls — no double-wrap risk. If
+  // createPg() is ever hoisted out of setupTestDb(), add a proto.__patched guard.
   const proto = Object.getPrototypeOf(pool);
 
   // Patch adaptQuery: strip `types.getTypeParser` before pg-mem sees it
@@ -93,6 +96,10 @@ function patchPgMemPool(pool: any): any {
   };
 
   // Patch adaptResults: handle rowMode: "array" by converting named rows to arrays
+  // NOTE: reconstruction is name-based (row[name]). If a future query projects two
+  // columns with the same output name (e.g. two unaliased .id columns from different
+  // tables in a join), both positions collapse to the same value. Drizzle's
+  // .select({ alias: table.col }) with unique keys avoids this — all current queries do.
   const origAdaptResults = proto.adaptResults;
   proto.adaptResults = function (query: any, res: any) {
     if (query && typeof query === "object" && query.rowMode === "array") {
@@ -126,6 +133,8 @@ function patchPgMemPool(pool: any): any {
 /** Fresh in-memory Postgres (pg-mem) with the baseline schema applied, injected into getDb(). Call in beforeEach. */
 export function setupTestDb(): void {
   const mem = newDb();
+  // Loads only the single squashed baseline migration. If/when additional migration
+  // files land, apply ALL of them in sorted order, not just [0].
   const file = readdirSync(MIGRATIONS)
     .filter((f) => f.endsWith(".sql"))
     .sort()[0];
