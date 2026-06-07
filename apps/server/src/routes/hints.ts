@@ -17,23 +17,23 @@ export async function hintsRoutes(app: FastifyInstance): Promise<void> {
     if (!pid.success) { reply.status(400); return { error: "player_id required" }; }
     const playerId = pid.data.player_id;
     const db = getDb();
-    const myst = db.select().from(mysteries).where(eq(mysteries.id, req.params.id)).get();
+    const [myst] = await db.select().from(mysteries).where(eq(mysteries.id, req.params.id)).limit(1);
     if (!myst || !myst.logic_structure_json || myst.status !== "ready") {
       reply.status(409); return { error: "mystery_not_ready" };
     }
-    const sol = db.select().from(solutions)
-      .where(and(eq(solutions.mystery_id, myst.id), eq(solutions.player_id, playerId))).get();
+    const [sol] = await db.select().from(solutions)
+      .where(and(eq(solutions.mystery_id, myst.id), eq(solutions.player_id, playerId))).limit(1);
     if (sol) { reply.status(409); return { error: "already_solved" }; }
-    const prior = db.select().from(hints)
-      .where(and(eq(hints.mystery_id, myst.id), eq(hints.player_id, playerId))).all();
+    const prior = await db.select().from(hints)
+      .where(and(eq(hints.mystery_id, myst.id), eq(hints.player_id, playerId)));
     if (prior.length >= MAX_HINTS) { reply.status(409); return { error: "hint_limit_reached", limit: MAX_HINTS }; }
 
-    const ls = JSON.parse(myst.logic_structure_json) as LogicStructure;
+    const ls = myst.logic_structure_json as unknown as LogicStructure;
     const content = await runHintAgent({ logicStructure: ls, priorHints: prior.map((h) => h.content) });
 
     const id = shortId();
-    db.insert(hints).values({ id, mystery_id: myst.id, player_id: playerId, content }).run();
-    const row = db.select().from(hints).where(eq(hints.id, id)).get();
+    await db.insert(hints).values({ id, mystery_id: myst.id, player_id: playerId, content });
+    const [row] = await db.select().from(hints).where(eq(hints.id, id)).limit(1);
     reply.status(201);
     return { hint: row, remaining: MAX_HINTS - (prior.length + 1) };
   });
@@ -42,8 +42,8 @@ export async function hintsRoutes(app: FastifyInstance): Promise<void> {
     const parsed = playerQuery.safeParse(req.query);
     if (!parsed.success) { reply.status(400); return { error: "player_id required" }; }
     const db = getDb();
-    const rows = db.select().from(hints)
-      .where(and(eq(hints.mystery_id, req.params.id), eq(hints.player_id, parsed.data.player_id))).all();
+    const rows = await db.select().from(hints)
+      .where(and(eq(hints.mystery_id, req.params.id), eq(hints.player_id, parsed.data.player_id)));
     return { hints: rows, remaining: Math.max(0, MAX_HINTS - rows.length) };
   });
 }
