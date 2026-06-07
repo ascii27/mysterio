@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
 import { setupTestDb } from "../test/db.js";
 import { getDb } from "../db/client.js";
+import type { LogicStructure } from "@mysterio/shared";
 import { mysteries, players, solutions } from "../db/schema.js";
 import { playersRoutes } from "./players.js";
 
@@ -20,7 +21,7 @@ const LOGIC = {
     { id: "mr-blue", name: "Mr. Blue" },
   ],
   true_solution: { who_did_it: "ms-green", how: "She used the spare key.", why: "To borrow it." },
-};
+} as unknown as LogicStructure;
 
 async function seedSolved(playerId: string, mysteryId: string, opts: { is_correct: boolean; status?: string; title?: string }) {
   const db = getDb();

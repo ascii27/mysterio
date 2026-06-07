@@ -29,7 +29,7 @@ async function main(): Promise<void> {
   await app.register(hintsRoutes, { prefix: "/api" });
   await app.register(staticRoutes);
 
-  markStaleMysteriesFailed();
+  await markStaleMysteriesFailed();
 
   await app.listen({ host: "0.0.0.0", port: env.PORT });
   logger.info("server_started", { port: env.PORT });

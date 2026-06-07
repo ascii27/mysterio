@@ -42,7 +42,7 @@ function unwrapForPgMem(raw: string): string {
   // Transform 1: unwrap DO $$ BEGIN <inner>; EXCEPTION ... END $$; blocks
   const doBlockMatch = stmt.match(/DO \$\$ BEGIN\s*([\s\S]*?)\s*EXCEPTION/);
   if (doBlockMatch) {
-    const inner = doBlockMatch[1].trim().replace(/;$/, "");
+    const inner = doBlockMatch[1]!.trim().replace(/;$/, "");
 
     // Transform 2: skip FK ALTER TABLE constraints — pg-mem doesn't support them,
     // and route tests don't rely on DB-level FK enforcement.
@@ -137,7 +137,7 @@ export function setupTestDb(): void {
   // files land, apply ALL of them in sorted order, not just [0].
   const file = readdirSync(MIGRATIONS)
     .filter((f) => f.endsWith(".sql"))
-    .sort()[0];
+    .sort()[0]!;
   const sqlText = readFileSync(`${MIGRATIONS}/${file}`, "utf8");
   for (const raw of sqlText.split("--> statement-breakpoint")) {
     const stmt = unwrapForPgMem(raw);

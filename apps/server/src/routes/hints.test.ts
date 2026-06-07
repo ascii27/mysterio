@@ -7,6 +7,7 @@ vi.mock("../services/generation/agents/hintAgent.js", () => ({
 
 import { setupTestDb } from "../test/db.js";
 import { getDb } from "../db/client.js";
+import type { LogicStructure } from "@mysterio/shared";
 import { players, mysteries } from "../db/schema.js";
 import { hintsRoutes } from "./hints.js";
 
@@ -25,7 +26,7 @@ const LS_FIXTURE = {
   how_distractors: ["A fox.", "It broke.", "Left open."],
   why_distractors: ["Prank.", "To sell.", "Anger."],
   logic_chain: ["Clover to gap.", "Latch lifted.", "Theo did it."],
-};
+} as LogicStructure;
 
 let app: FastifyInstance;
 beforeEach(async () => {

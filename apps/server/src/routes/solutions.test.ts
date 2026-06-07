@@ -7,6 +7,7 @@ vi.mock("../services/generation/agents/explanationAgent.js", () => ({
 
 import { setupTestDb } from "../test/db.js";
 import { getDb } from "../db/client.js";
+import type { LogicStructure } from "@mysterio/shared";
 import { players, mysteries } from "../db/schema.js";
 import { solutionsRoutes } from "./solutions.js";
 
@@ -28,7 +29,7 @@ const LS_FIXTURE = {
   how_distractors: ["A fox dug under.", "The latch broke on its own.", "Priya left the door open."],
   why_distractors: ["For a prank.", "To sell her.", "Out of anger."],
   logic_chain: ["Clover trail to fence gap.", "Latch lifted by a person.", "Theo lives past the fence and wanted a pet."],
-};
+} as LogicStructure;
 
 let app: FastifyInstance;
 beforeEach(async () => {

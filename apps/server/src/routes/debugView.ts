@@ -8,9 +8,9 @@ export interface DebugRow {
   status: string;
   difficulty: string;
   failure_reason: string | null;
-  logic_structure_json: string | null;
+  logic_structure_json: LogicStructure | null;
   narrative_text: string | null;
-  validation_passed: number | null;
+  validation_passed: boolean | null;
   validation_attempts: number;
   validation_notes: string | null;
 }
@@ -40,17 +40,8 @@ export interface DebugView {
   };
 }
 
-function parseLogic(json: string | null): LogicStructure | null {
-  if (!json) return null;
-  try {
-    return JSON.parse(json) as LogicStructure;
-  } catch {
-    return null;
-  }
-}
-
 export function buildDebugView(row: DebugRow): DebugView {
-  const logic = parseLogic(row.logic_structure_json);
+  const logic = row.logic_structure_json;
   const narrative = row.narrative_text ?? "";
 
   const clue_coverage: ClueCoverage[] =
@@ -81,7 +72,7 @@ export function buildDebugView(row: DebugRow): DebugView {
     failure_reason: row.failure_reason,
     logic_structure: logic,
     validation: {
-      passed: row.validation_passed === null ? null : row.validation_passed === 1,
+      passed: row.validation_passed,
       attempts: row.validation_attempts,
       notes: row.validation_notes,
     },

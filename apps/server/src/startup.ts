@@ -3,13 +3,13 @@ import { getDb } from "./db/client.js";
 import { mysteries } from "./db/schema.js";
 import { logger } from "./utils/logger.js";
 
-export function markStaleMysteriesFailed(): void {
+export async function markStaleMysteriesFailed(): Promise<void> {
   const db = getDb();
-  const result = db.update(mysteries)
+  const updated = await db.update(mysteries)
     .set({ status: "failed", failure_reason: "server_restart" })
     .where(notInArray(mysteries.status, ["ready", "failed"]))
-    .run();
-  if (result.changes > 0) {
-    logger.info("stale_mysteries_failed", { count: result.changes });
+    .returning({ id: mysteries.id });
+  if (updated.length > 0) {
+    logger.info("stale_mysteries_failed", { count: updated.length });
   }
 }

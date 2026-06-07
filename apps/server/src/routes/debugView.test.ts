@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
+import type { LogicStructure } from "@mysterio/shared";
 import { buildDebugView, type DebugRow } from "./debugView.js";
 
-function makeLogic() {
+function makeLogic(): LogicStructure {
   return {
     category: "missing-pet",
     setting: "A sunny backyard with a rabbit hutch.",
@@ -27,10 +28,10 @@ const baseRow: DebugRow = {
   status: "ready",
   difficulty: "easy",
   failure_reason: null,
-  logic_structure_json: JSON.stringify(makeLogic()),
+  logic_structure_json: makeLogic(),
   narrative_text:
     "Mia knelt by the hutch. A trail of fresh clover sprigs led to a gap in the back fence. The hutch latch was lifted, not broken. The neighbor's cat watched from the shed roof.",
-  validation_passed: 1,
+  validation_passed: true,
   validation_attempts: 2,
   validation_notes: "who/how/why all matched",
 };
@@ -53,7 +54,7 @@ describe("buildDebugView", () => {
 
   it("flags a missing essential clue", () => {
     const logic = makeLogic();
-    const row = { ...baseRow, logic_structure_json: JSON.stringify(logic), narrative_text: "Mia knelt by the hutch and saw nothing unusual at all today." };
+    const row = { ...baseRow, logic_structure_json: logic, narrative_text: "Mia knelt by the hutch and saw nothing unusual at all today." };
     const v = buildDebugView(row);
     const byId = Object.fromEntries(v.clue_coverage.map((c) => [c.id, c]));
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -76,8 +77,8 @@ describe("buildDebugView", () => {
     expect(v.clue_coverage).toEqual([]);
   });
 
-  it("maps validation_passed=0 to passed:false", () => {
-    const v = buildDebugView({ ...baseRow, validation_passed: 0 });
+  it("maps validation_passed=false to passed:false", () => {
+    const v = buildDebugView({ ...baseRow, validation_passed: false });
     expect(v.validation.passed).toBe(false);
   });
 
