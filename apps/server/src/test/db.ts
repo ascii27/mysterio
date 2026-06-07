@@ -133,15 +133,17 @@ function patchPgMemPool(pool: any): any {
 /** Fresh in-memory Postgres (pg-mem) with the baseline schema applied, injected into getDb(). Call in beforeEach. */
 export function setupTestDb(): void {
   const mem = newDb();
-  // Loads only the single squashed baseline migration. If/when additional migration
-  // files land, apply ALL of them in sorted order, not just [0].
-  const file = readdirSync(MIGRATIONS)
+  // Apply every migration file in sorted (lexical = chronological) order, so the
+  // harness schema stays current as new migrations land (e.g. in 3b-ii).
+  const files = readdirSync(MIGRATIONS)
     .filter((f) => f.endsWith(".sql"))
-    .sort()[0]!;
-  const sqlText = readFileSync(`${MIGRATIONS}/${file}`, "utf8");
-  for (const raw of sqlText.split("--> statement-breakpoint")) {
-    const stmt = unwrapForPgMem(raw);
-    if (stmt) mem.public.none(stmt);
+    .sort();
+  for (const file of files) {
+    const sqlText = readFileSync(`${MIGRATIONS}/${file}`, "utf8");
+    for (const raw of sqlText.split("--> statement-breakpoint")) {
+      const stmt = unwrapForPgMem(raw);
+      if (stmt) mem.public.none(stmt);
+    }
   }
   const { Pool } = mem.adapters.createPg();
   const pool = patchPgMemPool(new Pool());
