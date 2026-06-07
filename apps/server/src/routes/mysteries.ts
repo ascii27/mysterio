@@ -142,18 +142,21 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
     const db = getDb();
     // Use LEFT JOINs instead of correlated subqueries for pg-mem compatibility.
     // sol_correct: join on solved solution; sol_any: join on any solution; clue_any: join on any clue.
+    // SELECT DISTINCT so each LEFT JOIN is strictly 1:0-or-1 per mystery — without it,
+    // a player with multiple clues (or solutions) on one mystery fans the join out,
+    // duplicating mystery rows and breaking the LIMIT distinct-mystery count.
     const sol_correct = db.$with("sol_correct").as(
-      db.select({ mystery_id: solutions.mystery_id })
+      db.selectDistinct({ mystery_id: solutions.mystery_id })
         .from(solutions)
         .where(and(eq(solutions.player_id, playerId), eq(solutions.is_correct, true)))
     );
     const sol_any = db.$with("sol_any").as(
-      db.select({ mystery_id: solutions.mystery_id })
+      db.selectDistinct({ mystery_id: solutions.mystery_id })
         .from(solutions)
         .where(eq(solutions.player_id, playerId))
     );
     const clue_any = db.$with("clue_any").as(
-      db.select({ mystery_id: clues.mystery_id })
+      db.selectDistinct({ mystery_id: clues.mystery_id })
         .from(clues)
         .where(eq(clues.player_id, playerId))
     );
