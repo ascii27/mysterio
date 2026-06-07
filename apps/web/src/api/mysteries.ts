@@ -15,8 +15,8 @@ export interface MysteryDetail {
   cover_image_url: string | null;
   central_question: string | null;
   characters?: PublicCharacter[];
-  created_at: number;
-  ready_at: number | null;
+  created_at: string;
+  ready_at: string | null;
   failure_reason: string | null;
 }
 

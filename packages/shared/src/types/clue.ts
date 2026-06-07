@@ -10,5 +10,5 @@ export interface Clue {
   audio_timestamp_ms: number | null;
   source: ClueSource;
   annotation_id: string | null;
-  created_at: number;
+  created_at: string;
 }

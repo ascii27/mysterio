@@ -23,7 +23,7 @@ export interface Player {
   default_difficulty: DifficultyId;
   avatar_description: string | null;
   avatar_image_path: string | null;
-  created_at: number;
+  created_at: string;
   /** Server-computed; present on the GET /players DTO, absent on raw rows. */
   reputation?: PlayerReputation;
 }
@@ -36,8 +36,8 @@ export interface MysterySummary {
   target_age_range: AgeRange | null;
   status: MysteryStatus;
   title: string | null;
-  created_at: number;
-  ready_at: number | null;
+  created_at: string;
+  ready_at: string | null;
   solved: boolean;  // derived: this detective has a correct solution row
   started: boolean; // derived: this detective has any clue/solution row for this mystery
 }
