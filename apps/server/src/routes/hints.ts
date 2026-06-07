@@ -28,7 +28,7 @@ export async function hintsRoutes(app: FastifyInstance): Promise<void> {
       .where(and(eq(hints.mystery_id, myst.id), eq(hints.player_id, playerId)));
     if (prior.length >= MAX_HINTS) { reply.status(409); return { error: "hint_limit_reached", limit: MAX_HINTS }; }
 
-    const ls = myst.logic_structure_json as unknown as LogicStructure;
+    const ls = myst.logic_structure_json as LogicStructure;
     const content = await runHintAgent({ logicStructure: ls, priorHints: prior.map((h) => h.content) });
 
     const id = shortId();
