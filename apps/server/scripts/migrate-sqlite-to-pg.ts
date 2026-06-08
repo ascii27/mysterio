@@ -32,12 +32,14 @@ export interface EtlReport {
   inserted: number;
 }
 
-/** Throws if any child row has a NULL player_id (NOT NULL in PG) — fail loud, never drop. */
-function assertChildPlayerIds(sqlite: Database.Database): void {
+/** Throws if any child row has a NULL player_id or mystery_id (both NOT NULL in PG) — fail loud, never drop. */
+function assertChildFks(sqlite: Database.Database): void {
   for (const t of ["clues", "solutions", "hints"] as const) {
-    const bad = sqlite.prepare(`SELECT id FROM ${t} WHERE player_id IS NULL LIMIT 5`).all() as { id: string }[];
-    if (bad.length > 0) {
-      throw new Error(`${t} has rows with NULL player_id (cannot migrate to NOT NULL): ${bad.map((r) => r.id).join(", ")}`);
+    for (const col of ["player_id", "mystery_id"] as const) {
+      const bad = sqlite.prepare(`SELECT id FROM ${t} WHERE ${col} IS NULL LIMIT 5`).all() as { id: string }[];
+      if (bad.length > 0) {
+        throw new Error(`${t} has rows with NULL ${col} (cannot migrate to NOT NULL): ${bad.map((r) => r.id).join(", ")}`);
+      }
     }
   }
 }
@@ -47,7 +49,7 @@ export async function runEtl(
   db: Db,
   opts: { truncate?: boolean } = {},
 ): Promise<EtlReport[]> {
-  assertChildPlayerIds(sqlite);
+  assertChildFks(sqlite);
 
   const report: EtlReport[] = [];
 
