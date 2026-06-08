@@ -65,7 +65,15 @@ export async function runEtl(
       );
     }
     if (totalExisting > 0 && opts.truncate) {
-      await tx.execute(sql`TRUNCATE TABLE hints, solutions, clues, mysteries, players RESTART IDENTITY CASCADE`);
+      // pg-mem 3.x does not support multi-table TRUNCATE; issue one statement per
+      // table in FK-safe order (children before parents). RESTART IDENTITY omitted
+      // because all PKs are text — no sequences to reset — so this is safe for
+      // both pg-mem and real Postgres.
+      await tx.execute(sql`TRUNCATE TABLE hints CASCADE`);
+      await tx.execute(sql`TRUNCATE TABLE solutions CASCADE`);
+      await tx.execute(sql`TRUNCATE TABLE clues CASCADE`);
+      await tx.execute(sql`TRUNCATE TABLE mysteries CASCADE`);
+      await tx.execute(sql`TRUNCATE TABLE players CASCADE`);
     }
 
     // ---- players ----
