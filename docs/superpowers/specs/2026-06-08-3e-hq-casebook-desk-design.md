@@ -3,9 +3,11 @@
 **Date:** 2026-06-08
 **Status:** Approved (design); plan pending
 **Branch (planned):** `feat/hq-casebook-desk-3e`
-**Part of:** the "Maple Hollow — World & Reputation" program (Spec 3), the **fifth and final**
-sub-spec. **Depends on 3a** (reputation/rank), **3c** (cast/places data), and **3d** (World surfaces
-to link into). 3e is the capstone that ties the program together on the home screen.
+**Part of:** the "Maple Hollow — World & Reputation" program (Spec 3), the **final** sub-spec
+(execution order **3c → 3d → 3f → 3e**). **Depends on 3a** (reputation/rank), **3c** (cast/places
+data), **3d** (World surfaces to link into), and **3f** (the one-tap "Start a new case" button — 3e
+places it in the Open folder rather than defining its behavior). 3e is the capstone that ties the
+program together on the home screen.
 
 ## Program context (where 3e sits)
 
@@ -50,7 +52,9 @@ organizing motif:
 - **Open cases folder** — the detective's cases that are `ready` but **not yet resolved** by this
   player (no solution / not given up). Each is a case tab/card (cover thumbnail + title + a
   "new"/"in-progress" stamp). Tapping → the case (playback/solve flow). A "＋ New case" affordance
-  (the existing category-grid generate flow) lives here or as a folder action.
+  lives here — this is **3f's single "Start a new case" button** (open-ended, preset-driven
+  generation); 3e only places it, it does not define its behavior. (The old category grid is already
+  gone by 3f.)
 - **Closed cases folder** — cases this player has **solved or given up** (the Trophy Room's corpus,
   reframed on the desk). Solved cases carry a ✓/rank stamp. This folder is effectively the home-screen
   face of the 3a Trophy Room; the Trophy Room screen itself remains reachable for the full display.
@@ -111,8 +115,9 @@ rewrite (`project_stack_facts_actual`).
 - **Closed folder vs. Trophy Room overlap:** keep both (Closed folder = quick peek, Trophy Room =
   full display) vs. fold Trophy Room into the Closed folder. Recommend keeping both for v1 (least
   disruption to 3a).
-- **"New case" placement:** an action inside the Open folder vs. a persistent desk button. Recommend
-  inside/adjacent to the Open folder (it's the natural "add to open cases" gesture).
+- **"New case" placement:** 3f's "Start a new case" button inside the Open folder vs. a persistent
+  desk button. Recommend inside/adjacent to the Open folder (it's the natural "add to open cases"
+  gesture).
 - **Empty states:** a brand-new detective has empty Open/Closed folders — needs a friendly
   first-case prompt. Recommend a warm empty-folder card pointing at "＋ New case."
 

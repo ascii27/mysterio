@@ -16,11 +16,17 @@ sub-specs. Follows 3a (Reputation, PR #12) and 3b (Postgres: 3b-i PR #13 + 3b-ii
 | 3b — Postgres migration | SQLite→Postgres self-host | — | ✅ shipped + cut over |
 | **3c — Recurring cast & places + generation** ← _this spec_ | persistent characters/places; generation casts from a fixed roster; per-case appearances | 3b | this design |
 | 3d — World surfaces | Town (cards + map), Who's Who, character/place detail + portraits | 3c | designed (companion) |
-| 3e — HQ casebook desk | home reskin into manila-folder groups | 3a, 3c, 3d | designed (companion) |
+| 3f — Open-ended generation + one-tap Start | drop fixed category menu; AI invents the case; generate from player presets; single button | 3c, 3d | designed (companion) |
+| 3e — HQ casebook desk | home reskin into manila-folder groups | 3a, 3c, 3d, 3f | designed (companion) |
 
-3c is the **load-bearing, highest-risk** sub-spec: it changes the generation pipeline — the
-"load-bearing part of the design" per `CLAUDE.md`. The whole World (3d/3e) is presentation built on
-3c's data.
+**Execution order: 3c → 3d → 3f → 3e** (3f runs after the world exists; 3e's "New case" action is
+3f's button). 3c is the **load-bearing, highest-risk** sub-spec: it changes the generation pipeline —
+the "load-bearing part of the design" per `CLAUDE.md`. The whole World (3d/3f/3e) is built on 3c's data.
+
+> **Note on the category input:** 3c **retains** the existing fixed `category` + `difficulty` generate
+> inputs unchanged — it only adds roster casting. The fixed-category menu is removed later, in **3f**
+> (the AI invents an open-ended case type from the player's presets + the world). Don't remove
+> `category` in 3c.
 
 ## The problem 3c solves
 

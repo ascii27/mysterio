@@ -14,6 +14,10 @@ the presentation layer over 3c's `characters`/`places`/`case_appearances` data.
 a Town screen, a rich Who's Who directory, character and place **detail pages** with cross-case
 linking, and the **character/place portrait image pipeline** that 3c deliberately deferred.
 
+**Execution order in the program: 3c → 3d → 3f → 3e.** 3d is the last *purely additive* World layer;
+**3f** (open-ended generation + one-tap Start) follows it and depends on a populated world, and **3e**
+(the desk home) comes last. 3d itself makes no generation changes.
+
 ## The problem 3d solves
 
 After 3c, the world data exists but is barely visible (a flat list, monogram fallbacks, no detail, no
