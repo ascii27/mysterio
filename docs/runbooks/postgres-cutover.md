@@ -29,7 +29,11 @@ ssh panther-golem.exe.xyz 'cd ~/mysterio && pnpm install --frozen-lockfile && pn
 ssh panther-golem.exe.xyz
 cd ~/mysterio
 systemctl --user stop mysterio                                  # window begins
-cp data/mysterio.db data/mysterio.db.bak-$(date +%Y%m%d-%H%M%S) # backup (SQLite never mutated)
+# The live DB runs in WAL mode. Fold the (possibly large) -wal file into the
+# main DB so BOTH the backup and the ETL read a complete, consistent snapshot.
+# Harmless no-op if the clean shutdown already checkpointed. (sqlite3 CLI is on the VM.)
+sqlite3 data/mysterio.db "PRAGMA wal_checkpoint(TRUNCATE);"
+cp data/mysterio.db data/mysterio.db.bak-$(date +%Y%m%d-%H%M%S) # backup (now complete; ETL never mutates SQLite)
 pnpm --filter @mysterio/server db:migrate                       # create empty PG schema
 pnpm --filter @mysterio/server db:etl -- --sqlite ~/mysterio/data/mysterio.db   # load data; prints parity report
 # (db:seed deliberately SKIPPED — real players come from the ETL)
@@ -48,11 +52,13 @@ From your laptop: `curl -fsS https://panther-golem.exe.xyz/api/health` → `{"ok
 (mystery list shows 21 ready; the one solved case's trophy renders).
 
 ## E. Rollback (if validation fails)
-The SQLite DB is untouched. Point the app back at SQLite:
+The SQLite DB is untouched (ETL only reads it). Redeploy the pre-3b-i SQLite build:
 ```bash
-git -C ~/mysterio checkout 6f0ff19   # pre-3b-i (SQLite) build  — OR redeploy that tag from laptop
-# ensure .env DATABASE_PATH still points at ../../data/mysterio.db (it does)
-cd ~/mysterio && pnpm install --frozen-lockfile && pnpm --filter @mysterio/server build
-systemctl --user restart mysterio
+# The VM ~/mysterio is an rsync deploy (scripts/deploy.sh), NOT a git checkout —
+# so roll back by redeploying the pre-3b-i (SQLite) build from your LAPTOP:
+git checkout 6f0ff19          # laptop: last pre-3b-i (SQLite) commit on main
+scripts/deploy.sh             # rsync + install + build + restart the VM service
+git checkout -                # laptop: return to your previous branch
 ```
-Then investigate the ETL failure offline against the `.bak` copy.
+The VM `.env` still has `DATABASE_PATH=../../data/mysterio.db` (step A only APPENDED `DATABASE_URL`), so the
+pre-3b-i code reads SQLite again. Then investigate the ETL failure offline against the `.bak` copy.
