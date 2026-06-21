@@ -83,4 +83,30 @@ describe("extractAppearances", () => {
     const m = await db.select().from(mysteries).where(eq(mysteries.id, "m1"));
     expect(m[0]!.place_id).toBeNull();
   });
+
+  it("soft-persists all residents when the model over-invents (>1 new), never rejecting", async () => {
+    await setupMysteryAndRoster();
+    const db = getDb();
+    const logic = logicFixture();
+    // Detective + 1 existing resident + TWO brand-new residents (still exactly one culprit).
+    logic.characters = [
+      { id: "you", name: "You", role: "detective", description: "You are the detective on this case.", is_culprit: false, motive: null },
+      { id: "diner-owner-rosa-pine", name: "Rosa Pine", role: "witness", description: "Diner owner.", is_culprit: false, motive: null },
+      { id: "newcomer-finn", name: "Finn", role: "suspect", description: "A new face in town.", is_culprit: true, motive: "wanted the prize rabbit" },
+      { id: "newcomer-pax", name: "Pax", role: "bystander", description: "Another new face.", is_culprit: false, motive: null },
+    ];
+
+    await expect(
+      extractAppearances(db, { mysteryId: "m1", logic, places: [{ id: "maple-diner", name: "The Maple Diner" }] }),
+    ).resolves.toBeUndefined();
+
+    const chars = await db.select().from(characters);
+    const finn = chars.find((c) => c.id === "newcomer-finn")!;
+    const pax = chars.find((c) => c.id === "newcomer-pax")!;
+    expect(finn.is_seed).toBe(false);
+    expect(pax.is_seed).toBe(false);
+
+    const apps = await db.select().from(caseAppearances).where(eq(caseAppearances.mystery_id, "m1"));
+    expect(apps).toHaveLength(3); // 2 new + 1 existing, detective excluded
+  });
 });

@@ -95,8 +95,12 @@ export async function extractAppearances(db: Db, args: ExtractArgs): Promise<voi
     .onConflictDoNothing();
 
   // Match a roster place_id by case-insensitive name substring in the setting.
+  // Sort by descending name length so the most specific (longest) matching name
+  // wins — deterministic regardless of pool order.
   const setting = logic.setting.toLowerCase();
-  const matched = args.places.find((p) => setting.includes(p.name.toLowerCase()));
+  const matched = [...args.places]
+    .sort((a, b) => b.name.length - a.name.length)
+    .find((p) => setting.includes(p.name.toLowerCase()));
   if (matched) {
     await db.update(mysteries).set({ place_id: matched.id }).where(eq(mysteries.id, mysteryId));
   }
