@@ -4,6 +4,8 @@ import { z } from "zod";
 import type { CharacterListItem, CharacterDetail, CharacterAppearance, RoleInCase } from "@mysterio/shared";
 import { getDb } from "../db/client.js";
 import { characters, caseAppearances, mysteries, solutions } from "../db/schema.js";
+import { runCharacterPortraitAgent } from "../services/images/characterPortraitAgent.js";
+import { deleteImageByKey } from "../services/images/storage.js";
 
 const detailQuery = z.object({ player_id: z.string().min(1) });
 
@@ -82,5 +84,23 @@ export async function charactersRoutes(app: FastifyInstance): Promise<void> {
       appearances,
     };
     return { character: detail };
+  });
+
+  // Regenerate a character's portrait — synchronous, fail-soft, best-effort cleanup of the prior file.
+  app.post<{ Params: { id: string } }>("/characters/:id/portrait", async (req, reply) => {
+    const db = getDb();
+    const [character] = await db.select().from(characters).where(eq(characters.id, req.params.id)).limit(1);
+    if (!character) { reply.status(404); return { error: "character_not_found" }; }
+
+    const result = await runCharacterPortraitAgent({ characterId: character.id, description: character.description });
+    if (!result.ok) { reply.status(502); return { error: "portrait_generation_failed", detail: result.error }; }
+
+    const previousKey = character.portrait_image_path;
+    await db.update(characters).set({ portrait_image_path: result.portraitImagePath }).where(eq(characters.id, character.id));
+    if (previousKey && previousKey !== result.portraitImagePath) {
+      await deleteImageByKey(previousKey);
+    }
+    const [row] = await db.select().from(characters).where(eq(characters.id, character.id)).limit(1);
+    return { character: row };
   });
 }

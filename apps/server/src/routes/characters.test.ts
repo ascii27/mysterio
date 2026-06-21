@@ -1,5 +1,9 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
+
+vi.mock("../services/images/characterPortraitAgent.js", () => ({ runCharacterPortraitAgent: vi.fn() }));
+
+import * as portraitAgent from "../services/images/characterPortraitAgent.js";
 import { setupTestDb } from "../test/db.js";
 import { getDb } from "../db/client.js";
 import { characters, caseAppearances, mysteries, solutions } from "../db/schema.js";
@@ -89,5 +93,27 @@ describe("GET /api/characters/:id (spoiler redaction)", () => {
   it("400s when player_id is missing", async () => {
     const res = await app.inject({ method: "GET", url: "/api/characters/finn" });
     expect(res.statusCode).toBe(400);
+  });
+});
+
+describe("POST /api/characters/:id/portrait", () => {
+  it("regenerates a portrait, stores the path, and returns the character", async () => {
+    vi.spyOn(portraitAgent, "runCharacterPortraitAgent").mockResolvedValue({ ok: true, portraitImagePath: "characters/rosa-pine-abc123.png" });
+    const res = await app.inject({ method: "POST", url: "/api/characters/rosa-pine/portrait" });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().character.portrait_image_path).toBe("characters/rosa-pine-abc123.png");
+    vi.restoreAllMocks();
+  });
+
+  it("404s an unknown character", async () => {
+    const res = await app.inject({ method: "POST", url: "/api/characters/nope/portrait" });
+    expect(res.statusCode).toBe(404);
+  });
+
+  it("502s when generation fails (fail-soft, row unchanged)", async () => {
+    vi.spyOn(portraitAgent, "runCharacterPortraitAgent").mockResolvedValue({ ok: false, error: "boom" });
+    const res = await app.inject({ method: "POST", url: "/api/characters/rosa-pine/portrait" });
+    expect(res.statusCode).toBe(502);
+    vi.restoreAllMocks();
   });
 });
