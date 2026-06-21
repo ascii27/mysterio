@@ -1,4 +1,4 @@
-import { mkdir, writeFile, unlink } from "node:fs/promises";
+import { mkdir, writeFile, unlink, access, readFile, stat } from "node:fs/promises";
 import { resolve } from "node:path";
 import { loadEnv } from "../../config/env.js";
 import { shortId } from "../../utils/ids.js";
@@ -22,6 +22,69 @@ export async function writeAvatarImage(playerId: string, buf: Buffer): Promise<s
   const fileName = `${playerId}-${shortId()}.png`;
   await writeFile(`${dir}/${fileName}`, buf);
   return `avatars/${fileName}`;
+}
+
+/** Writes a versioned character portrait PNG and returns its key (relative to IMAGE_DIR), e.g. "characters/rosa-pine-ab12cd34.png". */
+export async function writePortraitImage(characterId: string, buf: Buffer): Promise<string> {
+  const env = loadEnv();
+  const imageDir = resolve(env.IMAGE_DIR);
+  const dir = `${imageDir}/characters`;
+  await mkdir(dir, { recursive: true });
+  const fileName = `${characterId}-${shortId()}.png`;
+  await writeFile(`${dir}/${fileName}`, buf);
+  return `characters/${fileName}`;
+}
+
+/** Writes a versioned place image PNG and returns its key (relative to IMAGE_DIR), e.g. "places/maple-diner-ab12cd34.png". */
+export async function writePlaceImage(placeId: string, buf: Buffer): Promise<string> {
+  const env = loadEnv();
+  const imageDir = resolve(env.IMAGE_DIR);
+  const dir = `${imageDir}/places`;
+  await mkdir(dir, { recursive: true });
+  const fileName = `${placeId}-${shortId()}.png`;
+  await writeFile(`${dir}/${fileName}`, buf);
+  return `places/${fileName}`;
+}
+
+/** Writes a fixed-name image under world/ (overwrites — used for the single town map). Returns the key. */
+export async function writeWorldImage(fileName: string, buf: Buffer): Promise<string> {
+  const env = loadEnv();
+  const imageDir = resolve(env.IMAGE_DIR);
+  const dir = `${imageDir}/world`;
+  await mkdir(dir, { recursive: true });
+  await writeFile(`${dir}/${fileName}`, buf);
+  return `world/${fileName}`;
+}
+
+/** Returns the world image's last-modified time in ms (a cache-bust token), or null if it doesn't exist. */
+export async function worldImageVersion(fileName: string): Promise<number | null> {
+  const env = loadEnv();
+  const imageDir = resolve(env.IMAGE_DIR);
+  try {
+    const s = await stat(`${imageDir}/world/${fileName}`);
+    return Math.floor(s.mtimeMs);
+  } catch {
+    return null;
+  }
+}
+
+/** True if the given world/ image already exists on disk (used to keep the map backfill idempotent). */
+export async function worldImageExists(fileName: string): Promise<boolean> {
+  const env = loadEnv();
+  const imageDir = resolve(env.IMAGE_DIR);
+  try {
+    await access(`${imageDir}/world/${fileName}`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Reads an image's bytes by its IMAGE_DIR-relative key (e.g. "places/maple-diner-x.png"). */
+export async function readImageByKey(key: string): Promise<Buffer> {
+  const env = loadEnv();
+  const imageDir = resolve(env.IMAGE_DIR);
+  return readFile(`${imageDir}/${key}`);
 }
 
 /** Best-effort delete of an image by its IMAGE_DIR-relative key. No-op if the file is missing. */

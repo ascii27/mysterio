@@ -8,6 +8,7 @@ import { hintsRoutes } from "./routes/hints.js";
 import { mysteriesRoutes } from "./routes/mysteries.js";
 import { placesRoutes } from "./routes/places.js";
 import { playersRoutes } from "./routes/players.js";
+import { townMapRoutes } from "./routes/townMap.js";
 import { solutionsRoutes } from "./routes/solutions.js";
 import { staticRoutes } from "./routes/static.js";
 import { markStaleMysteriesFailed } from "./startup.js";
@@ -31,6 +32,7 @@ async function main(): Promise<void> {
   await app.register(hintsRoutes, { prefix: "/api" });
   await app.register(charactersRoutes, { prefix: "/api" });
   await app.register(placesRoutes, { prefix: "/api" });
+  await app.register(townMapRoutes, { prefix: "/api" });
   await app.register(staticRoutes);
 
   await markStaleMysteriesFailed();
