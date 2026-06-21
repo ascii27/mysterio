@@ -1,4 +1,4 @@
-import { mkdir, writeFile, unlink } from "node:fs/promises";
+import { mkdir, writeFile, unlink, access } from "node:fs/promises";
 import { resolve } from "node:path";
 import { loadEnv } from "../../config/env.js";
 import { shortId } from "../../utils/ids.js";
@@ -44,6 +44,28 @@ export async function writePlaceImage(placeId: string, buf: Buffer): Promise<str
   const fileName = `${placeId}-${shortId()}.png`;
   await writeFile(`${dir}/${fileName}`, buf);
   return `places/${fileName}`;
+}
+
+/** Writes a fixed-name image under world/ (overwrites — used for the single town map). Returns the key. */
+export async function writeWorldImage(fileName: string, buf: Buffer): Promise<string> {
+  const env = loadEnv();
+  const imageDir = resolve(env.IMAGE_DIR);
+  const dir = `${imageDir}/world`;
+  await mkdir(dir, { recursive: true });
+  await writeFile(`${dir}/${fileName}`, buf);
+  return `world/${fileName}`;
+}
+
+/** True if the given world/ image already exists on disk (used to keep the map backfill idempotent). */
+export async function worldImageExists(fileName: string): Promise<boolean> {
+  const env = loadEnv();
+  const imageDir = resolve(env.IMAGE_DIR);
+  try {
+    await access(`${imageDir}/world/${fileName}`);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** Best-effort delete of an image by its IMAGE_DIR-relative key. No-op if the file is missing. */
