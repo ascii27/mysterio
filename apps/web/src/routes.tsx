@@ -8,6 +8,7 @@ import { TrophyRoom } from "./screens/TrophyRoom/TrophyRoom.js";
 import { CharacterDetailScreen } from "./screens/CharacterDetail/CharacterDetailScreen.js";
 import { WhosWhoScreen } from "./screens/WhosWho/WhosWhoScreen.js";
 import { PlaceDetailScreen } from "./screens/PlaceDetail/PlaceDetailScreen.js";
+import { TownScreen } from "./screens/Town/TownScreen.js";
 import { usePlayerStore } from "./state/playerStore.js";
 
 function Home() {
@@ -27,6 +28,7 @@ export function Routes() {
       <Route path="/whos-who" element={<WhosWhoScreen />} />
       <Route path="/characters/:id" element={<CharacterDetailScreen />} />
       <Route path="/places/:id" element={<PlaceDetailScreen />} />
+      <Route path="/town" element={<TownScreen />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </RRRoutes>
   );
