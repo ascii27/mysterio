@@ -34,4 +34,12 @@ describe("runCharacterPortraitAgent", () => {
     if (res.ok) expect(res.portraitImagePath).toMatch(/^characters\/rosa-pine-[a-z0-9]+\.png$/);
     expect(generate).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ size: "1024x1024" }));
   });
+
+  it("returns ok:false (never throws) when storage throws", async () => {
+    generate.mockResolvedValue(Buffer.from("png-bytes"));
+    writePortraitImage.mockRejectedValue(new Error("disk_full"));
+    const res = await runCharacterPortraitAgent(input);
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.error).toBe("disk_full");
+  });
 });
