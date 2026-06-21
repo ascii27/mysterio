@@ -22,6 +22,7 @@ export function WhosWhoScreen() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["characters"],
     queryFn: () => listCharacters(),
+    staleTime: 5 * 60 * 1000,
   });
 
   return (
@@ -50,7 +51,7 @@ export function WhosWhoScreen() {
             <Monogram name={c.name} />
             <div style={{ minWidth: 0 }}>
               <div style={{ fontFamily: "var(--display)", fontWeight: 700 }}>{c.name}</div>
-              <div style={{ fontSize: 13, color: "var(--text-dim)", overflow: "hidden", textOverflow: "ellipsis" }}>{c.description}</div>
+              <div style={{ fontSize: 13, color: "var(--text-dim)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.description}</div>
             </div>
             <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--text-dim)", fontFamily: "var(--mono)", whiteSpace: "nowrap" }}>
               {c.appearance_count} {c.appearance_count === 1 ? "case" : "cases"}
