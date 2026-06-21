@@ -27,6 +27,9 @@ describe("selectCastPool", () => {
     const ids = new Set(pool.characters.map((c) => c.id));
     expect(ids.size).toBe(pool.characters.length); // no duplicates
     for (const c of pool.characters) expect(c.id).toMatch(/^char-\d+$/);
+    const placeIds = new Set(pool.places.map((p) => p.id));
+    expect(placeIds.size).toBe(pool.places.length); // no duplicates
+    for (const p of pool.places) expect(p.id).toMatch(/^place-\d+$/);
   });
 
   it("returns an empty pool when the roster is empty (fail-soft, preserves legacy generation)", async () => {
