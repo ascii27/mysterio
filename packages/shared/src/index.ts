@@ -10,3 +10,5 @@ export * from "./types/clue.js";
 export * from "./types/solution.js";
 export * from "./types/hint.js";
 export * from "./types/narrativeAnnotation.js";
+export * from "./schemas/world.js";
+export * from "./types/world.js";
