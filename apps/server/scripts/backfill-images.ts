@@ -4,7 +4,7 @@ import { characters, places } from "../src/db/schema.js";
 import { logger } from "../src/utils/logger.js";
 import { runCharacterPortraitAgent } from "../src/services/images/characterPortraitAgent.js";
 import { runPlaceImageAgent } from "../src/services/images/placeImageAgent.js";
-import { runTownMapAgent, townMapExists } from "../src/services/images/townMapAgent.js";
+import { generateTownMapFromPlaces, townMapExists } from "../src/services/images/townMapAgent.js";
 
 type Db = ReturnType<typeof getDb>;
 
@@ -19,7 +19,7 @@ const defaultDeps: BackfillDeps = {
   generatePortrait: (id, description) => runCharacterPortraitAgent({ characterId: id, description }),
   generatePlaceImage: (id, name, description) => runPlaceImageAgent({ placeId: id, name, description }),
   townMapExists,
-  generateTownMap: runTownMapAgent,
+  generateTownMap: () => generateTownMapFromPlaces(getDb()),
 };
 
 /**

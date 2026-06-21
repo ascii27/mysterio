@@ -1,4 +1,4 @@
-import { mkdir, writeFile, unlink, access } from "node:fs/promises";
+import { mkdir, writeFile, unlink, access, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { loadEnv } from "../../config/env.js";
 import { shortId } from "../../utils/ids.js";
@@ -66,6 +66,13 @@ export async function worldImageExists(fileName: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/** Reads an image's bytes by its IMAGE_DIR-relative key (e.g. "places/maple-diner-x.png"). */
+export async function readImageByKey(key: string): Promise<Buffer> {
+  const env = loadEnv();
+  const imageDir = resolve(env.IMAGE_DIR);
+  return readFile(`${imageDir}/${key}`);
 }
 
 /** Best-effort delete of an image by its IMAGE_DIR-relative key. No-op if the file is missing. */

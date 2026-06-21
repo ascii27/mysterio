@@ -16,6 +16,7 @@
     "db:seed": "tsx --env-file=.env scripts/seed-players.ts",
     "db:seed:world": "tsx --env-file=.env scripts/seed-world.ts",
     "db:backfill:images": "tsx --env-file=.env scripts/backfill-images.ts",
+    "regenerate:town-map": "tsx --env-file=.env scripts/regenerate-town-map.ts",
     "db:etl": "tsx --env-file=.env scripts/migrate-sqlite-to-pg.ts"
   },
   "dependencies": {
