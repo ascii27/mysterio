@@ -33,4 +33,10 @@ describe("buildLogicStructureSystem", () => {
     expect(buildLogicStructureSystem("easy", "8-9")).toContain("AGE BAND: 8-9 — Lean toward the OBVIOUS end");
     expect(buildLogicStructureSystem("easy", "12-13")).toContain("AGE BAND: 12-13 — Lean toward SUBTLE");
   });
+
+  it("includes the CAST FROM ROSTER convention", () => {
+    const s = buildLogicStructureSystem("easy", "10-11");
+    expect(s).toContain("CAST FROM THE TOWN ROSTER");
+    expect(s.toLowerCase()).toContain("at most one");
+  });
 });
