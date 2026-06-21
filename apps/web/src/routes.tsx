@@ -5,6 +5,7 @@ import { PlaybackScreen } from "./screens/PlaybackScreen/PlaybackScreen.js";
 import { SettingsScreen } from "./screens/SettingsScreen/SettingsScreen.js";
 import { SolutionScreen } from "./screens/SolutionScreen/SolutionScreen.js";
 import { TrophyRoom } from "./screens/TrophyRoom/TrophyRoom.js";
+import { CharacterDetailScreen } from "./screens/CharacterDetail/CharacterDetailScreen.js";
 import { WhosWhoScreen } from "./screens/WhosWho/WhosWhoScreen.js";
 import { usePlayerStore } from "./state/playerStore.js";
 
@@ -23,6 +24,7 @@ export function Routes() {
       <Route path="/settings" element={<SettingsScreen />} />
       <Route path="/trophies" element={<TrophyRoom />} />
       <Route path="/whos-who" element={<WhosWhoScreen />} />
+      <Route path="/characters/:id" element={<CharacterDetailScreen />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </RRRoutes>
   );
