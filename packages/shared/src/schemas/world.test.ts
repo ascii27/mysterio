@@ -29,7 +29,7 @@ describe("world schemas", () => {
     expect(c.traits).toBeNull();
   });
 
-  it("parses a place and an appearance", () => {
+  it("parses a place", () => {
     const p = placeSchema.parse({
       id: "maple-diner",
       name: "The Maple Diner",
@@ -39,6 +39,9 @@ describe("world schemas", () => {
       created_at: "2026-06-21T00:00:00.000Z",
     });
     expect(p.id).toBe("maple-diner");
+  });
+
+  it("parses an appearance", () => {
     const a = caseAppearanceSchema.parse({
       id: "m1_old-man-hawthorne",
       mystery_id: "m1",
@@ -50,6 +53,22 @@ describe("world schemas", () => {
     });
     expect(a.role_in_case).toBe("suspect");
   });
+
+  it.each(["suspect", "witness", "bystander"] as const)(
+    "parses an appearance with role_in_case=%s",
+    (role) => {
+      const a = caseAppearanceSchema.parse({
+        id: `m1_c1`,
+        mystery_id: "m1",
+        character_id: "c1",
+        role_in_case: role,
+        is_culprit: false,
+        motive: null,
+        created_at: "2026-06-21T00:00:00.000Z",
+      });
+      expect(a.role_in_case).toBe(role);
+    },
+  );
 
   it("rejects an invalid role_in_case", () => {
     expect(() =>
