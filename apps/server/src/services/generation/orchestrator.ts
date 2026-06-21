@@ -6,8 +6,8 @@ import { mysteries } from "../../db/schema.js";
 import { logger } from "../../utils/logger.js";
 import { runLogicStructureAgent } from "./agents/logicStructureAgent.js";
 import { runValidationAgent } from "./agents/validationAgent.js";
-import { selectCastPool, extractAppearances } from "./roster.js";
 import { runCoverImageAgent } from "./agents/coverImageAgent.js";
+import { selectCastPool, extractAppearances, type CastPool } from "./roster.js";
 import { compareSolutions } from "./compareSolutions.js";
 import { redact } from "./redact.js";
 import { writeAndVerifyProse } from "./readthrough.js";
@@ -32,7 +32,7 @@ export async function runGeneration(input: RunInput): Promise<void> {
     let proseAttempted = false;
 
     // 3c: pick a recurring cast pool from the Maple Hollow roster (empty if unseeded → legacy behavior).
-    let castPool = { characters: [], places: [] } as Awaited<ReturnType<typeof selectCastPool>>;
+    let castPool: CastPool = { characters: [], places: [] };
     try {
       castPool = await selectCastPool(db);
     } catch (e) {
