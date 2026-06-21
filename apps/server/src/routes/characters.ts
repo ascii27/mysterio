@@ -1,5 +1,5 @@
-import type { FastifyInstance } from "fastify";
 import { and, eq, sql } from "drizzle-orm";
+import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import type { CharacterListItem, CharacterDetail, CharacterAppearance, RoleInCase } from "@mysterio/shared";
 import { getDb } from "../db/client.js";
@@ -15,6 +15,7 @@ export async function charactersRoutes(app: FastifyInstance): Promise<void> {
       .select({ id: characters.id, name: characters.name, description: characters.description, portrait_image_path: characters.portrait_image_path })
       .from(characters);
     const appRows = await db.select({ character_id: caseAppearances.character_id }).from(caseAppearances);
+    // JS tally instead of SQL COUNT/GROUP BY — avoids pg-mem aggregate limitations.
     const counts = new Map<string, number>();
     for (const a of appRows) counts.set(a.character_id, (counts.get(a.character_id) ?? 0) + 1);
     const list: CharacterListItem[] = rows.map((r) => ({
@@ -28,7 +29,7 @@ export async function charactersRoutes(app: FastifyInstance): Promise<void> {
   });
 
   // Detail — appearances with is_culprit/motive redacted unless the player resolved that case.
-  app.get<{ Params: { id: string } }>("/characters/:id", async (req, reply) => {
+  app.get<{ Params: { id: string }; Querystring: { player_id?: string } }>("/characters/:id", async (req, reply) => {
     const parsed = detailQuery.safeParse(req.query);
     if (!parsed.success) {
       return reply.code(400).send({ error: "player_id is required" });

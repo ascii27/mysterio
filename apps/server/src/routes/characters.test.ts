@@ -63,4 +63,31 @@ describe("GET /api/characters/:id (spoiler redaction)", () => {
     const res = await app.inject({ method: "GET", url: "/api/characters/nope?player_id=p1" });
     expect(res.statusCode).toBe(404);
   });
+
+  it("hides is_culprit on a case the player guessed WRONG but is still solving", async () => {
+    // p1 submitted a wrong guess on open-case (is_correct=false, gave_up=false) — still trying, must NOT see the answer.
+    await getDb().insert(solutions).values({ id: "s-wrong", mystery_id: "open-case", player_id: "p1", is_correct: false, gave_up: false } as never);
+    const res = await app.inject({ method: "GET", url: "/api/characters/finn?player_id=p1" });
+    const detail = res.json().character as { appearances: Array<{ mystery_id: string; is_culprit?: boolean; motive?: string | null }> };
+    const open = detail.appearances.find((a) => a.mystery_id === "open-case")!;
+    expect("is_culprit" in open).toBe(false);
+    expect("motive" in open).toBe(false);
+  });
+
+  it("reveals is_culprit on a case the player GAVE UP on", async () => {
+    await getDb().insert(solutions).values({ id: "s-gaveup", mystery_id: "open-case", player_id: "p2", is_correct: false, gave_up: true } as never);
+    const res = await app.inject({ method: "GET", url: "/api/characters/finn?player_id=p2" });
+    const detail = res.json().character as { appearances: Array<{ mystery_id: string; is_culprit?: boolean; motive?: string | null }> };
+    const open = detail.appearances.find((a) => a.mystery_id === "open-case")!;
+    expect(open.is_culprit).toBe(true);
+    expect(open.motive).toBe("revenge");
+    // p2 has no solution on solved-case → still hidden
+    const solved = detail.appearances.find((a) => a.mystery_id === "solved-case")!;
+    expect("is_culprit" in solved).toBe(false);
+  });
+
+  it("400s when player_id is missing", async () => {
+    const res = await app.inject({ method: "GET", url: "/api/characters/finn" });
+    expect(res.statusCode).toBe(400);
+  });
 });
