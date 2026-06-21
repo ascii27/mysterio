@@ -31,3 +31,18 @@ export interface CharacterDetail {
   portrait_image_path: string | null;
   appearances: CharacterAppearance[];
 }
+
+/** One case set in a place — spoiler-safe (title + the player's solved flag only; never a solution). */
+export interface PlaceCase {
+  mystery_id: string;
+  title: string | null;
+  solved: boolean;
+}
+
+export interface PlaceDetail {
+  id: string;
+  name: string;
+  description: string;
+  image_path: string | null;
+  cases: PlaceCase[];
+}
