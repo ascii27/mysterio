@@ -30,6 +30,7 @@ export const mysteries = pgTable("mysteries", {
   narrative_annotations: jsonb("narrative_annotations").$type<NarrativeAnnotation[]>(),
   audio_path: text("audio_path"),
   cover_image_path: text("cover_image_path"),
+  place_id: text("place_id").references(() => places.id, { onDelete: "set null" }),
   validation_passed: boolean("validation_passed"),
   validation_attempts: integer("validation_attempts").notNull().default(0),
   validation_notes: text("validation_notes"),
@@ -93,4 +94,38 @@ export const hints = pgTable("hints", {
   created_at: createdAt(),
 }, (t) => ({
   mysteryPlayerIdx: index("idx_hints_mystery_player").on(t.mystery_id, t.player_id),
+}));
+
+export const characters = pgTable("characters", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  traits: text("traits"),
+  portrait_image_path: text("portrait_image_path"),
+  is_seed: boolean("is_seed").notNull().default(false),
+  created_at: createdAt(),
+});
+
+export const places = pgTable("places", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  image_path: text("image_path"),
+  is_seed: boolean("is_seed").notNull().default(false),
+  created_at: createdAt(),
+});
+
+export const caseAppearances = pgTable("case_appearances", {
+  id: text("id").primaryKey(),
+  mystery_id: text("mystery_id").notNull().references(() => mysteries.id, { onDelete: "cascade" }),
+  character_id: text("character_id").notNull().references(() => characters.id, { onDelete: "cascade" }),
+  role_in_case: text("role_in_case").notNull(),
+  is_culprit: boolean("is_culprit").notNull().default(false),
+  motive: text("motive"),
+  created_at: createdAt(),
+}, (t) => ({
+  roleCheck: check("case_appearances_role_chk", sql`${t.role_in_case} IN ('suspect','witness','bystander')`),
+  mysteryCharUniq: uniqueIndex("case_appearances_mystery_char_uniq").on(t.mystery_id, t.character_id),
+  characterIdx: index("idx_case_appearances_character").on(t.character_id),
+  mysteryIdx: index("idx_case_appearances_mystery").on(t.mystery_id),
 }));

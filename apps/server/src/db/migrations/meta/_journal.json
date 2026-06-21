@@ -8,6 +8,13 @@
       "when": 1780749181741,
       "tag": "0000_graceful_freak",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782011636303,
+      "tag": "0001_soft_ego",
+      "breakpoints": true
     }
   ]
 }

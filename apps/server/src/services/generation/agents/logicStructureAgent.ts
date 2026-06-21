@@ -9,6 +9,7 @@ import {
 import { claudeText, extractJson } from "../../anthropic/client.js";
 import { buildLogicStructureSystem } from "../prompts/logicStructure.system.js";
 import { SAFETY_PREAMBLE } from "../prompts/shared.js";
+import type { CastPool } from "../roster.js";
 import { formatZodIssues } from "../zodFormat.js";
 
 export interface LogicStructureAgentInput {
@@ -16,6 +17,7 @@ export interface LogicStructureAgentInput {
   difficulty: DifficultyId;
   ageRange: AgeRange;
   previousFailureNotes?: string;
+  castPool?: CastPool;
 }
 
 export type LogicStructureAgentResult =
@@ -67,8 +69,20 @@ export async function runLogicStructureAgent(
   };
 }
 
+export function buildCastPoolUserSection(pool?: CastPool): string {
+  if (!pool || pool.characters.length === 0) return "";
+  const people = pool.characters
+    .map((c) => `- id "${c.id}", ${c.name}: ${c.description}${c.traits ? ` (traits: ${c.traits})` : ""}`)
+    .join("\n");
+  const placeLines = pool.places.map((p) => `- ${p.name}: ${p.description}`).join("\n");
+  const placePart = placeLines
+    ? `\n\nSet this case in ONE of these Maple Hollow places (weave its name into the setting):\n${placeLines}`
+    : "";
+  return `\n\nCast this mystery from these Maple Hollow townsfolk — reuse each one's EXACT id and name as suspects/witnesses/bystanders. You may add AT MOST ONE new resident if the plot needs it:\n${people}${placePart}`;
+}
+
 function buildUserMessage(input: LogicStructureAgentInput, lastError?: string): string {
-  const base = `Generate a ${input.difficulty} ${input.category} mystery.`;
+  const base = `Generate a ${input.difficulty} ${input.category} mystery.${buildCastPoolUserSection(input.castPool)}`;
   if (input.previousFailureNotes) {
     const parseNote = lastError ? `\n\nNote: your most recent JSON output also had a structural problem: ${lastError}` : "";
     return `${base}\n\nYour previous attempt failed validation. Fix these issues:\n${input.previousFailureNotes}${parseNote}`;

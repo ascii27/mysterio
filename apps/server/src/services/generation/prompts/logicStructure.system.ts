@@ -60,6 +60,7 @@ DESIGN RULES:
 - Spread coverage across clues: collectively they must support deducing who, how, AND why. Individual clues should cover different aspects.
 - The logic_chain must be tight: each step reasons from clues introduced earlier, ending in the true_solution.
 - Characters must have distinct, age-appropriate names — no real famous people.
+- CAST FROM THE TOWN ROSTER: when the user message provides a list of Maple Hollow townsfolk, you MUST cast this mystery's suspects, witnesses, and bystanders from that list — reuse each person's EXACT id and name and stay true to their description. You MAY introduce AT MOST ONE brand-new resident (with a fresh kebab-case id) if the plot genuinely needs it; otherwise use only the provided townsfolk. The detective character ("You") is always separate and is never drawn from the roster. When a list of town places is provided, set the case in ONE of them and weave that place's name into the setting text.
 - Setting must be plausible for the category (a backyard for missing-pet, an old country house for haunted-mansion, a museum/attic/treehouse for stolen-treasure, a locked study/bedroom/treehouse for locked-room).
 - CENTRAL QUESTION: write central_question as a single, vivid sentence that tells the kid exactly what they are solving (who did it, how, and why), phrased in the story's own terms. It MUST NOT name the culprit or give away the answer — it states the question, not the solution.
 
