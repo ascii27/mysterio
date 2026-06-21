@@ -46,6 +46,9 @@ export function MainScreen() {
           >
             {player?.name ?? "?"} · Switch
           </button>
+          <Link to="/whos-who" aria-label="Who's Who" title="Who's Who in Maple Hollow" style={{ width: 38, height: 38, borderRadius: 8, background: "var(--surface)", boxShadow: "inset 0 0 0 1.5px var(--line)", display: "grid", placeItems: "center", textDecoration: "none", fontSize: 18 }}>
+            🧑‍🤝‍🧑
+          </Link>
           <Link to="/settings" aria-label="Settings" title="Grown-up settings" style={{ width: 38, height: 38, borderRadius: 8, background: "var(--surface)", boxShadow: "inset 0 0 0 1.5px var(--line)", display: "grid", placeItems: "center", textDecoration: "none", fontSize: 18 }}>
             🔧
           </Link>
