@@ -8,8 +8,10 @@ export async function seedWorld(): Promise<{ seeded: boolean; characters: number
   const db = getDb();
   const res = await db.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM characters`);
   const n = Number((res.rows[0] as { n: number }).n);
+  const placesRes = await db.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM places`);
+  const placeCount = Number((placesRes.rows[0] as { n: number }).n);
   if (n > 0) {
-    return { seeded: false, characters: n, places: 0 };
+    return { seeded: false, characters: n, places: placeCount };
   }
   await db.insert(places).values(SEED_PLACES.map((p) => ({ ...p, is_seed: true }))).onConflictDoNothing();
   await db.insert(characters).values(SEED_CHARACTERS.map((c) => ({ ...c, is_seed: true }))).onConflictDoNothing();
