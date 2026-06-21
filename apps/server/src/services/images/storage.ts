@@ -35,6 +35,17 @@ export async function writePortraitImage(characterId: string, buf: Buffer): Prom
   return `characters/${fileName}`;
 }
 
+/** Writes a versioned place image PNG and returns its key (relative to IMAGE_DIR), e.g. "places/maple-diner-ab12cd34.png". */
+export async function writePlaceImage(placeId: string, buf: Buffer): Promise<string> {
+  const env = loadEnv();
+  const imageDir = resolve(env.IMAGE_DIR);
+  const dir = `${imageDir}/places`;
+  await mkdir(dir, { recursive: true });
+  const fileName = `${placeId}-${shortId()}.png`;
+  await writeFile(`${dir}/${fileName}`, buf);
+  return `places/${fileName}`;
+}
+
 /** Best-effort delete of an image by its IMAGE_DIR-relative key. No-op if the file is missing. */
 export async function deleteImageByKey(key: string): Promise<void> {
   const env = loadEnv();
