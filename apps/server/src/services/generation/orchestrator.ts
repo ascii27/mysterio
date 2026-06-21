@@ -6,6 +6,7 @@ import { mysteries } from "../../db/schema.js";
 import { logger } from "../../utils/logger.js";
 import { runLogicStructureAgent } from "./agents/logicStructureAgent.js";
 import { runValidationAgent } from "./agents/validationAgent.js";
+import { selectCastPool, extractAppearances } from "./roster.js";
 import { runCoverImageAgent } from "./agents/coverImageAgent.js";
 import { compareSolutions } from "./compareSolutions.js";
 import { redact } from "./redact.js";
@@ -30,6 +31,14 @@ export async function runGeneration(input: RunInput): Promise<void> {
     let previousFailureNotes: string | undefined;
     let proseAttempted = false;
 
+    // 3c: pick a recurring cast pool from the Maple Hollow roster (empty if unseeded → legacy behavior).
+    let castPool = { characters: [], places: [] } as Awaited<ReturnType<typeof selectCastPool>>;
+    try {
+      castPool = await selectCastPool(db);
+    } catch (e) {
+      log("cast_pool_select_failed", { err: e instanceof Error ? e.message : String(e) });
+    }
+
     for (let attempt = 1; attempt <= env.MAX_VALIDATION_ATTEMPTS; attempt++) {
       // Phase 1: logic structure
       await db.update(mysteries).set({ status: "generating_logic", validation_attempts: attempt - 1 })
@@ -39,6 +48,7 @@ export async function runGeneration(input: RunInput): Promise<void> {
         difficulty: input.difficulty,
         ageRange: input.ageRange,
         previousFailureNotes,
+        castPool,
       });
       if (!logicRes.ok) {
         previousFailureNotes = logicRes.error;
@@ -107,6 +117,13 @@ export async function runGeneration(input: RunInput): Promise<void> {
           cover_image_path: coverImagePath,
           ready_at: new Date(),
         }).where(eq(mysteries.id, input.mysteryId));
+        // 3c: project the finalized logic structure into the World tables. Enhancement, not
+        // correctness — never fail a good mystery on a linkage error.
+        try {
+          await extractAppearances(db, { mysteryId: input.mysteryId, logic, places: castPool.places });
+        } catch (e) {
+          log("extract_appearances_failed", { err: e instanceof Error ? e.message : String(e) });
+        }
         log("generation_complete", { attempt, cover: coverImagePath !== null });
         return;
       }
