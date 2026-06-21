@@ -15,6 +15,7 @@
     "db:migrate": "tsx --env-file=.env src/db/migrate.ts",
     "db:seed": "tsx --env-file=.env scripts/seed-players.ts",
     "db:seed:world": "tsx --env-file=.env scripts/seed-world.ts",
+    "db:backfill:images": "tsx --env-file=.env scripts/backfill-images.ts",
     "db:etl": "tsx --env-file=.env scripts/migrate-sqlite-to-pg.ts"
   },
   "dependencies": {

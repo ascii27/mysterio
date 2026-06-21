@@ -28,6 +28,7 @@ ssh "${VM_HOST}" bash -lc "'
   pnpm --filter @mysterio/server db:migrate
   pnpm --filter @mysterio/server db:seed || true
   pnpm --filter @mysterio/server db:seed:world || true
+  pnpm --filter @mysterio/server db:backfill:images || true
   mkdir -p ~/.config/systemd/user
   cp apps/server/systemd/mysterio.service ~/.config/systemd/user/mysterio.service
   systemctl --user daemon-reload
