@@ -24,3 +24,7 @@ export function getPlace(id: string, playerId: string): Promise<{ place: PlaceDe
 export function regeneratePlaceImage(id: string): Promise<{ place: Place }> {
   return api(`/api/places/${encodeURIComponent(id)}/image`, { method: "POST" });
 }
+
+export function getTownMap(): Promise<{ url: string | null }> {
+  return api("/api/town-map");
+}

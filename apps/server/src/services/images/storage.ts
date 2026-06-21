@@ -1,4 +1,4 @@
-import { mkdir, writeFile, unlink, access, readFile } from "node:fs/promises";
+import { mkdir, writeFile, unlink, access, readFile, stat } from "node:fs/promises";
 import { resolve } from "node:path";
 import { loadEnv } from "../../config/env.js";
 import { shortId } from "../../utils/ids.js";
@@ -54,6 +54,18 @@ export async function writeWorldImage(fileName: string, buf: Buffer): Promise<st
   await mkdir(dir, { recursive: true });
   await writeFile(`${dir}/${fileName}`, buf);
   return `world/${fileName}`;
+}
+
+/** Returns the world image's last-modified time in ms (a cache-bust token), or null if it doesn't exist. */
+export async function worldImageVersion(fileName: string): Promise<number | null> {
+  const env = loadEnv();
+  const imageDir = resolve(env.IMAGE_DIR);
+  try {
+    const s = await stat(`${imageDir}/world/${fileName}`);
+    return Math.floor(s.mtimeMs);
+  } catch {
+    return null;
+  }
 }
 
 /** True if the given world/ image already exists on disk (used to keep the map backfill idempotent). */

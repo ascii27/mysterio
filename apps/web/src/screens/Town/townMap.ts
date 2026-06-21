@@ -1,6 +1,4 @@
 /** Authored hotspot positions (percent of the map box) for each seed place. */
-export const TOWN_MAP_IMAGE = "/images/world/town-map.png";
-
 export interface Hotspot { id: string; topPct: number; leftPct: number; }
 
 export const TOWN_HOTSPOTS: Hotspot[] = [

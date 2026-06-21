@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { SceneFrame } from "../../components/casebook/index.js";
-import { listPlaces } from "../../api/world.js";
-import { TOWN_MAP_IMAGE, TOWN_HOTSPOTS } from "./townMap.js";
+import { listPlaces, getTownMap } from "../../api/world.js";
+import { TOWN_HOTSPOTS } from "./townMap.js";
 
 export function TownScreen() {
   const { data, isLoading, isError } = useQuery({ queryKey: ["places"], queryFn: () => listPlaces(), staleTime: 5 * 60 * 1000 });
+  const { data: mapData } = useQuery({ queryKey: ["town-map"], queryFn: () => getTownMap(), staleTime: 60 * 1000 });
+  const mapUrl = mapData?.url ?? null;
   const places = data?.places ?? [];
   const nameById = new Map(places.map((p) => [p.id, p.name]));
 
@@ -18,7 +20,7 @@ export function TownScreen() {
 
       {/* Map with tappable hotspots. The map image falls back to a parchment box if not yet generated. */}
       <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", borderRadius: "var(--radius)", overflow: "hidden", boxShadow: "inset 0 0 0 1.5px var(--line)", background: "var(--surface-2)", marginBottom: 24 }}>
-        <img src={TOWN_MAP_IMAGE} alt="Map of Maple Hollow" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        {mapUrl && <img src={mapUrl} alt="Map of Maple Hollow" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
         {TOWN_HOTSPOTS.filter((h) => nameById.has(h.id)).map((h) => (
           <Link key={h.id} to={`/places/${h.id}`} title={nameById.get(h.id)} style={{ position: "absolute", top: `${h.topPct}%`, left: `${h.leftPct}%`, transform: "translate(-50%, -50%)", fontFamily: "var(--mono)", fontSize: 11, fontWeight: 700, padding: "4px 8px", borderRadius: 999, background: "var(--surface)", color: "var(--text)", textDecoration: "none", boxShadow: "0 1px 0 rgba(0,0,0,0.25), inset 0 0 0 1.5px var(--line)", whiteSpace: "nowrap" }}>
             📍 {nameById.get(h.id)}
