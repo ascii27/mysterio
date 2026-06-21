@@ -16,4 +16,8 @@ describe("buildCastPoolUserSection", () => {
   it("returns an empty string when the pool has no characters (legacy generation path)", () => {
     expect(buildCastPoolUserSection({ characters: [], places: [] })).toBe("");
   });
+
+  it("returns an empty string when pool is undefined (legacy path)", () => {
+    expect(buildCastPoolUserSection(undefined)).toBe("");
+  });
 });
