@@ -62,6 +62,11 @@ describe("POST /api/places/:id/image", () => {
     vi.restoreAllMocks();
   });
 
+  it("404s an unknown place", async () => {
+    const res = await app.inject({ method: "POST", url: "/api/places/nope/image" });
+    expect(res.statusCode).toBe(404);
+  });
+
   it("502s when generation fails", async () => {
     vi.spyOn(placeAgent, "runPlaceImageAgent").mockResolvedValue({ ok: false, error: "boom" });
     const res = await app.inject({ method: "POST", url: "/api/places/maple-diner/image" });
