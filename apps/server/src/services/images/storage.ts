@@ -24,6 +24,17 @@ export async function writeAvatarImage(playerId: string, buf: Buffer): Promise<s
   return `avatars/${fileName}`;
 }
 
+/** Writes a versioned character portrait PNG and returns its key (relative to IMAGE_DIR), e.g. "characters/rosa-pine-ab12cd34.png". */
+export async function writePortraitImage(characterId: string, buf: Buffer): Promise<string> {
+  const env = loadEnv();
+  const imageDir = resolve(env.IMAGE_DIR);
+  const dir = `${imageDir}/characters`;
+  await mkdir(dir, { recursive: true });
+  const fileName = `${characterId}-${shortId()}.png`;
+  await writeFile(`${dir}/${fileName}`, buf);
+  return `characters/${fileName}`;
+}
+
 /** Best-effort delete of an image by its IMAGE_DIR-relative key. No-op if the file is missing. */
 export async function deleteImageByKey(key: string): Promise<void> {
   const env = loadEnv();
