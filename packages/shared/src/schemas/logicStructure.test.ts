@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { logicStructureSchema } from "./logicStructure.js";
 
 const valid = {
-  category: "missing-pet",
+  case_type: "missing pet",
   setting: "A cozy suburban backyard on a Saturday morning.",
   characters: [
     { id: "hazel", name: "Hazel", role: "detective", description: "An eight-year-old who knows every cat on the block.", is_culprit: false, motive: null },
@@ -193,5 +193,12 @@ describe("logicStructureSchema", () => {
     if (!res.success) {
       expect(res.error.issues.some((i) => i.message.includes("central_question must not name the culprit"))).toBe(true);
     }
+  });
+
+  it("accepts a free-text case_type and rejects empty/over-long ones", () => {
+    const base = valid;
+    expect(logicStructureSchema.safeParse({ ...base, case_type: "sabotaged bake-off" }).success).toBe(true);
+    expect(logicStructureSchema.safeParse({ ...base, case_type: "ab" }).success).toBe(false); // <3
+    expect(logicStructureSchema.safeParse({ ...base, case_type: "x".repeat(61) }).success).toBe(false); // >60
   });
 });

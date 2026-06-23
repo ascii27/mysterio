@@ -18,7 +18,7 @@ export type TrueSolution = z.infer<typeof trueSolutionSchema>;
 export type LogicStructure = z.infer<typeof logicStructureSchema>;
 
 export interface RedactedLogicStructure {
-  category: LogicStructure["category"];
+  case_type: LogicStructure["case_type"];
   setting: string;
   characters: Array<Pick<Character, "id" | "name" | "role" | "description">>;
   essential_clues: EssentialClue[];
