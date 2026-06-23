@@ -1,7 +1,7 @@
 import { and, desc, eq, or, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import type { AgeRange } from "@mysterio/shared";
+import type { AgeRange, DifficultyId } from "@mysterio/shared";
 import { getDb } from "../db/client.js";
 import { mysteries, players, solutions, clues } from "../db/schema.js";
 import { runGeneration } from "../services/generation/orchestrator.js";
@@ -12,8 +12,9 @@ import { resolveMysteryAudio } from "./mysteryAudio.js";
 
 const generateBody = z.object({
   player_id: z.string().min(1),
-  category: z.enum(["missing-pet", "haunted-mansion", "stolen-treasure", "locked-room"]),
-  difficulty: z.enum(["easy", "medium", "hard"]),
+  // Debug-only optional overrides (never sent by the kid UX). Difficulty defaults to the player's preset.
+  difficulty: z.enum(["easy", "medium", "hard"]).optional(),
+  case_type_hint: z.string().min(3).max(60).optional(),
 });
 
 export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
@@ -29,21 +30,23 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       reply.status(404);
       return { error: "player_not_found" };
     }
+    const difficulty = (parsed.data.difficulty ?? player.default_difficulty) as DifficultyId;
     const id = mysteryId();
     await db.insert(mysteries).values({
       id,
       player_id: parsed.data.player_id,
-      category: parsed.data.category,
-      difficulty: parsed.data.difficulty,
+      // Placeholder until the orchestrator copies the invented case_type into this column.
+      category: parsed.data.case_type_hint ?? "mystery",
+      difficulty,
       target_age_range: player.age_range,
       status: "pending",
     });
 
     void runGeneration({
       mysteryId: id,
-      category: parsed.data.category,
-      difficulty: parsed.data.difficulty,
+      difficulty,
       ageRange: player.age_range as AgeRange,
+      caseTypeHint: parsed.data.case_type_hint,
     });
 
     reply.status(202);

@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { AgeRange, CategoryId, DifficultyId, LogicStructure } from "@mysterio/shared";
+import type { AgeRange, DifficultyId, LogicStructure } from "@mysterio/shared";
 import { loadEnv } from "../../config/env.js";
 import { getDb } from "../../db/client.js";
 import { mysteries } from "../../db/schema.js";
@@ -14,11 +14,12 @@ import { writeAndVerifyProse } from "./readthrough.js";
 
 interface RunInput {
   mysteryId: string;
-  category: CategoryId;
   difficulty: DifficultyId;
   ageRange: AgeRange;
   /** When false, skips cover-image generation. Defaults to true (image generated). Spec-4 parent-toggle hook. */
   generateImage?: boolean;
+  /** Optional debug hint nudging the kind of case to invent. */
+  caseTypeHint?: string;
 }
 
 export async function runGeneration(input: RunInput): Promise<void> {
@@ -44,11 +45,11 @@ export async function runGeneration(input: RunInput): Promise<void> {
       await db.update(mysteries).set({ status: "generating_logic", validation_attempts: attempt - 1 })
         .where(eq(mysteries.id, input.mysteryId));
       const logicRes = await runLogicStructureAgent({
-        category: input.category,
         difficulty: input.difficulty,
         ageRange: input.ageRange,
         previousFailureNotes,
         castPool,
+        caseTypeHint: input.caseTypeHint,
       });
       if (!logicRes.ok) {
         previousFailureNotes = logicRes.error;
@@ -79,6 +80,7 @@ export async function runGeneration(input: RunInput): Promise<void> {
         status: "writing",
         logic_structure_json: logic,
         validation_passed: true,
+        category: logic.case_type,
       }).where(eq(mysteries.id, input.mysteryId));
 
       // Phase 3 + 4: narrative + readthrough gate (regen prose, then escalate).
@@ -98,7 +100,7 @@ export async function runGeneration(input: RunInput): Promise<void> {
         if (input.generateImage !== false) {
           const cover = await runCoverImageAgent({
             mysteryId: input.mysteryId,
-            category: input.category,
+            caseType: logic.case_type,
             title: prose.value.title,
             centralQuestion: logic.central_question,
             setting: logic.setting,

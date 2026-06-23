@@ -21,17 +21,36 @@ beforeEach(async () => {
 });
 afterEach(async () => { await app.close(); vi.clearAllMocks(); });
 
-describe("POST /mysteries/generate — age band", () => {
-  it("records the detective's age band and threads it to generation", async () => {
+describe("POST /mysteries/generate — presets", () => {
+  it("reads the detective's preset difficulty + age band and threads them to generation", async () => {
     const res = await app.inject({
       method: "POST", url: "/mysteries/generate",
-      payload: { player_id: "p-young", category: "missing-pet", difficulty: "easy" },
+      payload: { player_id: "p-young" }, // no category, no difficulty
     });
     expect(res.statusCode).toBe(202);
     const id = res.json().mystery_id;
     const [row] = await getDb().select().from(mysteries).where(eq(mysteries.id, id)).limit(1);
     expect(row?.target_age_range).toBe("8-9");
-    expect(runGeneration).toHaveBeenCalledWith(expect.objectContaining({ ageRange: "8-9" }));
+    expect(row?.difficulty).toBe("easy"); // from player.default_difficulty
+    expect(runGeneration).toHaveBeenCalledWith(
+      expect.objectContaining({ ageRange: "8-9", difficulty: "easy" }),
+    );
+  });
+
+  it("honors a debug difficulty override in the body", async () => {
+    const res = await app.inject({
+      method: "POST", url: "/mysteries/generate",
+      payload: { player_id: "p-young", difficulty: "hard" },
+    });
+    expect(res.statusCode).toBe(202);
+    expect(runGeneration).toHaveBeenCalledWith(expect.objectContaining({ difficulty: "hard" }));
+  });
+
+  it("404s for an unknown player", async () => {
+    const res = await app.inject({
+      method: "POST", url: "/mysteries/generate", payload: { player_id: "nope" },
+    });
+    expect(res.statusCode).toBe(404);
   });
 
   it("GET /mysteries/:id returns target_age_range", async () => {

@@ -1,6 +1,5 @@
 import {
   type AgeRange,
-  type CategoryId,
   type DifficultyId,
   type LogicStructure,
   difficultyConfig,
@@ -13,11 +12,12 @@ import type { CastPool } from "../roster.js";
 import { formatZodIssues } from "../zodFormat.js";
 
 export interface LogicStructureAgentInput {
-  category: CategoryId;
   difficulty: DifficultyId;
   ageRange: AgeRange;
   previousFailureNotes?: string;
   castPool?: CastPool;
+  /** Optional debug hint nudging the kind of case to invent. */
+  caseTypeHint?: string;
 }
 
 export type LogicStructureAgentResult =
@@ -82,7 +82,8 @@ export function buildCastPoolUserSection(pool?: CastPool): string {
 }
 
 function buildUserMessage(input: LogicStructureAgentInput, lastError?: string): string {
-  const base = `Generate a ${input.difficulty} ${input.category} mystery.${buildCastPoolUserSection(input.castPool)}`;
+  const hint = input.caseTypeHint ? ` The case should be along these lines: ${input.caseTypeHint}.` : "";
+  const base = `Invent a ${input.difficulty} kid-friendly mystery set in Maple Hollow.${hint}${buildCastPoolUserSection(input.castPool)}`;
   if (input.previousFailureNotes) {
     const parseNote = lastError ? `\n\nNote: your most recent JSON output also had a structural problem: ${lastError}` : "";
     return `${base}\n\nYour previous attempt failed validation. Fix these issues:\n${input.previousFailureNotes}${parseNote}`;

@@ -12,7 +12,7 @@ import { players, mysteries } from "../db/schema.js";
 import { hintsRoutes } from "./hints.js";
 
 const LS_FIXTURE = {
-  category: "missing-pet", setting: "A backyard.", central_question: "Who took Rosie?",
+  case_type: "missing-pet", setting: "A backyard.", central_question: "Who took Rosie?",
   characters: [
     { id: "you", name: "You", role: "detective", description: "The detective.", is_culprit: false, motive: null },
     { id: "theo", name: "Theo", role: "suspect", description: "Lives past the fence.", is_culprit: true, motive: "Wanted a pet." },

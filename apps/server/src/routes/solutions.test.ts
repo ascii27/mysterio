@@ -12,7 +12,7 @@ import { players, mysteries } from "../db/schema.js";
 import { solutionsRoutes } from "./solutions.js";
 
 const LS_FIXTURE = {
-  category: "missing-pet",
+  case_type: "missing-pet",
   setting: "A sunny backyard with a rabbit hutch.",
   central_question: "Who took Rosie and how did they get past the gate?",
   characters: [

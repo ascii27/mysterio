@@ -14,7 +14,7 @@ AGE BAND: ${ageRange} — ${b.subtletyNudge}
 
 SCHEMA:
 {
-  "category": "<one of: missing-pet | haunted-mansion | stolen-treasure | locked-room>",
+  "case_type": "<a short free-text label for this kind of case, 3-60 chars, e.g. 'sabotaged bake-off' or 'missing heirloom'>",
   "setting": "<2-4 sentences describing where and when the mystery takes place>",
   "characters": [
     { "id": "<lowercase kebab-case unique id>",

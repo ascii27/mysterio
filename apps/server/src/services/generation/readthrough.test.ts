@@ -4,7 +4,7 @@ import { runReadthroughGate } from "./readthrough.js";
 import { writeAndVerifyProse } from "./readthrough.js";
 
 const logic = {
-  category: "missing-pet",
+  case_type: "missing-pet",
   setting: "A quiet cul-de-sac with rabbit hutches.",
   characters: [
     { id: "maya", name: "Maya", role: "suspect", description: "The new kid next door who loves animals.", is_culprit: true, motive: "wanted to help the sick rabbit" },

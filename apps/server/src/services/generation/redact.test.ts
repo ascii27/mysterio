@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { redact } from "./redact.js";
 
 const ls: LogicStructure = {
-  category: "missing-pet",
+  case_type: "missing-pet",
   setting: "A backyard.",
   characters: [
     { id: "h", name: "H", role: "detective", description: "x".repeat(20), is_culprit: false, motive: null },
@@ -41,6 +41,6 @@ describe("redact", () => {
 
   it("has exactly the expected top-level keys", () => {
     const r = redact(ls);
-    expect(Object.keys(r).sort()).toEqual(["category", "characters", "essential_clues", "setting"]);
+    expect(Object.keys(r).sort()).toEqual(["case_type", "characters", "essential_clues", "setting"]);
   });
 });

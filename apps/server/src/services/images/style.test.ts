@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { STYLE_VERSION, buildCoverPrompt } from "./style.js";
 
 const baseInput = {
-  category: "missing-pet" as const,
+  caseType: "missing-pet",
   title: "The Case of the Empty Hutch",
   centralQuestion: "Who slipped the rabbit out of the locked hutch overnight, and how?",
   setting: "A cozy suburban backyard on a Saturday morning.",
