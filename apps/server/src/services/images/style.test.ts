@@ -29,6 +29,11 @@ describe("buildCoverPrompt", () => {
     expect(p).toContain(baseInput.centralQuestion);
   });
 
+  it("uses the free-text case_type as the scene flavor", () => {
+    const p = buildCoverPrompt({ ...baseInput, caseType: "sabotaged bake-off" });
+    expect(p).toContain("sabotaged bake-off");
+  });
+
   it("ignores extra solution/culprit keys and never leaks them", () => {
     const withSpoilers = {
       ...baseInput,
