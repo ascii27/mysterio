@@ -20,6 +20,8 @@ interface RunInput {
   generateImage?: boolean;
   /** Optional debug hint nudging the kind of case to invent. */
   caseTypeHint?: string;
+  /** Recent case types the player has already seen — passed to the logic agent to avoid repetition. */
+  avoidCaseTypes?: string[];
 }
 
 export async function runGeneration(input: RunInput): Promise<void> {
@@ -50,6 +52,7 @@ export async function runGeneration(input: RunInput): Promise<void> {
         previousFailureNotes,
         castPool,
         caseTypeHint: input.caseTypeHint,
+        avoidCaseTypes: input.avoidCaseTypes,
       });
       if (!logicRes.ok) {
         previousFailureNotes = logicRes.error;

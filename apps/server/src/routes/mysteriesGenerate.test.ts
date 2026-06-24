@@ -70,4 +70,15 @@ describe("POST /mysteries/generate — presets", () => {
     const res = await app.inject({ method: "GET", url: "/mysteries/m2" });
     expect(res.json().target_age_range).toBeNull();
   });
+
+  it("passes the player's recent ready case types as an avoid list", async () => {
+    await getDb().insert(mysteries).values({
+      id: "old1", player_id: "p-young", category: "missing heirloom",
+      difficulty: "easy", status: "ready", target_age_range: "8-9",
+    });
+    await app.inject({ method: "POST", url: "/mysteries/generate", payload: { player_id: "p-young" } });
+    expect(runGeneration).toHaveBeenCalledWith(
+      expect.objectContaining({ avoidCaseTypes: expect.arrayContaining(["missing heirloom"]) }),
+    );
+  });
 });

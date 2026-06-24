@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCastPoolUserSection } from "./logicStructureAgent.js";
+import { buildAvoidSection, buildCastPoolUserSection } from "./logicStructureAgent.js";
 
 describe("buildCastPoolUserSection", () => {
   it("lists provided residents and places with their exact ids", () => {
@@ -19,5 +19,13 @@ describe("buildCastPoolUserSection", () => {
 
   it("returns an empty string when pool is undefined (legacy path)", () => {
     expect(buildCastPoolUserSection(undefined)).toBe("");
+  });
+});
+
+describe("buildAvoidSection", () => {
+  it("lists recent case types to avoid when provided", () => {
+    expect(buildAvoidSection(["missing heirloom", "sabotaged bake-off"]))
+      .toContain("missing heirloom");
+    expect(buildAvoidSection([])).toBe("");
   });
 });

@@ -42,11 +42,20 @@ export async function mysteriesRoutes(app: FastifyInstance): Promise<void> {
       status: "pending",
     });
 
+    const recent = await db
+      .select({ category: mysteries.category })
+      .from(mysteries)
+      .where(and(eq(mysteries.player_id, parsed.data.player_id), eq(mysteries.status, "ready")))
+      .orderBy(desc(mysteries.created_at))
+      .limit(5);
+    const avoidCaseTypes = recent.map((r) => r.category).filter((c): c is string => !!c);
+
     void runGeneration({
       mysteryId: id,
       difficulty,
       ageRange: player.age_range as AgeRange,
       caseTypeHint: parsed.data.case_type_hint,
+      avoidCaseTypes,
     });
 
     reply.status(202);
