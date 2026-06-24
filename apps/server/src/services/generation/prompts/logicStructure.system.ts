@@ -12,9 +12,11 @@ DIFFICULTY: ${d.name} — produce exactly ${d.essentialClues} essential clues an
 MISDIRECTION FOR THIS DIFFICULTY: ${d.misdirection} The false_clues you write should match this level of misdirection.
 AGE BAND: ${ageRange} — ${b.subtletyNudge}
 
+THE CASE: Invent ANY kid-appropriate mystery you like — a theft, a prank, a sabotage, a mix-up, a missing object, a strange event — there is no fixed list of case types. The ONLY hard requirements: it is set in the town of Maple Hollow, it takes place in ONE of the town places provided in the user message, and it features AT LEAST ONE of the Maple Hollow townsfolk provided in the user message as a suspect, witness, or bystander. Emit a short free-text "case_type" label that captures the flavor (e.g. "sabotaged bake-off", "missing heirloom").
+
 SCHEMA:
 {
-  "category": "<one of: missing-pet | haunted-mansion | stolen-treasure | locked-room>",
+  "case_type": "<a short free-text label for this kind of case, 3-60 chars, e.g. 'sabotaged bake-off' or 'missing heirloom'>",
   "setting": "<2-4 sentences describing where and when the mystery takes place>",
   "characters": [
     { "id": "<lowercase kebab-case unique id>",
@@ -61,7 +63,6 @@ DESIGN RULES:
 - The logic_chain must be tight: each step reasons from clues introduced earlier, ending in the true_solution.
 - Characters must have distinct, age-appropriate names — no real famous people.
 - CAST FROM THE TOWN ROSTER: when the user message provides a list of Maple Hollow townsfolk, you MUST cast this mystery's suspects, witnesses, and bystanders from that list — reuse each person's EXACT id and name and stay true to their description. You MAY introduce AT MOST ONE brand-new resident (with a fresh kebab-case id) if the plot genuinely needs it; otherwise use only the provided townsfolk. The detective character ("You") is always separate and is never drawn from the roster. When a list of town places is provided, set the case in ONE of them and weave that place's name into the setting text.
-- Setting must be plausible for the category (a backyard for missing-pet, an old country house for haunted-mansion, a museum/attic/treehouse for stolen-treasure, a locked study/bedroom/treehouse for locked-room).
 - CENTRAL QUESTION: write central_question as a single, vivid sentence that tells the kid exactly what they are solving (who did it, how, and why), phrased in the story's own terms. It MUST NOT name the culprit or give away the answer — it states the question, not the solution.
 
 CLUE OBFUSCATION (very important — kids should DEDUCE, not READ the answer):
@@ -83,7 +84,7 @@ DISTRACTOR OPTIONS for multiple-choice solve:
 - Distractors should match the style and length of the true how/why (one sentence each).
 - Do NOT make distractors that are obviously wrong (e.g., "the rabbit teleported"). Subtle plausibility = better puzzle.
 - Distractors must be DISTINCT from the true solution and from each other.
-- Examples for a missing-pet mystery where the true how is "Theo unlatched the hutch and lured Rosie with clover":
+- Examples for a "rabbit gone missing" case where the true how is "Theo unlatched the hutch and lured Rosie with clover":
     GOOD how_distractors:
       - "A fox dug under the hutch and pulled Rosie out through the back."
       - "The latch was old and finally broke open on its own overnight."

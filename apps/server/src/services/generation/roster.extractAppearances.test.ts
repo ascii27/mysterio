@@ -11,7 +11,7 @@ beforeEach(() => { setupTestDb(); });
 /** A logic structure casting one EXISTING roster resident + one NEW resident + the detective. */
 function logicFixture(): LogicStructure {
   return {
-    category: "missing-pet",
+    case_type: "missing-pet",
     setting: "A quiet morning at The Maple Diner on Main Street.",
     characters: [
       { id: "you", name: "You", role: "detective", description: "You are the detective on this case.", is_culprit: false, motive: null },

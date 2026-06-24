@@ -123,7 +123,7 @@ function buildUserMessage(
 
 function redactForNarrative(ls: LogicStructure) {
   return {
-    category: ls.category,
+    case_type: ls.case_type,
     setting: ls.setting,
     central_question: ls.central_question,
     characters: ls.characters.map((c) => ({

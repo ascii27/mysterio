@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { AgeRange, CategoryId, DifficultyId, LogicStructure } from "@mysterio/shared";
+import type { AgeRange, DifficultyId, LogicStructure } from "@mysterio/shared";
 import { loadEnv } from "../../config/env.js";
 import { getDb } from "../../db/client.js";
 import { mysteries } from "../../db/schema.js";
@@ -7,18 +7,21 @@ import { logger } from "../../utils/logger.js";
 import { runLogicStructureAgent } from "./agents/logicStructureAgent.js";
 import { runValidationAgent } from "./agents/validationAgent.js";
 import { runCoverImageAgent } from "./agents/coverImageAgent.js";
-import { selectCastPool, extractAppearances, type CastPool } from "./roster.js";
+import { selectCastPool, extractAppearances, usesRosterResident, type CastPool } from "./roster.js";
 import { compareSolutions } from "./compareSolutions.js";
 import { redact } from "./redact.js";
 import { writeAndVerifyProse } from "./readthrough.js";
 
 interface RunInput {
   mysteryId: string;
-  category: CategoryId;
   difficulty: DifficultyId;
   ageRange: AgeRange;
   /** When false, skips cover-image generation. Defaults to true (image generated). Spec-4 parent-toggle hook. */
   generateImage?: boolean;
+  /** Optional debug hint nudging the kind of case to invent. */
+  caseTypeHint?: string;
+  /** Recent case types the player has already seen — passed to the logic agent to avoid repetition. */
+  avoidCaseTypes?: string[];
 }
 
 export async function runGeneration(input: RunInput): Promise<void> {
@@ -44,11 +47,12 @@ export async function runGeneration(input: RunInput): Promise<void> {
       await db.update(mysteries).set({ status: "generating_logic", validation_attempts: attempt - 1 })
         .where(eq(mysteries.id, input.mysteryId));
       const logicRes = await runLogicStructureAgent({
-        category: input.category,
         difficulty: input.difficulty,
         ageRange: input.ageRange,
         previousFailureNotes,
         castPool,
+        caseTypeHint: input.caseTypeHint,
+        avoidCaseTypes: input.avoidCaseTypes,
       });
       if (!logicRes.ok) {
         previousFailureNotes = logicRes.error;
@@ -56,6 +60,14 @@ export async function runGeneration(input: RunInput): Promise<void> {
         continue;
       }
       const logic: LogicStructure = logicRes.value;
+
+      // 3f: every case must tie into the world — require ≥1 roster resident (skipped when unseeded).
+      if (!usesRosterResident(logic, castPool)) {
+        previousFailureNotes =
+          "This case did not feature any Maple Hollow townsfolk. You MUST cast at least one suspect, witness, or bystander from the provided town roster — reuse their EXACT id and name.";
+        log("no_roster_resident", { attempt });
+        continue;
+      }
 
       // Phase 2: structure validation
       await db.update(mysteries).set({ status: "validating", validation_attempts: attempt })
@@ -79,6 +91,7 @@ export async function runGeneration(input: RunInput): Promise<void> {
         status: "writing",
         logic_structure_json: logic,
         validation_passed: true,
+        category: logic.case_type,
       }).where(eq(mysteries.id, input.mysteryId));
 
       // Phase 3 + 4: narrative + readthrough gate (regen prose, then escalate).
@@ -98,7 +111,7 @@ export async function runGeneration(input: RunInput): Promise<void> {
         if (input.generateImage !== false) {
           const cover = await runCoverImageAgent({
             mysteryId: input.mysteryId,
-            category: input.category,
+            caseType: logic.case_type,
             title: prose.value.title,
             centralQuestion: logic.central_question,
             setting: logic.setting,

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { STYLE_VERSION, buildCoverPrompt } from "./style.js";
 
 const baseInput = {
-  category: "missing-pet" as const,
+  caseType: "missing-pet",
   title: "The Case of the Empty Hutch",
   centralQuestion: "Who slipped the rabbit out of the locked hutch overnight, and how?",
   setting: "A cozy suburban backyard on a Saturday morning.",
@@ -27,6 +27,11 @@ describe("buildCoverPrompt", () => {
     expect(p).toContain(baseInput.title);
     expect(p).toContain(baseInput.setting);
     expect(p).toContain(baseInput.centralQuestion);
+  });
+
+  it("uses the free-text case_type as the scene flavor", () => {
+    const p = buildCoverPrompt({ ...baseInput, caseType: "sabotaged bake-off" });
+    expect(p).toContain("sabotaged bake-off");
   });
 
   it("ignores extra solution/culprit keys and never leaks them", () => {

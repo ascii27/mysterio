@@ -15,7 +15,7 @@ import { runCoverImageAgent } from "./coverImageAgent.js";
 
 const input = {
   mysteryId: "m-1",
-  category: "missing-pet" as const,
+  caseType: "missing-pet",
   title: "The Empty Hutch",
   centralQuestion: "Who took the rabbit, and how?",
   setting: "A cozy backyard.",

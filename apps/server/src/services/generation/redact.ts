@@ -2,7 +2,7 @@ import type { LogicStructure, RedactedLogicStructure } from "@mysterio/shared";
 
 export function redact(ls: LogicStructure): RedactedLogicStructure {
   return {
-    category: ls.category,
+    case_type: ls.case_type,
     setting: ls.setting,
     characters: ls.characters.map((c) => ({
       id: c.id,

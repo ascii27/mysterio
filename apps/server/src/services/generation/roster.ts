@@ -107,6 +107,17 @@ export async function extractAppearances(db: Db, args: ExtractArgs): Promise<voi
 }
 
 /**
+ * True if the generated structure ties into the world: ≥1 non-detective character reuses a
+ * roster id from the pool. Returns true when the pool is empty (unseeded → legacy behavior,
+ * nothing to enforce). Used as a generation gate (3f).
+ */
+export function usesRosterResident(logic: LogicStructure, pool: CastPool): boolean {
+  if (pool.characters.length === 0) return true;
+  const rosterIds = new Set(pool.characters.map((c) => c.id));
+  return logic.characters.some((c) => c.role !== "detective" && rosterIds.has(c.id));
+}
+
+/**
  * Select a cast pool for one mystery: 4-6 roster characters + 1-2 places.
  * Returns an EMPTY pool if the roster is empty — generation then falls back to
  * its legacy behavior (model invents the cast freely). Never throws on empty.

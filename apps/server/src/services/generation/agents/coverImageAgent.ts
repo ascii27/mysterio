@@ -1,4 +1,3 @@
-import type { CategoryId } from "@mysterio/shared";
 import { loadEnv } from "../../../config/env.js";
 import { logger } from "../../../utils/logger.js";
 import { defaultImageProvider } from "../../images/index.js";
@@ -7,7 +6,7 @@ import { buildCoverPrompt } from "../../images/style.js";
 
 export interface CoverImageAgentInput {
   mysteryId: string;
-  category: CategoryId;
+  caseType: string;
   title: string;
   centralQuestion: string;
   setting: string;
@@ -22,7 +21,7 @@ export async function runCoverImageAgent(
 ): Promise<CoverImageAgentResult> {
   const env = loadEnv();
   const prompt = buildCoverPrompt({
-    category: input.category,
+    caseType: input.caseType,
     title: input.title,
     centralQuestion: input.centralQuestion,
     setting: input.setting,

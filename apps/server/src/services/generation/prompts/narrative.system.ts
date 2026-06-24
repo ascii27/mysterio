@@ -17,7 +17,7 @@ Output ONLY a single JSON object — no prose, no markdown:
 CRITICAL RULES:
 - Word count: between ${minWords} and ${maxWords} words. Stories that are too long will lose the listener.
 - POV: third-person limited, following the detective character.
-- Tone: warm, observant, gently curious. Spookiness only if the category warrants it; never gory.
+- Tone: warm, observant, gently curious. Spookiness only if the case warrants it; never gory.
 - INCLUDE EVERY ESSENTIAL CLUE. Each essential_clues[i].description must appear in the prose, either verbatim or as a clear paraphrase using the same key nouns. False clues should appear too, but framed as plausible distractions, not as the answer.
 - Do NOT name the culprit explicitly in the prose, and do NOT reveal the true_solution. The story ends BEFORE the detective announces the answer — the kid solves it themselves afterward.
 - PRESERVE THE CLUE'S LEVEL OF AMBIGUITY. When weaving in a clue, keep the same level of detail the clue itself provides. If the clue says "a person carrying a bundled blue jacket through the fence", the prose says "a person carrying a bundled blue jacket through the fence" — do NOT add the suspect's name even though you know who it is. The ambiguity is what the kid deduces FROM.

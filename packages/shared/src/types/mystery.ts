@@ -1,5 +1,4 @@
 import type { AgeRange } from "../constants/ageRanges.js";
-import type { CategoryId } from "../constants/categories.js";
 import type { DifficultyId } from "../constants/difficulties.js";
 import type { PlayerReputation } from "../constants/reputation.js";
 
@@ -31,7 +30,7 @@ export interface Player {
 export interface MysterySummary {
   id: string;
   player_id: string | null; // creator (provenance only; null if the creator was deleted)
-  category: CategoryId;
+  category: string;
   difficulty: DifficultyId;
   target_age_range: AgeRange | null;
   status: MysteryStatus;

@@ -1,10 +1,10 @@
-import type { AgeRange, CategoryId, DifficultyId, LogicStructure, MysterySummary, MysteryStatus, NarrativeAnnotation } from "@mysterio/shared";
+import type { AgeRange, DifficultyId, LogicStructure, MysterySummary, MysteryStatus, NarrativeAnnotation } from "@mysterio/shared";
 import { api } from "./client.js";
 
 export interface MysteryDetail {
   id: string;
   player_id: string;
-  category: CategoryId;
+  category: string;
   difficulty: DifficultyId;
   target_age_range: AgeRange | null;
   status: MysteryStatus;
@@ -29,8 +29,6 @@ export interface PublicCharacter {
 
 export function generateMystery(input: {
   player_id: string;
-  category: CategoryId;
-  difficulty: DifficultyId;
 }): Promise<{ mystery_id: string; status: MysteryStatus }> {
   return api("/api/mysteries/generate", {
     method: "POST",

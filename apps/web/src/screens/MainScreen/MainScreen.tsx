@@ -1,13 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { type CategoryId, type DifficultyId, difficultyConfig, RANKS } from "@mysterio/shared";
+import { RANKS } from "@mysterio/shared";
 import { generateMystery } from "../../api/mysteries.js";
 import { listPlayers } from "../../api/players.js";
 import { Button } from "../../components/Button.js";
 import { usePlayerStore } from "../../state/playerStore.js";
-import { CategoryGrid } from "./CategoryGrid.js";
-import { DifficultyPicker } from "./DifficultyPicker.js";
 import { RecentList } from "./RecentList.js";
 import { Kicker, RankBadge } from "../../components/casebook/index.js";
 
@@ -24,11 +21,8 @@ export function MainScreen() {
   const { data: playersData } = useQuery({ queryKey: ["players"], queryFn: listPlayers });
   const player = playersData?.players.find((p) => p.id === playerId);
 
-  const [category, setCategory] = useState<CategoryId | null>(null);
-  const [difficulty, setDifficulty] = useState<DifficultyId>(player?.default_difficulty ?? "easy");
-
   const generate = useMutation({
-    mutationFn: () => generateMystery({ player_id: playerId, category: category!, difficulty }),
+    mutationFn: () => generateMystery({ player_id: playerId }),
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["mysteries", playerId] });
       navigate(`/mysteries/${res.mystery_id}`);
@@ -112,26 +106,19 @@ export function MainScreen() {
       })()}
 
       <section style={{ marginBottom: 24 }}>
-        <Kicker>Pick a kind of mystery</Kicker>
-        <CategoryGrid selected={category} onSelect={setCategory} />
-      </section>
-
-      <section style={{ marginBottom: 24 }}>
-        <Kicker>How tricky?</Kicker>
-        <DifficultyPicker selected={difficulty} onSelect={setDifficulty} />
-        <p style={{ fontSize: 13, color: "var(--text-dim)", marginTop: 8 }}>
-          {difficultyConfig(difficulty).essentialClues} essential clues · target ~{difficultyConfig(difficulty).targetWords} words
+        <Kicker>New case</Kicker>
+        <p style={{ fontSize: 14, color: "var(--text-dim)", marginTop: 8, marginBottom: 16 }}>
+          Tap below and the Maple Hollow case desk will write you a fresh mystery to crack.
         </p>
+        <Button
+          size="lg"
+          disabled={generate.isPending}
+          onClick={() => generate.mutate()}
+          style={{ width: "100%" }}
+        >
+          {generate.isPending ? "Writing up your case…" : "🔍 Start a new case"}
+        </Button>
       </section>
-
-      <Button
-        size="lg"
-        disabled={!category || generate.isPending}
-        onClick={() => generate.mutate()}
-        style={{ width: "100%" }}
-      >
-        {generate.isPending ? "Crafting…" : "🔍 Start the Case"}
-      </Button>
 
       <section style={{ marginTop: 32 }}>
         <Kicker>Recent case files</Kicker>

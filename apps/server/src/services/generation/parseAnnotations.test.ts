@@ -4,7 +4,7 @@ import { parseNarrativeAnnotations } from "./parseAnnotations.js";
 
 function ls(): LogicStructure {
   return {
-    category: "missing-pet",
+    case_type: "missing-pet",
     setting: "A backyard on a Saturday morning.",
     characters: [
       { id: "lily", name: "Lily", role: "detective", description: "...", is_culprit: false, motive: null },
