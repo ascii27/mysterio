@@ -39,4 +39,15 @@ describe("buildLogicStructureSystem", () => {
     expect(s).toContain("CAST FROM THE TOWN ROSTER");
     expect(s.toLowerCase()).toContain("at most one");
   });
+
+  it("frames generation as open-ended and Maple-Hollow-bound, with no fixed categories", () => {
+    const sys = buildLogicStructureSystem("easy", "10-11");
+    expect(sys).toContain("Maple Hollow");
+    expect(sys).toContain("case_type");
+    // No fixed category menu anymore:
+    expect(sys).not.toContain("missing-pet");
+    expect(sys).not.toContain("haunted-mansion");
+    // No category-plausibility rule anymore:
+    expect(sys).not.toContain("plausible for the category");
+  });
 });
